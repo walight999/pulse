@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pulse — Your money & time, in rhythm</title>
+<meta name="description" content="Pulse tracks your subscriptions, AI tokens, and computer time — all on your computer. Catch unused subs, see real AI ROI, save money.">
+<style>
+  :root {
+    --indigo: #6366f1;
+    --indigo-d: #4f46e5;
+    --indigo-bg: #eef2ff;
+    --slate-900: #0f172a;
+    --slate-700: #334155;
+    --slate-500: #64748b;
+    --slate-300: #cbd5e1;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --white: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--slate-900);
+    background: var(--white);
+    line-height: 1.55;
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* Nav */
+  nav {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--slate-100);
+  }
+  nav .row { display: flex; align-items: center; justify-content: space-between; }
+  nav .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; }
+  nav .logo {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--indigo), #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 0.9rem;
+  }
+  nav a { color: var(--slate-500); text-decoration: none; margin-left: 22px; font-size: 0.95rem; }
+  nav a:hover { color: var(--slate-900); }
+  nav .cta {
+    background: var(--indigo); color: white !important;
+    padding: 8px 16px; border-radius: 7px; margin-left: 22px;
+    font-weight: 500;
+  }
+  nav .cta:hover { background: var(--indigo-d); }
+
+  /* Hero */
+  .hero { padding: 88px 0 64px; text-align: center; }
+  .hero h1 {
+    font-size: 3.4rem; font-weight: 800; letter-spacing: -0.02em;
+    margin: 0 0 18px; line-height: 1.05;
+  }
+  .hero .grad {
+    background: linear-gradient(135deg, var(--indigo), #a855f7);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p {
+    font-size: 1.2rem; color: var(--slate-500);
+    max-width: 620px; margin: 0 auto 28px;
+  }
+  .hero .ctas { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    display: inline-block; padding: 12px 22px; border-radius: 8px;
+    font-weight: 600; text-decoration: none; font-size: 0.98rem;
+    border: 1px solid transparent; transition: all 0.15s ease;
+  }
+  .btn-primary {
+    background: var(--indigo); color: white;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
+  }
+  .btn-primary:hover { background: var(--indigo-d); }
+  .btn-secondary {
+    background: white; color: var(--slate-700); border-color: var(--slate-300);
+  }
+  .btn-secondary:hover { background: var(--slate-50); }
+  .hero .meta {
+    margin-top: 18px; font-size: 0.9rem; color: var(--slate-500);
+  }
+
+  /* Mockup */
+  .mockup { padding: 36px 0 64px; }
+  .mockup-frame {
+    background: linear-gradient(180deg, var(--slate-50), var(--white));
+    border: 1px solid var(--slate-300); border-radius: 16px;
+    padding: 32px; max-width: 920px; margin: 0 auto;
+    box-shadow: 0 30px 60px -20px rgba(15, 23, 42, 0.18);
+  }
+  .mockup-frame .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stat {
+    background: white; border: 1px solid var(--slate-100); border-radius: 10px;
+    padding: 14px;
+  }
+  .stat .label { font-size: 0.7rem; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+  .stat .value { font-size: 1.5rem; font-weight: 700; margin-top: 4px; }
+  .stat .sub { font-size: 0.75rem; color: var(--slate-500); margin-top: 2px; }
+  .stat.good .value { color: #16a34a; }
+  .stat.bad  .value { color: #dc2626; }
+  .stat.warn .value { color: #d97706; }
+
+  /* Features */
+  .features { padding: 80px 0; background: var(--slate-50); }
+  .features h2 { text-align: center; font-size: 2.2rem; font-weight: 700; margin: 0 0 12px; letter-spacing: -0.01em; }
+  .features .lead { text-align: center; color: var(--slate-500); margin: 0 0 56px; font-size: 1.1rem; }
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .feature {
+    background: white; border: 1px solid var(--slate-100); border-radius: 12px;
+    padding: 26px;
+  }
+  .feature h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 10px; }
+  .feature p { color: var(--slate-500); font-size: 0.95rem; margin: 0; }
+
+  /* Pricing */
+  .pricing { padding: 80px 0; }
+  .pricing h2 { text-align: center; font-size: 2.2rem; font-weight: 700; margin: 0 0 12px; letter-spacing: -0.01em; }
+  .pricing .lead { text-align: center; color: var(--slate-500); margin: 0 0 48px; }
+  .tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; max-width: 920px; margin: 0 auto; }
+  .tier {
+    background: white; border: 1px solid var(--slate-300); border-radius: 14px;
+    padding: 30px;
+  }
+  .tier.featured {
+    border-color: var(--indigo);
+    box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.25);
+    position: relative;
+  }
+  .tier.featured::before {
+    content: "Most popular"; position: absolute; top: -12px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--indigo); color: white; font-size: 0.72rem; padding: 4px 12px;
+    border-radius: 99px; font-weight: 600;
+  }
+  .tier .name { font-size: 0.78rem; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+  .tier .price { font-size: 2.2rem; font-weight: 800; margin: 8px 0 4px; }
+  .tier .price .sub { font-size: 1rem; font-weight: 400; color: var(--slate-500); }
+  .tier .billing { font-size: 0.85rem; color: var(--slate-500); margin-bottom: 22px; }
+  .tier ul { list-style: none; padding: 0; margin: 0 0 22px; }
+  .tier li { font-size: 0.92rem; color: var(--slate-700); padding: 6px 0 6px 24px; position: relative; }
+  .tier li::before {
+    content: "✓"; position: absolute; left: 0; color: var(--indigo); font-weight: 700;
+  }
+  .tier .cta { display: block; text-align: center; }
+
+  /* CTA */
+  .cta-block { padding: 90px 0; background: linear-gradient(135deg, var(--indigo), #a855f7); color: white; text-align: center; }
+  .cta-block h2 { font-size: 2.2rem; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.01em; }
+  .cta-block p { font-size: 1.1rem; margin: 0 0 28px; opacity: 0.9; }
+  .cta-block .btn-primary { background: white; color: var(--indigo); }
+  .cta-block .btn-primary:hover { background: var(--slate-50); }
+  .waitlist-form { display: flex; gap: 8px; max-width: 460px; margin: 0 auto; }
+  .waitlist-form input {
+    flex: 1; padding: 13px 16px; border-radius: 8px; border: none;
+    font-size: 0.98rem; font-family: inherit;
+  }
+
+  /* Footer */
+  footer {
+    background: var(--slate-900); color: var(--slate-300);
+    padding: 48px 0 32px; font-size: 0.9rem;
+  }
+  footer .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 18px; }
+  footer a { color: var(--slate-300); text-decoration: none; margin-left: 22px; }
+  footer a:hover { color: white; }
+  footer .copy { color: var(--slate-500); font-size: 0.82rem; margin-top: 28px; }
+
+  @media (max-width: 720px) {
+    .hero h1 { font-size: 2.2rem; }
+    .hero p { font-size: 1.02rem; }
+    .feature-grid, .tier-grid, .mockup-frame .stat-row { grid-template-columns: 1fr; }
+    nav a:not(.cta) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container row">
+    <div class="brand">
+      <div class="logo">P</div>
+      <span>Pulse</span>
+    </div>
+    <div>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#waitlist" class="cta">Join waitlist</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <h1>Your money & time,<br/><span class="grad">in rhythm.</span></h1>
+    <p>Pulse tracks your subscriptions, AI usage, and computer time — all on your machine.
+      Catch unused subs, see real AI ROI, save thousands per year.</p>
+    <div class="ctas">
+      <a href="#waitlist" class="btn btn-primary">Join Pro waitlist</a>
+      <a href="#features" class="btn btn-secondary">See how it works</a>
+    </div>
+    <div class="meta">100% local · No account required · Free forever for personal use</div>
+  </div>
+</section>
+
+<section class="mockup">
+  <div class="container">
+    <div class="mockup-frame">
+      <div style="font-size:0.78rem; color:var(--slate-500); margin-bottom:14px;">YOUR DASHBOARD</div>
+      <div class="stat-row">
+        <div class="stat">
+          <div class="label">Monthly subs</div>
+          <div class="value">฿8.2K</div>
+          <div class="sub">$254 USD</div>
+        </div>
+        <div class="stat good">
+          <div class="value" style="font-size:1.5rem;">39×</div>
+          <div class="label" style="margin-top:4px;">Plan ROI this month</div>
+          <div class="sub">$7,899 in API value · $200 paid</div>
+        </div>
+        <div class="stat warn">
+          <div class="label">Need attention</div>
+          <div class="value">2</div>
+          <div class="sub">subs to verify</div>
+        </div>
+        <div class="stat bad">
+          <div class="label">Likely wasted</div>
+          <div class="value">฿340</div>
+          <div class="sub">/mo on unused</div>
+        </div>
+      </div>
+      <div style="background:white; border:1px solid var(--slate-100); border-radius:10px; padding:18px;">
+        <div style="font-weight:600; margin-bottom:10px;">Anthropic Claude Max (20x)</div>
+        <div style="color:#16a34a; font-size:0.85rem; font-weight:600;">Active monthly · last charge 6 days ago</div>
+        <div style="background:var(--slate-100); height:4px; border-radius:2px; margin-top:10px; overflow:hidden;">
+          <div style="background:var(--indigo); height:100%; width:20%;"></div>
+        </div>
+        <div style="font-size:0.78rem; color:var(--slate-500); margin-top:6px;">24 days until renewal · 20% through cycle</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="features">
+  <div class="container">
+    <h2>Built for power users</h2>
+    <p class="lead">Three views, one source of truth — entirely on your computer.</p>
+    <div class="feature-grid">
+      <div class="feature">
+        <h3>Subscriptions</h3>
+        <p>Auto-detects status: active monthly, late payment, probably yearly, or likely cancelled.
+           Renewal reminders, calendar export, and cost-per-hour-of-use ROI for app-linked subs.</p>
+      </div>
+      <div class="feature">
+        <h3>AI usage</h3>
+        <p>Imports your Claude Code logs. See exact equivalent API cost vs your flat plan.
+           Hourly heatmaps, per-project breakdowns, daily budgets with spike alerts.</p>
+      </div>
+      <div class="feature">
+        <h3>Activity</h3>
+        <p>Foreground app tracking with idle awareness. Auto-categorized into Dev / Browser /
+           Communication / Entertainment. Spot what you actually use vs what you pay for.</p>
+      </div>
+      <div class="feature">
+        <h3>Smart alerts</h3>
+        <p>Native Windows toast notifications for upcoming renewals, AI cost spikes, and
+           subscriptions you haven't used in months.</p>
+      </div>
+      <div class="feature">
+        <h3>Local-first</h3>
+        <p>Everything stored in a SQLite file on your machine. No accounts, no logins,
+           no telemetry by default. Auto-backups + one-click restore.</p>
+      </div>
+      <div class="feature">
+        <h3>Multi-currency</h3>
+        <p>Display in any of 30+ currencies. Live exchange rates from ECB. Subscriptions
+           paid in different currencies are converted automatically.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" class="pricing">
+  <div class="container">
+    <h2>Simple pricing</h2>
+    <p class="lead">Free forever for personal local use. Pro adds cloud, mobile, and AI assistant.</p>
+    <div class="tier-grid">
+      <div class="tier">
+        <div class="name">Free</div>
+        <div class="price">$0<span class="sub">/forever</span></div>
+        <div class="billing">Local, single device</div>
+        <ul>
+          <li>Subscription tracking</li>
+          <li>AI token analytics</li>
+          <li>App usage tracking</li>
+          <li>Windows alerts</li>
+          <li>CSV / .ics export</li>
+          <li>Local backup</li>
+        </ul>
+        <a class="btn btn-secondary cta" href="#download">Download</a>
+      </div>
+      <div class="tier featured">
+        <div class="name">Pro</div>
+        <div class="price">$9<span class="sub">/mo</span></div>
+        <div class="billing">or $89/yr (15% off)</div>
+        <ul>
+          <li>Everything in Free</li>
+          <li>Cloud sync (encrypted)</li>
+          <li>Mobile companion app</li>
+          <li>Web dashboard</li>
+          <li>AI assistant — Ask Pulse</li>
+          <li>Cross-provider tracking</li>
+          <li>Bank auto-import</li>
+          <li>Email digest + push</li>
+        </ul>
+        <a class="btn btn-primary cta" href="#waitlist">Join waitlist</a>
+      </div>
+      <div class="tier">
+        <div class="name">Team</div>
+        <div class="price">$19<span class="sub">/seat/mo</span></div>
+        <div class="billing">3-seat minimum</div>
+        <ul>
+          <li>Everything in Pro</li>
+          <li>Shared subscriptions</li>
+          <li>Per-user attribution</li>
+          <li>Approval workflow</li>
+          <li>Tax categorization</li>
+          <li>Annual tax pack PDF</li>
+          <li>SSO + audit log</li>
+        </ul>
+        <a class="btn btn-secondary cta" href="#waitlist">Get notified</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="waitlist" class="cta-block">
+  <div class="container">
+    <h2>Be first when Pro launches</h2>
+    <p>Get early access + lifetime deal pricing. We'll only email when there's something to share.</p>
+    <form class="waitlist-form" onsubmit="event.preventDefault(); alert('Backend not connected yet — when Pulse Pro launches, this form will store your email.'); return false;">
+      <input type="email" placeholder="you@example.com" required>
+      <button type="submit" class="btn btn-primary">Join waitlist</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="brand" style="display:flex; align-items:center; gap:10px;">
+        <div style="width:24px; height:24px; border-radius:6px; background: linear-gradient(135deg, var(--indigo), #a855f7); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:0.78rem;">P</div>
+        <span style="color:white; font-weight:600;">Pulse</span>
+      </div>
+      <div>
+        <a href="PRIVACY.md">Privacy</a>
+        <a href="TERMS.md">Terms</a>
+        <a href="ROADMAP.md">Roadmap</a>
+      </div>
+    </div>
+    <div class="copy">© 2026 Pulse. Made with care in Bangkok.</div>
+  </div>
+</footer>
+
+</body>
+</html>

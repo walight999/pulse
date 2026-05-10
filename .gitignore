@@ -1,0 +1,55 @@
+# ────────── Pulse — git ignore ──────────
+# Personal data, secrets, and machine-specific files
+
+# User data (DB, caches, waitlist, etc.) — never commit
+data/
+backups/
+logs/
+
+# Sensitive Streamlit secrets if added later
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Browser profiles created by integrations (Edge, Chrome)
+edge_profile/
+chrome_profile/
+
+# Node (in marketing/ if any)
+node_modules/
+
+# Local dev / smoke test artifacts
+_test_*.py
+*.tmp
+.cache/
