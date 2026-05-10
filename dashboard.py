@@ -221,7 +221,28 @@ st.markdown(
         }
         /* Vertical rhythm — Streamlit blocks get consistent breathing room */
         [data-testid="stMainBlockContainer"] [data-testid="stVerticalBlock"] {
-            gap: 0.4rem;
+            gap: 0.6rem;
+        }
+        /* Horizontal column spacing — prevents adjacent KPI cards/widgets
+           from touching each other. Default Streamlit gap is too tight. */
+        [data-testid="stMainBlockContainer"] [data-testid="stHorizontalBlock"] {
+            gap: 1rem;
+        }
+        /* Markdown block bottom margin — keeps consecutive paragraphs apart */
+        [data-testid="stMarkdownContainer"] > * + * {
+            margin-top: 0.4rem;
+        }
+        /* Sidebar columns get tighter spacing (less width to spare) */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
+            gap: 0.5rem;
+        }
+        /* Tab panel — give content space below the tab strip */
+        [data-testid="stTabs"] [data-baseweb="tab-panel"] {
+            padding-top: 0.6rem;
+        }
+        /* Last child of vertical block — no extra bottom margin */
+        [data-testid="stVerticalBlock"] > div:last-child {
+            margin-bottom: 0;
         }
 
         /* Typography — looser line-heights, better hierarchy */
@@ -752,10 +773,15 @@ st.markdown(
             pointer-events: none;
         }
 
-        /* Streak chip — glow animation when streak hits 30+ days */
+        /* Streak chip — glow animation when streak hits 30+ days.
+           Glow radius kept small so it doesn't overlap with the H1 title next to it. */
         @keyframes pulse-streak-glow {
-            0%, 100% { box-shadow: 0 0 0 0 var(--accent-bg), 0 0 8px 0 var(--accent-bg); }
-            50%      { box-shadow: 0 0 0 4px transparent, 0 0 12px 2px var(--accent-bg); }
+            0%, 100% { box-shadow: 0 0 0 0 var(--accent-bg), 0 0 4px 0 var(--accent-bg); }
+            50%      { box-shadow: 0 0 0 2px transparent, 0 0 8px 1px var(--accent-bg); }
+        }
+        .pulse-streak-chip {
+            position: relative;
+            top: -1px;          /* fine-tune vertical alignment with H1 */
         }
         .pulse-streak-elite {
             animation: pulse-streak-glow 2.4s ease-in-out infinite !important;
@@ -1197,22 +1223,24 @@ st.markdown(
             transform: translateY(-1px);
         }
 
-        /* Sub-action row — visually merge with the card above */
+        /* Sub-action row — sits under the card with a small gap, NOT overlapping.
+           Previous design tried to overlap (margin-top:-2px) which caused the
+           dashed border to clip the card's bottom border. */
         .sub-actions-row + [data-testid="stHorizontalBlock"] {
-            margin-top: -2px !important;
-            margin-bottom: 8px !important;
-            padding: 6px 8px !important;
+            margin-top: 4px !important;
+            margin-bottom: 18px !important;
+            padding: 8px 10px !important;
             background: var(--bg-secondary);
             border: 1px solid var(--border-subtle);
-            border-top: 1px dashed var(--border);
-            border-radius: 0 0 8px 8px;
+            border-radius: 8px;
+            gap: 0.4rem !important;
         }
         /* Action buttons: smaller, ghost-like, text center, tightly packed */
         .sub-actions-row + [data-testid="stHorizontalBlock"] .stButton > button {
             font-size: 0.78rem !important;
-            padding: 0 10px !important;
-            height: 28px !important;
-            min-height: 28px !important;
+            padding: 0 12px !important;
+            height: 30px !important;
+            min-height: 30px !important;
             border-radius: 6px !important;
             display: flex !important;
             align-items: center !important;
@@ -1639,18 +1667,22 @@ def load_app_usage(days: int) -> pd.DataFrame:
 
 
 def page_header(title: str, caption: str, action_label: str | None = None, action_key: str | None = None) -> bool:
-    """Render page title with optional action button on the right. Returns True if action clicked."""
+    """Render page title with optional action button on the right.
+    Adds breathing room below the header so content doesn't crowd the title."""
     if action_label:
         col_t, col_a = st.columns([5, 1])
         with col_t:
             st.markdown(f"# {title}")
             st.caption(caption)
         with col_a:
-            st.markdown('<div style="height: 6px;"></div>', unsafe_allow_html=True)
-            return st.button(action_label, key=action_key, use_container_width=True)
+            st.markdown('<div style="height: 12px;"></div>', unsafe_allow_html=True)
+            clicked = st.button(action_label, key=action_key, use_container_width=True)
+        st.markdown('<div style="height: 8px;"></div>', unsafe_allow_html=True)
+        return clicked
     else:
         st.markdown(f"# {title}")
         st.caption(caption)
+        st.markdown('<div style="height: 8px;"></div>', unsafe_allow_html=True)
         return False
 
 
