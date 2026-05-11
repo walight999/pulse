@@ -1555,12 +1555,14 @@ def pulse_empty(title: str, message: str, icon: str = ICON_NO_DATA) -> None:
 def pulse_table(df: pd.DataFrame, num_cols: list[str] | None = None,
                 strong_cols: list[str] | None = None,
                 col_labels: dict[str, str] | None = None,
-                max_height: int | None = None) -> None:
+                max_height: int | None = None,
+                fixed_height: int | None = None) -> None:
     """Render a DataFrame as a fully-themed HTML table.
     `num_cols` get right-aligned tabular numerics.
     `strong_cols` get text-primary weight 600.
     `col_labels` rename headers (e.g. {'process_name': 'Process'}).
-    `max_height` (px) wraps in a scroll container."""
+    `max_height` (px) caps height with overflow scroll.
+    `fixed_height` (px) forces exact height — use when matching panel heights."""
     num_cols = set(num_cols or [])
     strong_cols = set(strong_cols or [])
     col_labels = col_labels or {}
@@ -1586,7 +1588,13 @@ def pulse_table(df: pd.DataFrame, num_cols: list[str] | None = None,
         f'<table class="pulse-table"><thead><tr>{head}</tr></thead>'
         f'<tbody>{"".join(body_rows)}</tbody></table>'
     )
-    if max_height:
+    if fixed_height:
+        table_html = (
+            f'<div class="pulse-table-wrap" '
+            f'style="height:{fixed_height}px; max-height:{fixed_height}px;">'
+            f'{table_html}</div>'
+        )
+    elif max_height:
         table_html = (
             f'<div class="pulse-table-wrap" style="max-height:{max_height}px;">'
             f'{table_html}</div>'
@@ -2781,12 +2789,28 @@ def render_apps():
         )
         days_apps = 1
     else:
-        max_range = min(30, span_days + 1)
-        days_apps = st.slider(
-            f"Range (days) — {span_days} day(s) of history available",
-            1, max_range, min(7, max_range),
-            key="apps_range",
+        # Discrete range chips (replaces free-form slider — cleaner, on-brand).
+        # Available presets are filtered to those that have data behind them.
+        ALL_PRESETS = [
+            ("1d",  1),  ("7d",  7),  ("14d", 14),
+            ("30d", 30), ("90d", 90), ("All", 9999),
+        ]
+        max_range = max(min(span_days + 1, 9999), 1)
+        presets = [(label, days) for label, days in ALL_PRESETS if days <= max_range]
+        if not presets:
+            presets = [("1d", 1)]
+        labels = [p[0] for p in presets]
+        default_label = "7d" if "7d" in labels else labels[0]
+        st.caption(f"{span_days} day(s) of history available")
+        chosen_label = st.radio(
+            "Activity range",
+            labels,
+            index=labels.index(default_label),
+            horizontal=True,
+            label_visibility="collapsed",
+            key="apps_range_label",
         )
+        days_apps = dict(presets)[chosen_label]
 
     usage_t = load_app_usage(days=days_apps)
     if usage_t.empty:
@@ -2820,7 +2844,9 @@ def render_apps():
 
     # Both columns share the same content height for visual balance.
     # 5 top-app rows × ~46px + container padding/gap ≈ 280px
-    PANEL_H = 300
+    # Both panels share fixed height — 5 top-app rows × ~52px + 16+16 padding
+    # + 8 header + legend = ~340px. No scroll needed for default 5 items.
+    PANEL_H = 360
 
     cc1, cc2 = st.columns([1, 2])
     with cc1:
@@ -2833,7 +2859,7 @@ def render_apps():
             num_cols=["hours", "apps"],
             strong_cols=["category"],
             col_labels={"category": "Category", "hours": "Hours", "apps": "Apps"},
-            max_height=PANEL_H,
+            fixed_height=PANEL_H,
         )
         if distraction_h > 0:
             ratio = distraction_h / max(distraction_h + productive_h, 0.001) * 100
@@ -3895,6 +3921,34 @@ def _render_settings_data():
         if st.button("Import CSV", use_container_width=True):
             st.session_state["show_csv_import_settings"] = True
             st.rerun()
+
+    # ─── External AI usage (Gmail invoices from other machines) ───
+    st.markdown("")
+    st.markdown("##### External AI usage")
+    st.caption(
+        "Pulse parses your local Claude logs automatically. To capture usage "
+        "from OTHER machines (Claude/GPT/Cursor on your laptop, server, etc.), "
+        "we can scan Gmail invoices for monthly totals from each provider."
+    )
+
+    ext_col1, ext_col2 = st.columns([3, 1])
+    with ext_col1:
+        ext_enabled = st.checkbox(
+            "Include external usage from Gmail invoices",
+            value=get_setting("external_usage_gmail_enabled", "0") == "1",
+            key="external_usage_gmail_enabled_cb",
+            help="Scans inbox for invoices from Anthropic, OpenAI, Cursor, "
+                 "GitHub Copilot, Gemini, Perplexity. Adds monthly totals as "
+                 "synthetic usage rows tagged 'external-{provider}'. "
+                 "Coming v1.1 — currently scaffold-only.",
+        )
+        if ext_enabled != (get_setting("external_usage_gmail_enabled", "0") == "1"):
+            set_setting("external_usage_gmail_enabled", "1" if ext_enabled else "0")
+            st.rerun()
+    with ext_col2:
+        if st.button("Scan now", use_container_width=True, disabled=not ext_enabled):
+            st.info("Gmail invoice scanner ships in v1.1 (M+1). "
+                    "Scaffold in `providers/gmail_usage_parser.py`.")
 
     # Inline CSV import + restore
     if st.session_state.get("show_csv_import_settings"):
