@@ -1,4 +1,17 @@
+# Pulse v1.0 — runtime dependencies
+# Install with: pip install -r requirements.txt
+
+# Core dashboard
 streamlit>=1.30
-psutil>=5.9
 pandas>=2.0
 plotly>=5.18
+
+# System monitoring (foreground app + idle detection)
+psutil>=5.9
+
+# Optional — Windows tray (skip on macOS/Linux for headless dev)
+pystray>=0.19; sys_platform == "win32"
+Pillow>=10.0; sys_platform == "win32"
+
+# Phase B — Cloud sync (install if using Pulse Cloud)
+# pip install -r requirements-cloud.txt

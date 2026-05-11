@@ -119,7 +119,83 @@ MIGRATIONS = [
     # Savings tracking — captured at time of cancellation
     "ALTER TABLE subscriptions ADD COLUMN cancelled_at TEXT",
     "ALTER TABLE subscriptions ADD COLUMN cancelled_monthly_usd REAL",  # at-cancel monthly equiv
+    # Phase B — sync support: every table needs updated_at for delta sync
+    "ALTER TABLE subscriptions ADD COLUMN updated_at TEXT",
+    "ALTER TABLE token_usage ADD COLUMN updated_at TEXT",
+    "ALTER TABLE app_activity ADD COLUMN updated_at TEXT",
+    "ALTER TABLE subscriptions ADD COLUMN provider TEXT",   # 'openai' | 'anthropic' | 'cursor' | etc.
+    # Phase B — audit log (security + compliance)
+    """CREATE TABLE IF NOT EXISTS audit_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+        actor TEXT,                    -- 'local-user' | <account_id> | 'system'
+        action TEXT NOT NULL,          -- 'signin' | 'signout' | 'api_key_create' | 'export' | etc.
+        target TEXT,                   -- entity touched (sub id, project, etc.)
+        details TEXT,                  -- JSON blob with relevant context
+        ip TEXT,
+        user_agent TEXT
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_audit_ts ON audit_log(timestamp DESC)",
+    "CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action)",
+    # Phase B — cloud sync state per workspace
+    """CREATE TABLE IF NOT EXISTS cloud_state (
+        workspace_id TEXT PRIMARY KEY,
+        last_sync_at TEXT,
+        sync_status TEXT,              -- 'synced' | 'pending' | 'error'
+        last_error TEXT,
+        rows_pushed INTEGER DEFAULT 0,
+        rows_pulled INTEGER DEFAULT 0
+    )""",
+    # Phase B — friend invites (for leaderboard)
+    """CREATE TABLE IF NOT EXISTS friend_invites (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT UNIQUE NOT NULL,
+        issued_by TEXT NOT NULL,
+        issued_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        redeemed_by TEXT,
+        redeemed_at TEXT
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_friend_code ON friend_invites(code)",
+    # Phase B — API keys for Pulse SDK + 3rd party
+    """CREATE TABLE IF NOT EXISTS api_keys (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        key_prefix TEXT NOT NULL,      -- first 8 chars for display, e.g. 'pk_live_...'
+        key_hash TEXT UNIQUE NOT NULL, -- SHA-256 of full key (never store plaintext)
+        label TEXT,                    -- user-supplied
+        scopes TEXT DEFAULT 'read',    -- comma-separated: 'read,write,leaderboard'
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        last_used_at TEXT,
+        revoked_at TEXT
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_apikey_hash ON api_keys(key_hash)",
+    # Phase B — webhook integrations
+    """CREATE TABLE IF NOT EXISTS integrations_webhooks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        kind TEXT NOT NULL,            -- 'slack' | 'teams' | 'discord' | 'generic'
+        url TEXT NOT NULL,
+        events TEXT,                   -- comma-separated event types
+        enabled INTEGER DEFAULT 1,
+        last_sent_at TEXT,
+        last_status INTEGER,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )""",
 ]
+
+
+def log_audit(action: str, actor: str = "local-user",
+              target: str | None = None, details: dict | None = None,
+              ip: str | None = None, user_agent: str | None = None) -> None:
+    """Append an entry to the audit log. Use for security-relevant events."""
+    import json as _json
+    conn = get_conn()
+    conn.execute(
+        "INSERT INTO audit_log (actor, action, target, details, ip, user_agent) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (actor, action, target,
+         _json.dumps(details) if details else None,
+         ip, user_agent),
+    )
+    conn.commit()
 
 
 def get_conn():

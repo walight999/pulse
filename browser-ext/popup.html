@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Pulse</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      width: 280px; padding: 16px; margin: 0;
+      background: #0a0b0f; color: #e8e8ec;
+    }
+    .header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .logo {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: 0.9rem;
+    }
+    .name { font-weight: 700; font-size: 1.05rem; }
+    .stats { font-size: 0.85rem; color: #a3a4ae; margin-bottom: 12px; }
+    .row { display: flex; justify-content: space-between; padding: 4px 0; }
+    button {
+      width: 100%; padding: 8px 12px; background: #6366f1; color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-weight: 600;
+      font-size: 0.85rem; margin-top: 8px;
+    }
+    button:hover { background: #4f46e5; }
+    .status {
+      font-size: 0.75rem; color: #6a6b76; margin-top: 8px; text-align: center;
+    }
+    .ok { color: #4ade80; }
+    .err { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">P</div>
+    <div class="name">Pulse</div>
+  </div>
+  <div class="stats" id="stats">Loading...</div>
+  <button id="flush">Sync now</button>
+  <div class="status" id="status">Waiting for desktop app...</div>
+  <script src="popup.js"></script>
+</body>
+</html>
