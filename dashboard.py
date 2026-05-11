@@ -2790,7 +2790,28 @@ def render_apps():
     with cc2:
         top = full.head(5).copy()
         top["hours"] = top["hours"].round(2)
-        st.markdown("**Top apps**")
+
+        # Header row: title (left) + inline legend (right) — keeps the bottom
+        # of the panel clean for the actual data.
+        st.markdown(
+            '<div style="display:flex; justify-content:space-between; align-items:center; '
+            'margin-bottom:8px; gap:12px;">'
+            '<div style="font-weight:600; font-size:0.95rem; color:var(--text-primary);">'
+            'Top apps</div>'
+            '<div style="display:flex; gap:14px; font-size:0.7rem; '
+            'color:var(--text-muted); align-items:center;">'
+            '<span style="display:inline-flex; align-items:center;">'
+            '<span style="display:inline-block; width:10px; height:6px; '
+            'border-radius:2px; background:linear-gradient(90deg, var(--success), var(--accent)); '
+            'margin-right:5px;"></span>Productive</span>'
+            '<span style="display:inline-flex; align-items:center;">'
+            '<span style="display:inline-block; width:10px; height:6px; '
+            'border-radius:2px; background:linear-gradient(90deg, var(--warning), var(--danger)); '
+            'margin-right:5px;"></span>Distraction</span>'
+            '</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
 
         # Single redesigned list: rank · name+category · gradient bar · hours.
         # Replaces the chart+table pair with a cleaner, more scannable layout.
@@ -2822,19 +2843,6 @@ def render_apps():
         st.markdown(
             f'<div class="top-apps-list" '
             f'style="height:{PANEL_H}px; overflow-y:auto;">{"".join(rows_html)}</div>',
-            unsafe_allow_html=True,
-        )
-        # Legend
-        st.markdown(
-            '<div style="display:flex; gap:14px; margin-top:6px; '
-            'font-size:0.72rem; color:var(--text-muted);">'
-            '<span><span style="display:inline-block; width:8px; height:8px; '
-            'border-radius:2px; background:linear-gradient(90deg, var(--success), var(--accent));'
-            ' vertical-align:middle; margin-right:4px;"></span>Productive</span>'
-            '<span><span style="display:inline-block; width:8px; height:8px; '
-            'border-radius:2px; background:linear-gradient(90deg, var(--warning), var(--danger));'
-            ' vertical-align:middle; margin-right:4px;"></span>Distraction</span>'
-            '</div>',
             unsafe_allow_html=True,
         )
 
