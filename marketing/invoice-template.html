@@ -1,0 +1,93 @@
+<!--
+Invoice template for pulse Pro / Team / Enterprise customers.
+Variables: {{customer_name}} {{customer_email}} {{invoice_number}}
+          {{invoice_date}} {{due_date}} {{line_items}} {{subtotal}}
+          {{tax}} {{total}} {{payment_link}}
+Render via Stripe webhook or a simple template engine (Jinja2).
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin:0; padding:32px 16px; background:#f6f7f9; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,system-ui,sans-serif; color:#0a0b0f; }
+  .invoice { max-width:720px; margin:0 auto; background:#fff; border-radius:14px; padding:44px; box-shadow:0 1px 4px rgba(10,11,15,0.08); }
+  .top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .logo { width:44px; height:44px; border-radius:10px; background:#000; position:relative; overflow:hidden; }
+  .logo-p { color:#fff; font-weight:800; font-size:1.4rem; letter-spacing:-0.04em; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); }
+  .logo-line { position:absolute; left:0; right:0; top:58%; height:2px; background:linear-gradient(90deg, transparent, #34d399 20%, #6ee7b7 50%, #34d399 80%, transparent); }
+  .brand-name { font-size:1.3rem; font-weight:700; letter-spacing:-0.02em; }
+  .invoice-meta { text-align:right; font-size:13px; color:#5a6172; }
+  .invoice-meta strong { color:#0a0b0f; }
+  .label { font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:#5a6172; font-weight:600; margin-bottom:6px; }
+  .billed-to { margin-bottom:28px; font-size:14px; line-height:1.5; }
+  table { width:100%; border-collapse:collapse; margin-top:16px; }
+  th { text-align:left; padding:12px; border-bottom:2px solid #0a0b0f; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:#5a6172; }
+  td { padding:14px 12px; border-bottom:1px solid #e5e7eb; font-size:14px; }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .totals { margin-top:24px; padding-top:24px; border-top:1px solid #e5e7eb; }
+  .totals .row { display:flex; justify-content:space-between; padding:6px 0; font-size:14px; }
+  .totals .row.total { font-size:1.2rem; font-weight:700; padding-top:14px; margin-top:8px; border-top:2px solid #0a0b0f; }
+  .pay-cta { display:inline-block; margin-top:24px; background:#10b981; color:#fff !important; padding:14px 28px; border-radius:8px; text-decoration:none; font-weight:600; font-size:15px; }
+  .footer { margin-top:32px; padding-top:24px; border-top:1px solid #e5e7eb; font-size:12px; color:#5a6172; line-height:1.6; }
+</style>
+</head>
+<body>
+  <div class="invoice">
+    <div class="top">
+      <div class="brand">
+        <div class="logo"><span class="logo-p">P</span><span class="logo-line"></span></div>
+        <div class="brand-name" style="text-transform:lowercase;">pulse</div>
+      </div>
+      <div class="invoice-meta">
+        <div class="label">Invoice</div>
+        <div><strong>{{invoice_number}}</strong></div>
+        <div>Issued: {{invoice_date}}</div>
+        <div>Due: {{due_date}}</div>
+      </div>
+    </div>
+
+    <div class="billed-to">
+      <div class="label">Billed to</div>
+      <div><strong>{{customer_name}}</strong></div>
+      <div style="color:#5a6172;">{{customer_email}}</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th style="text-align:center;">Qty</th>
+          <th class="num">Unit</th>
+          <th class="num">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{line_items}}
+        <!-- Example row:
+        <tr>
+          <td>pulse Pro · monthly</td>
+          <td style="text-align:center;">1</td>
+          <td class="num">$9.00</td>
+          <td class="num">$9.00</td>
+        </tr> -->
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div class="row"><span>Subtotal</span><span>{{subtotal}}</span></div>
+      <div class="row"><span>Tax</span><span>{{tax}}</span></div>
+      <div class="row total"><span>Total due</span><span>{{total}}</span></div>
+    </div>
+
+    <a href="{{payment_link}}" class="pay-cta">Pay invoice →</a>
+
+    <div class="footer">
+      Pulse is operated by White (sole proprietor) based in Bangkok, Thailand.<br>
+      Reply to this email with any billing questions, or write hi@pulse.app.<br>
+      <a href="https://pulse.app" style="color:#10b981;">pulse.app</a> · Mint for the AI era
+    </div>
+  </div>
+</body>
+</html>

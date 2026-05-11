@@ -4482,10 +4482,14 @@ def render_overview():
     streak_quip = quips.for_streak(streak)
     subtitle = streak_quip or "Here's where your money and time went."
 
+    # Greeting + animated ECG line — Pulse's signature visual element.
+    # Subtle pulse animation reinforces brand identity without being noisy.
     st.markdown(
-        f'<div style="margin-bottom:18px;">'
+        f'<div style="margin-bottom:22px;">'
         f'<h1 style="margin-bottom:4px;">{greeting}, {escape(user_display)}{streak_html}</h1>'
-        f'<div style="font-size:0.92rem; color:var(--text-secondary);">{escape(subtitle)}</div>'
+        f'<div style="font-size:0.92rem; color:var(--text-secondary); margin-bottom:14px;">'
+        f'{escape(subtitle)}</div>'
+        f'<div class="pulse-ecg-line"></div>'
         f'</div>',
         unsafe_allow_html=True,
     )

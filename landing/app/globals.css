@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+body { background: #000; color: #fff; font-feature-settings: "ss01" on, "cv11" on; }
+
+.ecg-line {
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    #34d399 18%, #6ee7b7 24%, #34d399 30%,
+    transparent 50%,
+    #34d399 68%, #6ee7b7 74%, #34d399 80%,
+    transparent 100%);
+  background-size: 200% 100%;
+  animation: pulse-ecg 6s linear infinite;
+}
+@keyframes pulse-ecg {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.logo-mark {
+  position: relative;
+  background: #000; color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 800; letter-spacing: -0.04em;
+  overflow: hidden;
+}
+.logo-mark::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 55%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #34d399 15%, #6ee7b7 50%, #34d399 85%, transparent);
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
+}
