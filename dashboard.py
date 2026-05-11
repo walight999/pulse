@@ -37,6 +37,26 @@ st.set_page_config(
 APP_NAME = "pulse"          # lowercase wordmark per brand identity
 APP_TAGLINE = "Mint for the AI era"
 
+# Master Brand Core SVG — inline so logo matches favicon + landing + email
+# everywhere. Geometry from pulse-brand-core/scripts/generate_brand_core.py.
+_PULSE_LOGO_SVG = (
+    '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" '
+    'style="width:100%;height:100%;display:block;">'
+    '<rect x="0" y="0" width="1024" height="1024" rx="184" ry="184" fill="#0A0A0F"/>'
+    '<g fill="#FAFAF7">'
+    '<path d="M 360 200 L 360 824 L 484 824 L 484 588 L 580 588 '
+    'C 720 588 824 484 824 360 C 824 270 760 200 620 200 Z '
+    'M 484 308 L 600 308 C 660 308 700 332 700 392 '
+    'C 700 452 660 480 600 480 L 484 480 Z"/>'
+    '</g>'
+    '<g fill="none" stroke="#00E5A0" stroke-width="32" '
+    'stroke-linecap="round" stroke-linejoin="round">'
+    '<path d="M 80 560 L 220 560 L 260 460 L 320 680 L 380 380 '
+    'L 440 620 L 500 480 L 560 600 L 640 560 L 800 560 L 944 560"/>'
+    '</g>'
+    '</svg>'
+)
+
 COLOR_HEX = {
     "green":  "#16a34a",
     "amber":  "#d97706",
@@ -330,56 +350,27 @@ st.markdown(
             background: var(--bg-hover);
         }
 
-        /* Brand row — Pulse logomark + lowercase wordmark.
-           Logo is inline SVG: black square + white "P" + mint pulse line.
-           Matches the brand identity (logomark.png / app-icon.png). */
+        /* Brand row — exact Pulse logomark (inline SVG) + lowercase wordmark.
+           SVG matches Brand Core master geometry exactly (P + ECG waveform). */
         .pulse-brand-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             height: 38px;
         }
         .pulse-logo-mark {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: #000000;
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-            box-shadow: 0 1px 4px rgba(16, 185, 129, 0.25);
-            position: relative;
-            overflow: hidden;
+            filter: drop-shadow(0 1px 4px rgba(0, 229, 160, 0.25));
         }
-        .pulse-logo-mark::before {
-            /* The white "P" letter */
-            content: "P";
-            color: #ffffff;
-            font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
-            font-weight: 800;
-            font-size: 1.15rem;
-            line-height: 1;
-            letter-spacing: -0.04em;
-            z-index: 1;
-        }
-        .pulse-logo-mark::after {
-            /* The mint pulse line cutting horizontally through the P */
-            content: "";
-            position: absolute;
-            left: 0; right: 0;
-            top: 55%;
-            height: 2px;
-            background: linear-gradient(90deg,
-                transparent 0%,
-                #34d399 12%,
-                #34d399 35%,
-                #6ee7b7 50%,
-                #34d399 65%,
-                #34d399 88%,
-                transparent 100%);
-            box-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
-            z-index: 2;
+        .pulse-logo-mark svg {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
         .pulse-brand-name {
             font-size: 1.32rem;
@@ -1755,15 +1746,10 @@ def run_onboarding() -> bool:
         return False
 
     st.markdown(
-        '<div style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">'
-        '<div style="width:40px; height:40px; border-radius:10px; background:#000; '
-        'display:flex; align-items:center; justify-content:center; color:white; '
-        'font-weight:800; font-size:1.4rem; letter-spacing:-0.04em; '
-        'position:relative; overflow:hidden; '
-        'box-shadow:0 1px 6px rgba(16,185,129,0.3);">'
-        'P<span style="position:absolute; left:0; right:0; top:55%; height:2.5px; '
-        'background:linear-gradient(90deg, transparent, #34d399 15%, #6ee7b7 50%, '
-        '#34d399 85%, transparent); box-shadow:0 0 8px rgba(52,211,153,0.6);"></span>'
+        '<div style="display:flex; align-items:center; gap:14px; margin-bottom:8px;">'
+        '<div style="width:48px; height:48px; flex-shrink:0; '
+        'filter:drop-shadow(0 1px 6px rgba(0,229,160,0.3));">'
+        + _PULSE_LOGO_SVG +
         '</div>'
         f'<h1 style="margin:0;">Welcome to {APP_NAME}</h1>'
         '</div>',
@@ -1843,11 +1829,9 @@ with st.sidebar:
 
     brand_col, toggle_col = st.columns([1, 0.32])
     with brand_col:
-        # Logomark "P" + pulse line are rendered via CSS pseudo-elements
-        # (see .pulse-logo-mark in the CSS block above). Empty div = clean DOM.
         st.markdown(
             f'<div class="pulse-brand-row">'
-            f'<div class="pulse-logo-mark"></div>'
+            f'<div class="pulse-logo-mark">{_PULSE_LOGO_SVG}</div>'
             f'<div class="pulse-brand-name">{APP_NAME}</div>'
             f'</div>',
             unsafe_allow_html=True,
@@ -2965,10 +2949,13 @@ def load_token_period(period: str, pricing_mode: str) -> dict:
     since, granularity, _ = _period_window(period)
     cost_sql = _cost_expr(pricing_mode)
 
+    # Bucket timestamps in the user's LOCAL timezone (SQLite 'localtime' modifier).
+    # Claude Code writes UTC timestamps; converting to local makes hourly buckets
+    # show actual time-of-day usage in the user's clock, not UTC.
     if granularity == "hour":
-        ts_expr = "strftime('%Y-%m-%dT%H:00:00', timestamp)"
+        ts_expr = "strftime('%Y-%m-%dT%H:00:00', timestamp, 'localtime')"
     else:
-        ts_expr = "DATE(timestamp)"
+        ts_expr = "DATE(timestamp, 'localtime')"
 
     series = pd.read_sql_query(
         f"""
@@ -3380,8 +3367,8 @@ def render_token_view(period: str, pricing_mode: str) -> None:
         conn = get_conn()
         since_iso, _, _ = _period_window(period)
         hm_df = pd.read_sql_query(
-            "SELECT strftime('%w', timestamp) AS dow, "
-            "       strftime('%H', timestamp) AS hour, "
+            "SELECT strftime('%w', timestamp, 'localtime') AS dow, "
+            "       strftime('%H', timestamp, 'localtime') AS hour, "
             "       SUM(cost_usd) AS cost "
             "FROM token_usage WHERE timestamp >= ? "
             "GROUP BY dow, hour",
@@ -4166,18 +4153,13 @@ def _render_settings_advanced():
 # PAGE: HEALTH
 # ============================================================
 def render_health():
-    # Marketing-style about page — full Pulse brand identity
+    # Marketing-style about page — full Pulse brand identity (real SVG)
     st.markdown(
-        f'<div style="display:flex; align-items:center; gap:14px; margin-bottom:8px;">'
-        f'<div style="width:56px; height:56px; border-radius:14px; background:#000; '
-        f'display:flex; align-items:center; justify-content:center; color:white; '
-        f'font-weight:800; font-size:2rem; letter-spacing:-0.04em; '
-        f'position:relative; overflow:hidden; '
-        f'box-shadow:0 2px 10px rgba(16,185,129,0.35);">'
-        f'P<span style="position:absolute; left:0; right:0; top:55%; height:3px; '
-        f'background:linear-gradient(90deg, transparent, #34d399 15%, #6ee7b7 50%, '
-        f'#34d399 85%, transparent); box-shadow:0 0 10px rgba(52,211,153,0.7);"></span>'
-        f'</div>'
+        '<div style="display:flex; align-items:center; gap:18px; margin-bottom:10px;">'
+        '<div style="width:72px; height:72px; flex-shrink:0; '
+        'filter:drop-shadow(0 2px 12px rgba(0,229,160,0.4));">'
+        + _PULSE_LOGO_SVG +
+        '</div>'
         f'<div>'
         f'<h1 style="margin:0;">{APP_NAME}</h1>'
         f'<div style="color:var(--text-secondary); font-size:0.95rem;">{APP_TAGLINE}</div>'
@@ -4303,7 +4285,7 @@ def compute_streak() -> int:
     """Consecutive days (counting today or yesterday as start) with AI usage."""
     conn = get_conn()
     rows = conn.execute(
-        "SELECT DISTINCT DATE(timestamp) AS d FROM token_usage "
+        "SELECT DISTINCT DATE(timestamp, 'localtime') AS d FROM token_usage "
         "WHERE source = 'claude_code_log' ORDER BY d DESC LIMIT 365"
     ).fetchall()
     if not rows:
@@ -4617,10 +4599,12 @@ def render_overview():
     st.markdown("")
 
     # ----- Two-column: upcoming renewals + insights — equal widths + matched boxes -----
-    # Both columns use identical fixed-height boxes so visual rhythm matches.
+    # Both columns use min-height so content (2-3 lines) fits without clipping
+    # while still keeping visual rhythm matched.
     BOX_STYLE = (
-        "padding:14px 16px; border-radius:10px; margin-bottom:10px; "
-        "height:72px; box-sizing:border-box;"
+        "padding:14px 16px; border-radius:10px; margin-bottom:12px; "
+        "min-height:90px; box-sizing:border-box; "
+        "display:flex; flex-direction:column; justify-content:center;"
     )
     cl, cr = st.columns([1, 1])
     with cl:
@@ -4753,15 +4737,16 @@ def render_overview():
     # Spend-today quip if it's notably high or spiking
     today_iso = today_d.isoformat()
     today_cost = float(conn.execute(
-        "SELECT COALESCE(SUM(cost_usd), 0) AS c FROM token_usage WHERE DATE(timestamp) = ?",
+        "SELECT COALESCE(SUM(cost_usd), 0) AS c FROM token_usage WHERE DATE(timestamp, 'localtime') = ?",
         (today_iso,)
     ).fetchone()["c"] or 0)
     avg_cost_30d = float(conn.execute(
         """
         SELECT COALESCE(AVG(daily), 0) AS avg_c FROM (
-          SELECT DATE(timestamp) AS d, SUM(cost_usd) AS daily
+          SELECT DATE(timestamp, 'localtime') AS d, SUM(cost_usd) AS daily
           FROM token_usage
-          WHERE DATE(timestamp) >= DATE('now', '-30 days') AND DATE(timestamp) < ?
+          WHERE DATE(timestamp, 'localtime') >= DATE('now', 'localtime', '-30 days')
+            AND DATE(timestamp, 'localtime') < ?
           GROUP BY d
         )
         """,
