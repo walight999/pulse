@@ -453,6 +453,185 @@ def phase8_reference():
     print(f"    ✓ {len(list(out.iterdir()))} reference files copied")
 
 
+# ────────────────── Phase 8b: Transparent + crop variants ──────────────────
+
+def trim_solid_borders(img: Image.Image, threshold: int = 240) -> Image.Image:
+    """Trim near-uniform borders from an image (useful for cropping
+    photo mockups that have wooden/light backgrounds the user dislikes)."""
+    if img.mode != "RGBA":
+        img = img.convert("RGBA")
+    arr = np.array(img)
+    # Mask: pixel is "non-background" if any RGB channel is dark OR saturated
+    r, g, b, a = arr[..., 0], arr[..., 1], arr[..., 2], arr[..., 3]
+    is_bg = (r > threshold) & (g > threshold) & (b > threshold)
+    is_fg = ~is_bg & (a > 0)
+    if not is_fg.any():
+        return img
+    rows = np.where(is_fg.any(axis=1))[0]
+    cols = np.where(is_fg.any(axis=0))[0]
+    top, bottom = rows[0], rows[-1] + 1
+    left, right = cols[0], cols[-1] + 1
+    return img.crop((left, top, right, bottom))
+
+
+def transparent_logomark_svg() -> str:
+    """Logomark with NO background — just white P + PULSE waveform.
+    For overlays where you want the mark to read on any surface."""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <g fill="{PAPER}">
+    <path d="M 360 200 L 360 824 L 484 824 L 484 588 L 580 588 C 720 588 824 484 824 360 C 824 270 760 200 620 200 Z M 484 308 L 600 308 C 660 308 700 332 700 392 C 700 452 660 480 600 480 L 484 480 Z"/>
+  </g>
+  <g fill="none" stroke="{PULSE}" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 80 560 L 220 560 L 260 460 L 320 680 L 380 380 L 440 620 L 500 480 L 560 600 L 640 560 L 800 560 L 944 560"/>
+  </g>
+</svg>"""
+
+
+def transparent_logomark_ink_svg() -> str:
+    """Logomark with NO bg — ink-colored P + PULSE waveform.
+    For overlays on light surfaces."""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <g fill="{INK}">
+    <path d="M 360 200 L 360 824 L 484 824 L 484 588 L 580 588 C 720 588 824 484 824 360 C 824 270 760 200 620 200 Z M 484 308 L 600 308 C 660 308 700 332 700 392 C 700 452 660 480 600 480 L 484 480 Z"/>
+  </g>
+  <g fill="none" stroke="{PULSE}" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 80 560 L 220 560 L 260 460 L 320 680 L 380 380 L 440 620 L 500 480 L 560 600 L 640 560 L 800 560 L 944 560"/>
+  </g>
+</svg>"""
+
+
+def phase8b_transparent():
+    print("\n[8b] Transparent + cropped variants")
+    out = OUTPUT_DIR / "01-logomark"
+
+    # Transparent logomarks
+    t_paper = transparent_logomark_svg()
+    (out / "pulse-mark--transparent-white.svg").write_text(t_paper, encoding="utf-8")
+    svg_to_png(t_paper, out / "pulse-mark--transparent-white.png", 1024)
+
+    t_ink = transparent_logomark_ink_svg()
+    (out / "pulse-mark--transparent-ink.svg").write_text(t_ink, encoding="utf-8")
+    svg_to_png(t_ink, out / "pulse-mark--transparent-ink.png", 1024)
+
+    # Trim photo references (remove wooden/light bg if any)
+    ref = OUTPUT_DIR / "06-reference"
+    for f in ref.glob("*.png"):
+        img = Image.open(f)
+        if img.mode == "RGB":
+            # Convert to RGBA and trim
+            cropped = trim_solid_borders(img)
+            cropped.save(ref / f"{f.stem}-cropped.png")
+
+    print("    ✓ 2 transparent logomarks + cropped references")
+
+
+# ────────────────── Phase 8c: Branded browser-window mockup ──────────────────
+
+def browser_window_svg(width: int = 1600, height: int = 1000) -> str:
+    """Programmatic browser window frame containing a stylized dashboard preview.
+    Replaces the laptop photo mockup that had a light wooden background."""
+    bar_h = 56
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}">
+  <!-- Background INK -->
+  <rect width="{width}" height="{height}" fill="{INK}"/>
+
+  <!-- Browser window with shadow -->
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="20"/>
+      <feOffset dx="0" dy="16"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)" transform="translate(140 100)">
+    <!-- Window body -->
+    <rect width="{width - 280}" height="{height - 200}" rx="14" fill="{INK_SOFT}"/>
+
+    <!-- Top bar with traffic lights + URL -->
+    <rect width="{width - 280}" height="{bar_h}" rx="14" fill="#222229"/>
+    <rect y="{bar_h - 2}" width="{width - 280}" height="2" fill="#0a0a0f"/>
+    <circle cx="28" cy="{bar_h/2}" r="8" fill="#ff5f56"/>
+    <circle cx="56" cy="{bar_h/2}" r="8" fill="#ffbd2e"/>
+    <circle cx="84" cy="{bar_h/2}" r="8" fill="#27c93f"/>
+    <rect x="160" y="{bar_h/2 - 14}" rx="6" ry="6" width="{width - 580}" height="28" fill="#0e0e15" stroke="#2a2a32" stroke-width="1"/>
+    <text x="180" y="{bar_h/2 + 5}" font-family="JetBrains Mono, ui-monospace, monospace" font-size="14" fill="{PAPER}" opacity="0.55">pulse.app</text>
+
+    <!-- Sidebar -->
+    <rect y="{bar_h}" width="240" height="{height - 200 - bar_h}" fill="#0e0e14"/>
+    <!-- Brand row in sidebar -->
+    <g transform="translate(24 {bar_h + 28})">
+      <rect width="36" height="36" rx="8" fill="{INK}"/>
+      <text x="18" y="25" text-anchor="middle" font-family="Inter Tight, Inter, sans-serif" font-weight="800" font-size="22" fill="{PAPER}" letter-spacing="-1">P</text>
+      <line x1="0" y1="22" x2="36" y2="22" stroke="{PULSE}" stroke-width="2" stroke-linecap="round"/>
+      <text x="48" y="24" font-family="Inter Tight, Inter, sans-serif" font-weight="700" font-size="20" fill="{PAPER}" letter-spacing="-0.5">pulse</text>
+    </g>
+    <!-- Nav items -->
+    <g font-family="Inter Tight, Inter, sans-serif" font-size="14" fill="{PAPER}" opacity="0.8">
+      <rect x="16" y="{bar_h + 100}" width="208" height="40" rx="8" fill="{PULSE}" opacity="0.15"/>
+      <text x="32" y="{bar_h + 125}" fill="{PULSE}" font-weight="600">Overview</text>
+      <text x="32" y="{bar_h + 165}" opacity="0.7">Subscriptions</text>
+      <text x="32" y="{bar_h + 205}" opacity="0.7">Activity</text>
+      <text x="32" y="{bar_h + 245}" opacity="0.7">AI usage</text>
+      <text x="32" y="{bar_h + 285}" opacity="0.7">Settings</text>
+    </g>
+
+    <!-- Main content area -->
+    <g transform="translate(280 {bar_h + 32})">
+      <!-- Greeting -->
+      <text font-family="Inter Tight, Inter, sans-serif" font-weight="700" font-size="26" fill="{PAPER}" letter-spacing="-0.5">
+        <tspan>Good morning, White</tspan>
+        <tspan dx="14" font-size="12" font-weight="600" fill="{PULSE}">47-day streak</tspan>
+      </text>
+      <text y="32" font-family="Inter Tight, Inter, sans-serif" font-size="14" fill="{PAPER}" opacity="0.6">Mint for the AI era</text>
+
+      <!-- ECG line -->
+      <path d="M 0 56 L 100 56 L 130 38 L 160 76 L 190 28 L 220 70 L 260 56 L 360 56 L 420 56 L {width - 720} 56"
+            stroke="{PULSE}" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>
+
+      <!-- ROI hero card -->
+      <g transform="translate(0 96)">
+        <rect width="{width - 720}" height="220" rx="14" fill="{INK}" stroke="{PULSE}" stroke-width="1" opacity="0.95"/>
+        <text x="24" y="32" font-family="Inter Tight, Inter, sans-serif" font-weight="700" font-size="11" fill="{PULSE}" letter-spacing="2">EXCELLENT VALUE  ★★★★★</text>
+        <text x="24" y="48" font-family="Inter Tight, Inter, sans-serif" font-size="11" fill="{PAPER}" opacity="0.6">Power user</text>
+        <text x="24" y="140" font-family="Inter Tight, Inter, sans-serif" font-weight="800" font-size="80" fill="{PULSE}" letter-spacing="-3">10.5<tspan font-size="44">×</tspan></text>
+        <text x="24" y="170" font-family="Inter Tight, Inter, sans-serif" font-size="13" fill="{PAPER}" opacity="0.7">return on plan cost</text>
+        <text x="24" y="200" font-family="Inter Tight, Inter, sans-serif" font-size="14" fill="{PAPER}" opacity="0.85">You're crushing it — elite mileage out of this plan.</text>
+      </g>
+
+      <!-- KPI grid -->
+      <g transform="translate(0 340)" font-family="Inter Tight, Inter, sans-serif">
+        <rect width="220" height="80" rx="10" fill="{INK}" stroke="#22222a" stroke-width="1"/>
+        <text x="16" y="26" font-size="10" fill="{PAPER}" opacity="0.6" letter-spacing="1">MONTHLY</text>
+        <text x="16" y="58" font-weight="700" font-size="22" fill="{PAPER}">฿4,289</text>
+
+        <g transform="translate(240 0)">
+          <rect width="220" height="80" rx="10" fill="{INK}" stroke="#22222a" stroke-width="1"/>
+          <text x="16" y="26" font-size="10" fill="{PAPER}" opacity="0.6" letter-spacing="1">AI THIS MONTH</text>
+          <text x="16" y="58" font-weight="700" font-size="22" fill="{PULSE}">฿14,287</text>
+        </g>
+
+        <g transform="translate(480 0)">
+          <rect width="220" height="80" rx="10" fill="{INK}" stroke="#22222a" stroke-width="1"/>
+          <text x="16" y="26" font-size="10" fill="{PAPER}" opacity="0.6" letter-spacing="1">APP HOURS (7D)</text>
+          <text x="16" y="58" font-weight="700" font-size="22" fill="{PAPER}">42.3h</text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>"""
+
+
+def phase8c_browser_mockup():
+    print("\n[8c] Branded browser-window mockup")
+    out = OUTPUT_DIR / "06-reference"
+    svg = browser_window_svg(1600, 1000)
+    (out / "browser-mockup-clean.svg").write_text(svg, encoding="utf-8")
+    svg_to_png(svg, out / "browser-mockup-clean.png", 1600, 1000)
+    print("    ✓ browser-mockup-clean.svg + .png (INK bg, no laptop photo)")
+
+
 # ────────────────── Phase 9: README ──────────────────
 
 def phase9_readme():
@@ -526,6 +705,12 @@ EXPECTED_FILES = [
     "01-logomark/pulse-mark--mono-black.svg",
     "01-logomark/pulse-mark--mono-black.png",
     "01-logomark/pulse-mark--solid-green.svg",
+    "01-logomark/pulse-mark--transparent-white.svg",
+    "01-logomark/pulse-mark--transparent-white.png",
+    "01-logomark/pulse-mark--transparent-ink.svg",
+    "01-logomark/pulse-mark--transparent-ink.png",
+    "06-reference/browser-mockup-clean.svg",
+    "06-reference/browser-mockup-clean.png",
     "02-lockups/pulse-lockup-horizontal-light.svg",
     "02-lockups/pulse-lockup-horizontal-light.png",
     "02-lockups/pulse-lockup-horizontal-dark.svg",
@@ -609,6 +794,8 @@ def main():
     phase6_icons()
     phase7_social()
     phase8_reference()
+    phase8b_transparent()
+    phase8c_browser_mockup()
     phase9_readme()
     ok, miss, size = phase10_verify()
     phase11_zip()

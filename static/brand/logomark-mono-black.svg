@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- INK background with rounded corners -->
+  <rect x="0" y="0" width="1024" height="1024" rx="184" ry="184" fill="#FAFAF7"/>
+
+  <!-- White P letter (centered, bold, generous bowl) -->
+  <g fill="#0A0A0F">
+    <path d="
+      M 360 200
+      L 360 824
+      L 484 824
+      L 484 588
+      L 580 588
+      C 720 588 824 484 824 360
+      C 824 270 760 200 620 200
+      Z
+      M 484 308
+      L 600 308
+      C 660 308 700 332 700 392
+      C 700 452 660 480 600 480
+      L 484 480
+      Z
+    " />
+  </g>
+
+  <!-- PULSE waveform (ECG-like) crossing horizontally through the P -->
+  <g fill="none" stroke="#0A0A0F" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+    <path d="
+      M 80 560
+      L 220 560
+      L 260 460
+      L 320 680
+      L 380 380
+      L 440 620
+      L 500 480
+      L 560 600
+      L 640 560
+      L 800 560
+      L 944 560
+    " />
+  </g>
+</svg>
