@@ -34,3 +34,96 @@ body { background: #000; color: #fff; font-feature-settings: "ss01" on, "cv11" o
   background: linear-gradient(90deg, transparent, #34d399 15%, #6ee7b7 50%, #34d399 85%, transparent);
   box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
 }
+
+/* === Legal subpages typography === */
+.legal-prose h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+}
+.legal-prose h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e4e4e7;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.legal-prose p { margin-bottom: 1rem; }
+.legal-prose ul, .legal-prose ol { margin: 0.5rem 0 1rem 1.25rem; }
+.legal-prose ul { list-style: disc; }
+.legal-prose ol { list-style: decimal; }
+.legal-prose li { margin-bottom: 0.35rem; }
+.legal-prose a {
+  color: #34d399;
+  text-decoration: underline;
+  text-decoration-color: rgba(52, 211, 153, 0.45);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s;
+}
+.legal-prose a:hover { text-decoration-color: rgba(52, 211, 153, 1); }
+.legal-prose code {
+  background: #18181b;
+  color: #34d399;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-family: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace;
+}
+.legal-prose pre {
+  background: #0f0f12;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.85em;
+  margin: 1rem 0;
+}
+.legal-prose pre code { background: transparent; padding: 0; color: #e4e4e7; }
+.legal-prose blockquote {
+  border-left: 3px solid #00C58A;
+  padding-left: 1rem;
+  color: #a1a1aa;
+  margin: 1rem 0;
+  font-style: italic;
+}
+.legal-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9em;
+}
+.legal-prose th, .legal-prose td {
+  border: 1px solid #27272a;
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+}
+.legal-prose th { background: #18181b; font-weight: 600; }
+.legal-prose hr {
+  border: none;
+  border-top: 1px solid #27272a;
+  margin: 2rem 0;
+}
+.legal-prose strong { color: #fff; }
+
+/* Focus-visible polish (a11y) */
+:focus-visible {
+  outline: 2px solid #00E5A0;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Smooth scrolling + anchor offset for sticky header */
+html { scroll-behavior: smooth; }
+section[id], h1[id], h2[id], h3[id] { scroll-margin-top: 84px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ecg-line { animation: none !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

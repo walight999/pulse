@@ -5286,15 +5286,73 @@ def render_overview():
 
 
 # ============================================================
-# Route
+# Route — wrapped in error boundary so a single page crash doesn't
+# blank out the whole app. Streamlit's default behavior on an
+# uncaught exception is to leave the user staring at a stack trace
+# with no way back. The boundary renders a friendly fallback page
+# with the actual error in an expander + a "Go to Overview" button.
 # ============================================================
-if page == "Overview":
-    render_overview()
-elif page == "Subscriptions":
-    render_subscriptions()
-elif page == "Activity":
-    render_apps()
-elif page == "AI usage":
-    render_tokens()
-elif page == "Settings":
-    render_settings()
+PAGE_RENDERERS = {
+    "Overview":      render_overview,
+    "Subscriptions": render_subscriptions,
+    "Activity":      render_apps,
+    "AI usage":      render_tokens,
+    "Settings":      render_settings,
+}
+
+
+def _render_error_boundary(page_name: str, exc: BaseException) -> None:
+    """Friendly fallback when a page renderer raises.
+    Logs full traceback for diagnostics + offers safe recovery actions."""
+    import traceback
+    tb = traceback.format_exc()
+    try:
+        from db import log_audit
+        log_audit("page_render_error", {"page": page_name, "error": str(exc)})
+    except Exception:
+        pass
+
+    st.markdown(
+        f'<div style="background:linear-gradient(135deg, rgba(248,113,113,0.10), rgba(248,113,113,0.02)); '
+        f'border:1px solid rgba(248,113,113,0.4); border-radius:12px; padding:24px; margin:30px 0;">'
+        f'<div style="font-size:0.7rem; color:#f87171; text-transform:uppercase; letter-spacing:0.08em; font-weight:700;">'
+        f'Page failed to render</div>'
+        f'<div style="font-size:1.3rem; font-weight:700; color:var(--text-primary); margin-top:6px;">'
+        f'{escape(page_name)} hit a snag.</div>'
+        f'<div style="font-size:0.88rem; color:var(--text-secondary); margin-top:8px;">'
+        f'Your data is safe — only this view crashed. Try the actions below or reload the app.</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        if st.button("Go to Overview", use_container_width=True, type="primary"):
+            st.session_state["page"] = "Overview"
+            st.rerun()
+    with c2:
+        if st.button("Reload this page", use_container_width=True):
+            st.cache_data.clear()
+            st.rerun()
+    with c3:
+        if st.button("Open Settings", use_container_width=True):
+            st.session_state["page"] = "Settings"
+            st.rerun()
+
+    with st.expander("Show error details (for bug report)", expanded=False):
+        st.code(tb, language="python")
+        st.caption(
+            "If this keeps happening, copy the trace above and open an issue at "
+            "github.com/walight999/pulse/issues — local data is fine, but a fix lands faster with a trace."
+        )
+
+
+_renderer = PAGE_RENDERERS.get(page)
+if _renderer is None:
+    st.session_state["page"] = "Overview"
+    st.rerun()
+else:
+    try:
+        _renderer()
+    except Exception as _page_exc:
+        _render_error_boundary(page, _page_exc)
