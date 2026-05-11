@@ -149,7 +149,7 @@ Pricing model:
 
 Repo: https://github.com/walight999/pulse
 HN: [link]
-Landing: pulse.app (when live)
+Landing: mintforai.com (when live)
 
 Curious what r/SaaS folks think about the freemium positioning. Free truly
 free + Pro hooked on cross-device + Team hooked on shared visibility.

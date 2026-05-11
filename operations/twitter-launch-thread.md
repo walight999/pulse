@@ -3,7 +3,7 @@
 ## Account setup
 
 - **Handle**: `@pulse_app_ai` (check availability) or `@pulseaiapp` or `@trypulseapp`
-- **Bio**: "Mint for the AI era · Local-first personal-finance dashboard for AI subscriptions, Claude tokens & focused work · pulse.app"
+- **Bio**: "Mint for the AI era · Local-first personal-finance dashboard for AI subscriptions, Claude tokens & focused work · mintforai.com"
 - **Header image**: Use `static/brand/og-social-card.png` crop (1500x500)
 - **Avatar**: `static/brand/app-icon.png`
 - **Pinned tweet**: Launch announcement (tweet 1 below)
@@ -123,7 +123,7 @@ Free forever for local use. Pro at $9/mo when Cloud launches.
 ```
 🎯 Try it: github.com/walight999/pulse
 
-🌐 Landing: pulse.app
+🌐 Landing: mintforai.com
 
 📝 Show HN: [link]
 

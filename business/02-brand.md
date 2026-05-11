@@ -100,7 +100,7 @@ Default: **"Mint for the AI era."**
 
 Variants by context:
 - Twitter bio: "Mint for the AI era · Local-first · MIT"
-- Email signature: "Mint for the AI era — pulse.app"
+- Email signature: "Mint for the AI era — mintforai.com"
 - GitHub repo description: "Mint for the AI era. Local-first personal-finance dashboard for AI subscriptions, Claude tokens, and focused work."
 - HN title: depends on angle (see `operations/marketing/hn-faq-bank.md`)
 

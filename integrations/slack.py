@@ -69,7 +69,7 @@ def format_daily_digest(date_iso: str, token_cost_usd: float, msgs: int,
     blocks.append({
         "type": "context",
         "elements": [
-            {"type": "mrkdwn", "text": "<https://pulse.app|Open Pulse dashboard>"},
+            {"type": "mrkdwn", "text": "<https://mintforai.com|Open Pulse dashboard>"},
         ],
     })
     return {"blocks": blocks}

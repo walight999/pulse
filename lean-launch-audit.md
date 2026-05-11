@@ -53,7 +53,7 @@
 |---|---|---|
 | Tier 0 | GitHub Pages `walight999.github.io/pulse` (option) | Use for landing if Tier 1 unavailable |
 | **Tier 1** | `pulse.<umbrella-brand>.<tld>` | **Recommended for v1.0 launch** — use existing brand |
-| Tier 2 | `pulse.app` / `usepulse.com` | Defer until v1.2 release + 1K+ users |
+| Tier 2 | `mintforai.com` ✅ registered (2026-05-11) | Live by v1.0 launch — wire to Vercel + Cloudflare DNS |
 
 **For Show HN** — use **GitHub URL directly** (HN community prefers repo over marketing site). Landing page = secondary destination.
 

@@ -14,7 +14,7 @@ accounts can pick it up and build.
 
 **Goal:** Pro tier launches. Users can pay $9/mo, sign in, and have
 their Pulse data synced to a server (encrypted), accessible from a web
-dashboard at pulse.app.
+dashboard at mintforai.com.
 
 ### 1.1 Backend stack
 
@@ -190,7 +190,7 @@ Recommended:
 
 ### 2.2 API contract (REST, JSON)
 
-Base URL: `https://api.pulse.app/v1/`
+Base URL: `https://api.mintforai.com/v1/`
 
 ```
 POST   /auth/login          {email, password} → {jwt, refresh_token}
@@ -225,7 +225,7 @@ Replaces the Claude-Code-chat-based discovery with a real OAuth client:
 1. **Create Google Cloud project** at console.cloud.google.com
 2. Enable Gmail API
 3. Create OAuth 2.0 client ID (web app type)
-   - Redirect URI: `https://api.pulse.app/oauth/google/callback`
+   - Redirect URI: `https://api.mintforai.com/oauth/google/callback`
 4. In-app:
    - User clicks "Connect Gmail" in Settings
    - Browser opens to Google's consent screen
@@ -398,7 +398,7 @@ Not yet planned but worth considering:
 
 Before opening Pro signups:
 
-- [ ] Marketing site (pulse.app) live with pricing page
+- [ ] Marketing site (mintforai.com) live with pricing page
 - [ ] Privacy policy + Terms of service published
 - [ ] Stripe live keys + webhook verified
 - [ ] Cloud DB migrated + tested with 100+ test accounts

@@ -300,12 +300,12 @@ Users `git clone` + `pip install -r requirements.txt` + `python app.py`. Future:
 
 ```bash
 cd landing && vercel --prod
-# Custom domain: pulse.app
+# Custom domain: mintforai.com
 ```
 
 ### REST API (Phase 2)
 
-Cloudflare Workers or Fly.io. JWT auth via Supabase. CORS configured for pulse.app + Pro mobile.
+Cloudflare Workers or Fly.io. JWT auth via Supabase. CORS configured for mintforai.com + Pro mobile.
 
 ### Browser extension
 

@@ -18,7 +18,7 @@ Copy-paste ready for submission. Target listing date: ~7 days after Show HN laun
 ```
 Pulse — Mint for the AI era.
 
-The browser companion to the pulse desktop dashboard (https://pulse.app).
+The browser companion to the pulse desktop dashboard (https://mintforai.com).
 Captures your AI tool web sessions and feeds them into your local pulse
 dashboard for unified analytics across ChatGPT, Claude.ai, Gemini, and
 Perplexity.
@@ -126,7 +126,7 @@ program — apply once we have macOS port.
 
 ## Post-listing growth
 
-- Add "Available on Chrome Web Store" badge to pulse.app
+- Add "Available on Chrome Web Store" badge to mintforai.com
 - Add to product hunt launch
 - Cross-link with desktop GitHub README
 - Discord announcement: "pulse browser extension is live"

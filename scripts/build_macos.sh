@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Build pulse.app for macOS (.app bundle)
+# Build pulse for macOS (.app bundle)
 # Run on macOS only. Apple Silicon + Intel both supported (universal2).
 # ============================================================================
 set -euo pipefail

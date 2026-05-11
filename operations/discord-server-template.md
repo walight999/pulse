@@ -31,7 +31,7 @@ Local-first by default. Cloud sync (opt-in, E2E encrypted) launches Q3.
 Free forever for local use. Pro is $9/mo for cross-device.
 
 🔗 Get started: github.com/walight999/pulse
-🔗 Landing: pulse.app
+🔗 Landing: mintforai.com
 🔗 Roadmap: github.com/walight999/pulse/blob/main/ROADMAP.md
 
 To get started:
@@ -170,7 +170,7 @@ Burnout protection:
 
 - Don't promote outside (Discord is a magnet, not a beacon)
 - Cross-link from GitHub README ("Join the community →")
-- Cross-link from pulse.app footer
+- Cross-link from mintforai.com footer
 - After Show HN: invite top commenters who installed
 - After v1.1 release: invite providers parser PR contributors
 
@@ -202,7 +202,7 @@ If we hit 500 active by 90-day mark, consider:
 - [ ] GitHub Issues webhook posting to #release-notes
 - [ ] Founder profile set up with pulse logo + bio
 - [ ] Invite link generated with infinite use + no expiry
-- [ ] Link added to GitHub README + pulse.app footer
+- [ ] Link added to GitHub README + mintforai.com footer
 - [ ] First 5 messages in #general (founder posts to seed activity)
 
 After launch:

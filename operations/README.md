@@ -36,11 +36,11 @@ The operational runbook for launching + scaling Pulse. Everything in this folder
 
 ### Phase 2 — Landing page (Days 3–6)
 
-**Critical bottleneck**. Cannot launch without `pulse.app` live.
+**Critical bottleneck**. Cannot launch without `mintforai.com` live.
 
-- [ ] Register `pulse.app` on Cloudflare ($14/yr) — 30 min
+- [ ] Register `mintforai.com` on Cloudflare ($14/yr) — 30 min
 - [ ] `cd landing && npm install && vercel --prod` — 30 min
-- [ ] Custom domain `pulse.app` in Vercel + DNS — 10 min
+- [ ] Custom domain `mintforai.com` in Vercel + DNS — 10 min
 - [ ] Wire waitlist endpoint to Supabase (or Formspree initially) — 1 hr
 - [ ] Lighthouse ≥ 95 audit — 30 min
 - [ ] Mobile responsiveness check — 30 min

@@ -108,7 +108,7 @@ This list is intentional. v1 is for the Claude-heavy Windows prosumer. We expand
 - **Defer Phase B+C cloud activation 60+ days post-launch** — prevent scope creep
 - **Show HN target shift**: May 18 → May 26 or 28 — give warmup phase runway
 - **Beta tester recruitment is non-negotiable** — minimum 10 installs before launch
-- **Landing page is critical path** — cannot launch without `pulse.app` live
+- **Landing page is critical path** — cannot launch without `mintforai.com` live
 - **Free truly free** — local users never need to pay, ever
 - **Pro hooked on cross-device** — sync + mobile are the freemium upsell
 - **Team hooked on shared visibility** — per-user attribution + Slack

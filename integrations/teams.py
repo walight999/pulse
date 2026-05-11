@@ -72,7 +72,7 @@ def format_daily_digest(date_iso: str, token_cost_usd: float, msgs: int,
             ("AI spend", f"{symbol}{token_cost_usd:,.2f}"),
             ("Messages", f"{msgs:,}"),
         ],
-        action_url="https://pulse.app",
+        action_url="https://mintforai.com",
     )
 
 
@@ -84,5 +84,5 @@ def format_spike_alert(today_cost: float, avg_cost: float, multiplier: float,
             f"Today's {symbol}{today_cost:,.2f} is {multiplier:.1f}x your "
             f"recent average of {symbol}{avg_cost:,.2f}."
         ),
-        action_url="https://pulse.app",
+        action_url="https://mintforai.com",
     )

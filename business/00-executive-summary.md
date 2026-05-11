@@ -6,7 +6,7 @@
 **Founded**: 2026-05-11 (build day)
 **CEO**: White (@walight999)
 **Repo**: https://github.com/walight999/pulse
-**Domain**: pulse.app (to register)
+**Domain**: mintforai.com (to register)
 **Launch target**: Tue May 26 or Thu May 28 at 19:00 ICT (08:00 EST)
 
 ---
@@ -66,7 +66,7 @@ Anthropic + Intuit are secondary targets.
 
 ## Top 3 next moves (TODAY)
 
-1. **Register `pulse.app`** on Cloudflare ($14/yr) — 30 min
+1. **Register `mintforai.com`** on Cloudflare ($14/yr) — 30 min
 2. **`cd landing && vercel --prod`** — deploy landing page — 30 min
 3. **Reserve `@pulse_app_ai`** on Twitter/X + post Tweet 1.1 from `operations/marketing/twitter-warmup-tweets.md` — 5 min
 

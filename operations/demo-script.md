@@ -57,8 +57,8 @@ ffmpeg -i demo.mp4 -i palette.png -lavfi "fps=24,scale=1280:-1:flags=lanczos[x];
 | 1:10 | Settings panel | Theme switch ☾ → ☀ → ☾ smooth transition | "Light or dark. Your data, your way." |
 | 1:18 | Privacy emphasis | Sidebar shows "100% local" indicator | "100% local. No account. No telemetry." |
 | 1:22 | Browser ext popup | Quick shot of browser extension icon | "Browser extension captures ChatGPT, Claude.ai, Gemini, Perplexity." |
-| 1:26 | End card | Logomark + "pulse.app" + "MIT licensed" | "pulse. Mint for the AI era." |
-| 1:30 | Black out | URL pulses on screen | "pulse.app" |
+| 1:26 | End card | Logomark + "mintforai.com" + "MIT licensed" | "pulse. Mint for the AI era." |
+| 1:30 | Black out | URL pulses on screen | "mintforai.com" |
 
 ### Recording setup
 
@@ -117,7 +117,7 @@ Before recording:
 - [ ] Length: 30s GIF + 90s video both produced
 - [ ] File size: GIF < 4 MB, MP4 < 50 MB
 - [ ] Captions: SRT file for video, embedded text for GIF
-- [ ] Branding: logomark in corner, "pulse.app" lower-right
+- [ ] Branding: logomark in corner, "mintforai.com" lower-right
 - [ ] Thumbnail: hero shot at 0:15 mark
 - [ ] Export: MP4 H.264 for video, GIF + WebP for animation
 - [ ] Upload: YouTube unlisted first (review), then public on launch day

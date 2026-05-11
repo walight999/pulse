@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "pulse — Mint for the AI era",
     description: "Prove your $200 Claude plan returns $4,000 in API value.",
-    url: "https://pulse.app",
+    url: "https://mintforai.com",
     siteName: "pulse",
     images: [{ url: "/brand/og-social-card.png", width: 1200, height: 630 }],
     locale: "en_US",

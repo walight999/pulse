@@ -31,7 +31,7 @@ npm run test:ui
 ## Environment overrides
 
 ```bash
-PULSE_LANDING_URL=https://pulse.app npm run test:landing
+PULSE_LANDING_URL=https://mintforai.com npm run test:landing
 PULSE_DASHBOARD_URL=http://192.168.1.5:8501 npm run test:dashboard
 ```
 

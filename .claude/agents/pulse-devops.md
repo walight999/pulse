@@ -36,7 +36,7 @@ For each version (vX.Y):
 ```bash
 cd landing
 vercel --prod
-# Custom domain pulse.app in Vercel dashboard
+# Custom domain mintforai.com in Vercel dashboard
 # DNS records at Cloudflare → A + CNAME to Vercel
 ```
 

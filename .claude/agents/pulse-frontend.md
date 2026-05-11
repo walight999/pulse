@@ -46,7 +46,7 @@ Build/fix UI in Streamlit + Plotly + custom CSS. Maintain landing page (Next.js)
 ## Landing page (Next.js)
 
 Located in `landing/`. Use Tailwind tokens from `landing/tailwind.config.ts`.
-Deploy: `vercel --prod`. Custom domain: `pulse.app`.
+Deploy: `vercel --prod`. Custom domain: `mintforai.com`.
 
 ## Browser extension popup
 

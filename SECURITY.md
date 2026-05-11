@@ -66,7 +66,7 @@ Cloud accounts get a mirror in Supabase audit table, retained for 90 days
 
 If you discover a security issue, **please do not file a public issue**.
 
-Email: security@pulse.app (when domain registered) or DM @walight999 on GitHub.
+Email: security@mintforai.com (when domain registered) or DM @walight999 on GitHub.
 
 We aim to:
 

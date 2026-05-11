@@ -39,5 +39,5 @@ def daily_digest_embed(date_iso: str, token_cost_usd: float, msgs: int,
             {"name": "AI spend",  "value": f"{symbol}{token_cost_usd:,.2f}", "inline": True},
             {"name": "Messages",  "value": f"{msgs:,}", "inline": True},
         ],
-        "footer": {"text": "pulse.app"},
+        "footer": {"text": "mintforai.com"},
     }

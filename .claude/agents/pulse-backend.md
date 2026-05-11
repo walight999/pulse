@@ -56,7 +56,7 @@ Dedupe by `request_id` UNIQUE constraint.
 
 - All endpoints behind `Authorization: Bearer <jwt>` (except `/health`)
 - Use FastAPI dependency injection for auth
-- CORS configured for `pulse.app` + mobile origin only
+- CORS configured for `mintforai.com` + mobile origin only
 - Rate limit per plan tier (60/300/1000/5000 req/min)
 
 ## Webhook integrations

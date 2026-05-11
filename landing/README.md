@@ -1,6 +1,6 @@
 # pulse landing — Next.js 14 (App Router)
 
-Marketing site at `pulse.app` (when deployed).
+Marketing site at `mintforai.com` (when deployed).
 
 ## Quickstart
 
@@ -20,9 +20,9 @@ vercel               # first-time setup
 vercel --prod        # production deploy
 ```
 
-Once domain `pulse.app` is registered:
+Once domain `mintforai.com` is registered:
 
-1. In Vercel → Settings → Domains → Add `pulse.app`
+1. In Vercel → Settings → Domains → Add `mintforai.com`
 2. In your registrar → DNS → Add Vercel A/CNAME records
 3. SSL auto-provisions via Let's Encrypt
 
@@ -56,5 +56,5 @@ Place the 5 PNGs from `static/brand/` into `landing/public/brand/`:
 - [ ] Docs at `/docs` (MDX or Mintlify)
 - [ ] Pricing page detail (`/pricing` — currently in-page anchor)
 - [ ] Compare page (`/vs/claudemetrics`, `/vs/anthropic-console`)
-- [ ] Status page (`status.pulse.app`)
+- [ ] Status page (`status.mintforai.com`)
 - [ ] Sign-in flow (when Cloud launches)

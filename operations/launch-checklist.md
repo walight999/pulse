@@ -5,17 +5,17 @@ The end-to-end runbook for going from "v1.2 in repo" to "live with traction."
 ## T-minus 7 days
 
 ### Domain + landing
-- [ ] Register `pulse.app` ($30/yr on Namecheap or $14/yr on Cloudflare)
+- [ ] Register `mintforai.com` ($30/yr on Namecheap or $14/yr on Cloudflare)
 - [ ] Set up Vercel project from `landing/` folder
-- [ ] Point `pulse.app` DNS to Vercel (A + CNAME records)
+- [ ] Point `mintforai.com` DNS to Vercel (A + CNAME records)
 - [ ] Verify SSL provisioned
 - [ ] Confirm OG card renders correctly via opengraph.xyz test
 
 ### Social accounts
 - [ ] Reserve `@pulse_app_ai` on Twitter/X
-- [ ] Reserve `@pulse.app` on Bluesky
+- [ ] Reserve `@mintforai.com` on Bluesky
 - [ ] Reserve `pulse-app` on GitHub org (if not already taken)
-- [ ] Set up `hi@pulse.app` email forward via your domain provider
+- [ ] Set up `hi@mintforai.com` email forward via your domain provider
 - [ ] Apply email signature from `marketing/email-signature.html`
 
 ### Repo polish

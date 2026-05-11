@@ -26,7 +26,7 @@ class PulseError(Exception):
 
 
 class PulseClient:
-    DEFAULT_BASE_URL = "https://api.pulse.app"
+    DEFAULT_BASE_URL = "https://api.mintforai.com"
 
     def __init__(self, api_key: str, base_url: Optional[str] = None, timeout: int = 10):
         if not api_key:

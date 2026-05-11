@@ -408,7 +408,7 @@ def social_svg(width: int, height: int, with_subhead: bool = True) -> str:
   <g font-family="JetBrains Mono, ui-monospace, monospace" font-size="{int(height * 0.026)}" fill="{PAPER}" opacity="0.6">
     <text x="64" y="{height - 48}">github.com/walight999/pulse</text>
     <text x="{width / 2}" y="{height - 48}" text-anchor="middle">Local-first · MIT</text>
-    <text x="{width - 64}" y="{height - 48}" text-anchor="end">pulse.app</text>
+    <text x="{width - 64}" y="{height - 48}" text-anchor="end">mintforai.com</text>
   </g>
 </svg>"""
 
@@ -556,7 +556,7 @@ def browser_window_svg(width: int = 1600, height: int = 1000) -> str:
     <circle cx="56" cy="{bar_h/2}" r="8" fill="#ffbd2e"/>
     <circle cx="84" cy="{bar_h/2}" r="8" fill="#27c93f"/>
     <rect x="160" y="{bar_h/2 - 14}" rx="6" ry="6" width="{width - 580}" height="28" fill="#0e0e15" stroke="#2a2a32" stroke-width="1"/>
-    <text x="180" y="{bar_h/2 + 5}" font-family="JetBrains Mono, ui-monospace, monospace" font-size="14" fill="{PAPER}" opacity="0.55">pulse.app</text>
+    <text x="180" y="{bar_h/2 + 5}" font-family="JetBrains Mono, ui-monospace, monospace" font-size="14" fill="{PAPER}" opacity="0.55">mintforai.com</text>
 
     <!-- Sidebar -->
     <rect y="{bar_h}" width="240" height="{height - 200 - bar_h}" fill="#0e0e14"/>

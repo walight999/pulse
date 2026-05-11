@@ -28,7 +28,7 @@ st.set_page_config(
     page_icon=str(_BRAND_ICON) if _BRAND_ICON.exists() else "💚",
     layout="wide",
     initial_sidebar_state="expanded",
-    menu_items={"About": "pulse — Mint for the AI era. https://pulse.app"},
+    menu_items={"About": "pulse — Mint for the AI era. https://mintforai.com"},
 )
 
 # ============================================================

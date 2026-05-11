@@ -55,7 +55,7 @@ Supabase Dashboard → Authentication → Email Templates:
 
 - Enable email confirmations
 - Customize magic link template with Pulse branding (use `operations/welcome-email.html`)
-- Set sender to `hi@pulse.app` (requires custom SMTP)
+- Set sender to `hi@mintforai.com` (requires custom SMTP)
 
 ### 5. Set env vars in desktop app
 
@@ -139,7 +139,7 @@ Supabase Pro tier ($25/mo) covers:
 - 8 GB database storage (millions of encrypted rows)
 - 50 GB bandwidth
 - 100K monthly active users
-- Custom domain (api.pulse.app)
+- Custom domain (api.mintforai.com)
 - SOC 2 Type II compliance (parent platform)
 
 For first 1,000 Pulse Pro users, free tier ($0) suffices:

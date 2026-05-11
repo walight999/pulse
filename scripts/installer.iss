@@ -12,7 +12,7 @@
 #define MyAppName "pulse"
 #define MyAppVersion "1.5.0"
 #define MyAppPublisher "White"
-#define MyAppURL "https://pulse.app"
+#define MyAppURL "https://mintforai.com"
 #define MyAppExeName "pulse.exe"
 
 [Setup]

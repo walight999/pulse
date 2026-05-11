@@ -222,7 +222,7 @@ monthly spend in the comments. Mine right now:
 ## Links
 
 - 🔗 Code: https://github.com/walight999/pulse
-- 🔗 Landing: https://pulse.app (live soon)
+- 🔗 Landing: https://mintforai.com (live soon)
 - 🔗 Show HN: [link when live]
 - 🔗 Twitter: @pulse_app_ai
 
