@@ -1083,6 +1083,107 @@ st.markdown(
             border: 1px solid var(--border) !important;
         }
 
+        /* Themed scrollbars — WebKit (Chrome / Edge / Safari) + Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-strong) transparent;
+        }
+        *::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: var(--border-strong);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+            background-clip: padding-box;
+            border: 2px solid transparent;
+        }
+        *::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        /* Selectbox closed state — center the displayed value vertically.
+           Streamlit's baseweb dropdown has weird default vertical alignment. */
+        .block-container [data-testid="stSelectbox"] > div > div {
+            min-height: 38px !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 4px 12px !important;
+        }
+        .block-container [data-testid="stSelectbox"] > div > div > div {
+            display: flex !important;
+            align-items: center !important;
+            line-height: 1.3 !important;
+            padding: 0 !important;
+        }
+        /* The actual text inside the closed select */
+        [data-baseweb="select"] [data-baseweb="select-control"] {
+            min-height: 38px !important;
+        }
+        [data-baseweb="select"] [data-baseweb="select-control"] > div {
+            display: flex !important;
+            align-items: center !important;
+        }
+        /* Value text inside select */
+        [data-baseweb="select"] [class*="ValueContainer"],
+        [data-baseweb="select"] [data-baseweb="tag"],
+        [data-baseweb="select"] input {
+            display: flex !important;
+            align-items: center !important;
+            line-height: 1.3 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        /* Save / form submit button — distinctive Pulse accent treatment */
+        [data-testid="stFormSubmitButton"] button,
+        [data-testid="stForm"] [data-testid="stBaseButton-primary"] {
+            background: var(--accent) !important;
+            color: var(--text-invert) !important;
+            border: 1px solid var(--accent) !important;
+            font-weight: 600 !important;
+            padding: 0 22px !important;
+            height: 38px !important;
+            min-height: 38px !important;
+            border-radius: 8px !important;
+            box-shadow: 0 1px 4px rgba(0, 229, 160, 0.25) !important;
+            letter-spacing: 0.01em !important;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease !important;
+        }
+        [data-testid="stFormSubmitButton"] button:hover,
+        [data-testid="stForm"] [data-testid="stBaseButton-primary"]:hover {
+            background: var(--accent-hover) !important;
+            border-color: var(--accent-hover) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 229, 160, 0.35) !important;
+        }
+        [data-testid="stFormSubmitButton"] button:active,
+        [data-testid="stForm"] [data-testid="stBaseButton-primary"]:active {
+            transform: translateY(0);
+        }
+        /* Secondary form button (Cancel etc) — ghost style */
+        [data-testid="stFormSubmitButton"] button[kind="secondary"],
+        [data-testid="stForm"] [data-testid="stBaseButton-secondary"] {
+            background: var(--bg-card) !important;
+            color: var(--text-secondary) !important;
+            border: 1px solid var(--border) !important;
+            box-shadow: none !important;
+        }
+        [data-testid="stFormSubmitButton"] button[kind="secondary"]:hover {
+            background: var(--bg-hover) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-strong) !important;
+            transform: none !important;
+        }
+
         /* Custom HTML tables (.pulse-table) — replaces st.dataframe where full
            theming is required. Streamlit's dataframe uses Glide Data Grid which
            ignores our CSS variables. */
@@ -3807,19 +3908,16 @@ def render_pulse_pro_section():
 def render_settings():
     page_header("Settings", f"{APP_NAME} · v1.0 · Local-first, private by design")
 
-    tab_prefs, tab_pro, tab_data, tab_adv = st.tabs(
-        ["Preferences", "Pulse Pro", "Data & backup", "Advanced"]
+    tab_prefs, tab_pro, tab_data = st.tabs(
+        ["Preferences", "Pulse Pro", "Data & backup"]
     )
 
-    # ====== PREFERENCES TAB ======
     with tab_prefs:
         _render_settings_preferences()
     with tab_pro:
         render_pulse_pro_section()
     with tab_data:
         _render_settings_data()
-    with tab_adv:
-        _render_settings_advanced()
 
 
 def _render_settings_preferences():
