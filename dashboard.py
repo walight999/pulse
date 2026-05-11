@@ -3989,6 +3989,147 @@ def _render_settings_preferences():
             set_setting("alerts_dead_subs_enabled", "1" if n_dead else "0")
             st.success("Saved")
 
+    st.markdown("---")
+
+    # ── PROVIDER API KEYS (D2 — multi-provider integration) ──────
+    st.markdown("##### Provider API keys")
+    st.caption(
+        "Optional. Connect API keys for OpenAI / Anthropic / Gemini / Mistral. "
+        "Keys are stored locally in your SQLite DB. They never leave your machine "
+        "unless you enable cloud sync (E2E encrypted)."
+    )
+
+    with st.form("api_keys_form"):
+        k1, k2 = st.columns(2)
+        with k1:
+            new_openai_key = st.text_input(
+                "OpenAI API key",
+                value=get_setting("openai_api_key", ""),
+                type="password",
+                placeholder="sk-...",
+                help="Get from https://platform.openai.com/api-keys. Enables /v1/usage parsing.",
+            )
+            new_gemini_key = st.text_input(
+                "Google AI Studio key",
+                value=get_setting("gemini_api_key", ""),
+                type="password",
+                placeholder="AIza...",
+                help="Get from https://aistudio.google.com/app/apikey",
+            )
+        with k2:
+            new_mistral_key = st.text_input(
+                "Mistral key",
+                value=get_setting("mistral_api_key", ""),
+                type="password",
+                placeholder="...",
+                help="Get from https://console.mistral.ai/api-keys",
+            )
+            new_anth_key = st.text_input(
+                "Anthropic API key (optional)",
+                value=get_setting("anthropic_api_key", ""),
+                type="password",
+                placeholder="sk-ant-...",
+                help="Only needed for cross-machine Claude tracking. Local logs work without it.",
+            )
+        if st.form_submit_button("Save API keys", type="primary"):
+            for key, val in [
+                ("openai_api_key",    new_openai_key),
+                ("gemini_api_key",    new_gemini_key),
+                ("mistral_api_key",   new_mistral_key),
+                ("anthropic_api_key", new_anth_key),
+            ]:
+                set_setting(key, val.strip())
+            st.toast("API keys saved locally", icon=":material/check_circle:")
+            st.rerun()
+
+    st.markdown("---")
+
+    # ── CLOUD SIGN-IN (D1 — closes the loop on cloud module) ──────
+    st.markdown("##### Pulse Cloud")
+    try:
+        from cloud import auth as cloud_auth
+        cloud_ready = cloud_auth.is_configured()
+        session = cloud_auth.current_session() if cloud_ready else None
+    except Exception:
+        cloud_ready, session = False, None
+
+    if not cloud_ready:
+        st.caption(
+            "Pulse Cloud is opt-in. To enable: set `SUPABASE_URL` + `SUPABASE_ANON_KEY` "
+            "env vars, then run `pip install -r requirements-cloud.txt` and restart."
+        )
+        st.info("Cloud not configured. See `cloud/README.md` for setup.")
+    elif session is None:
+        st.caption(
+            "Sign in to sync across devices. End-to-end encrypted "
+            "(AES-256-GCM + Argon2id). The server cannot read your data."
+        )
+        with st.form("cloud_signin_form"):
+            sc1, sc2 = st.columns([3, 1])
+            with sc1:
+                cloud_email = st.text_input(
+                    "Email",
+                    placeholder="you@example.com",
+                    key="cloud_signin_email",
+                )
+            with sc2:
+                if st.form_submit_button("Sign in", type="primary",
+                                         use_container_width=True):
+                    if not cloud_email:
+                        st.warning("Email required")
+                    else:
+                        from account import get_account_id
+                        r = cloud_auth.signin_with_magic_link(cloud_email)
+                        if r.get("ok"):
+                            st.toast("Check your email for the sign-in link",
+                                     icon=":material/mail:")
+                        else:
+                            st.error(f"Failed: {r.get('error')}")
+    else:
+        st.success(f"Signed in as {session.email} · plan: **{session.plan}**")
+        cs1, cs2, cs3 = st.columns(3)
+        with cs1:
+            st.metric("Last sync", get_setting("cloud_last_sync_at", "never")[:16])
+        with cs2:
+            if st.button("Sync now", use_container_width=True):
+                st.info("Cloud sync requires master password to derive encryption key. "
+                        "First-time sync flow lands in v2.0.")
+        with cs3:
+            if st.button("Sign out", use_container_width=True):
+                cloud_auth.signout()
+                st.toast("Signed out", icon=":material/logout:")
+                st.rerun()
+
+    st.markdown("---")
+
+    # ── AUDIT LOG (D4 — security-conscious users + compliance) ────
+    st.markdown("##### Audit log")
+    st.caption("Local-only security event log. Sign-ins, exports, API key changes, sync events.")
+    try:
+        conn = get_conn()
+        audit_rows = pd.read_sql_query(
+            "SELECT timestamp, action, actor, target FROM audit_log "
+            "ORDER BY id DESC LIMIT 25",
+            conn,
+        )
+        if not audit_rows.empty:
+            audit_rows["timestamp"] = audit_rows["timestamp"].str[:16].str.replace("T", " ")
+            pulse_table(
+                audit_rows,
+                strong_cols=["action"],
+                col_labels={"timestamp": "When", "action": "Event",
+                            "actor": "Actor", "target": "Target"},
+                max_height=240,
+            )
+        else:
+            pulse_empty(
+                "Quiet here",
+                "No security events recorded yet. Sign in to cloud or export data to see entries.",
+                ICON_INBOX,
+            )
+    except Exception as e:
+        st.caption(f"Audit log unavailable: {e}")
+
 
 def _render_settings_data():
     """Backup, restore, CSV import/export, ICS export."""
