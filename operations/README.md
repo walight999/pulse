@@ -20,6 +20,7 @@ The operational runbook for launching + scaling Pulse. Everything in this folder
 | `discord-server-template.md` | 8-channel setup + 4 roles |
 | `browser-extension-store-listing.md` | Chrome/Edge store submission |
 | `vercel-deploy.md` | **Click-by-click Vercel + Cloudflare DNS for `mintforai.com`** |
+| `post-launch-backend.md` | Stripe/Supabase/SSO wiring runbook — triggered per first paying user / team / enterprise |
 | `welcome-email.html` | Waitlist confirmation email |
 | `email-signature.html` | Founder email signature |
 | `invoice-template.html` | Stripe-renderable customer invoice |

@@ -1838,6 +1838,49 @@ def load_app_usage(days: int) -> pd.DataFrame:
     )
 
 
+_TIER_BADGE_COLORS = {
+    "pro":        ("#00E5A0", "#0A0A0F"),
+    "team":       ("#7C3AED", "#FFFFFF"),
+    "enterprise": ("#F59E0B", "#0A0A0F"),
+}
+
+
+def tier_lock_banner(feature_flag: str, message: str | None = None) -> bool:
+    """If the current tier already has `feature_flag`, return True (caller renders feature).
+    Otherwise render an inline upgrade banner and return False.
+    Keeps the gating call-site to a one-liner: `if not tier_lock_banner('cloud_sync'): return`.
+    """
+    if account.feature_enabled(feature_flag):
+        return True
+    required = account.tier_for_feature(feature_flag) or "pro"
+    bg, fg = _TIER_BADGE_COLORS.get(required, ("#00E5A0", "#0A0A0F"))
+    disp = account.tier_display(required)
+    msg = message or f"This feature unlocks with {disp['name']}."
+    upgrade_href = "https://mintforai.com/#pricing"
+    if required == "team":
+        upgrade_href = "mailto:sales@mintforai.com?subject=pulse%20Team%20inquiry"
+    elif required == "enterprise":
+        upgrade_href = "mailto:enterprise@mintforai.com?subject=pulse%20Enterprise%20inquiry"
+    st.markdown(
+        f'<div style="background:var(--bg-card); border:1px dashed {bg}; border-radius:10px; '
+        f'padding:14px 18px; display:flex; align-items:center; justify-content:space-between; '
+        f'gap:14px; flex-wrap:wrap;">'
+        f'<div style="display:flex; align-items:center; gap:10px; flex:1;">'
+        f'<span style="background:{bg}; color:{fg}; padding:3px 9px; border-radius:99px; '
+        f'font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;">'
+        f'{escape(disp["name"])}</span>'
+        f'<span style="font-size:0.85rem; color:var(--text-primary);">{escape(msg)}</span>'
+        f'</div>'
+        f'<a href="{escape(upgrade_href)}" target="_blank" rel="noopener" '
+        f'style="background:{bg}; color:{fg}; padding:7px 14px; border-radius:6px; '
+        f'text-decoration:none; font-size:0.78rem; font-weight:600;">'
+        f'Upgrade to {escape(disp["name"])}</a>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+    return False
+
+
 def page_header(title: str, caption: str, action_label: str | None = None, action_key: str | None = None) -> bool:
     """Render page title with optional action button on the right.
     Adds breathing room below the header so content doesn't crowd the title."""
@@ -3761,58 +3804,157 @@ def render_leaderboard_preview() -> None:
 # PAGE: SETTINGS
 # ============================================================
 def render_pulse_pro_section():
-    """Pricing + waitlist + referral + account info — embedded inside Settings."""
-    st.markdown("##### Pulse Pro — coming soon")
-    st.caption(
-        "Pulse is free forever for local use. Pro adds cloud sync, mobile, "
-        "AI assistant, cross-provider tracking, and bank integration."
+    """Plans + billing + waitlist + referral + account info — embedded inside Settings."""
+    current_tier = account.get_tier()
+    current_disp = account.tier_display(current_tier)
+
+    # ── Current tier banner ────────────────────────────────
+    next_tier = current_disp["next_tier"]
+    next_disp = account.tier_display(next_tier) if next_tier else None
+    upsell = (
+        f'Upgrade to <strong>{escape(next_disp["name"])}</strong> ({escape(next_disp["price_label"])}) for more.'
+        if next_disp else "You're on the top tier. Thanks for supporting pulse."
+    )
+    st.markdown(
+        f'<div style="background:linear-gradient(135deg, rgba(0,229,160,0.10), rgba(0,229,160,0.02)); '
+        f'border:1px solid var(--pulse-dim, #00C58A); border-radius:12px; padding:16px 18px; '
+        f'margin-bottom:18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">'
+        f'<div>'
+        f'<div style="font-size:0.7rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.08em;">Current plan</div>'
+        f'<div style="font-size:1.4rem; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">'
+        f'<span>{escape(current_disp["name"])}</span>'
+        f'<span style="background:rgba(0,229,160,0.15); color:#00E5A0; padding:2px 9px; border-radius:99px; '
+        f'font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">{escape(current_disp["price_label"])}</span>'
+        f'</div>'
+        f'<div style="font-size:0.82rem; color:var(--text-secondary); margin-top:4px;">{upsell}</div>'
+        f'</div>'
+        f'</div>',
+        unsafe_allow_html=True,
     )
 
-    # Pricing tiers — 3 column comparison
-    pp1, pp2, pp3 = st.columns(3)
+    # ── Plans grid (4 tiers — matches landing/app/page.tsx) ────
+    st.markdown("##### Plans")
+    st.caption("Free is fully featured for local use. Pay only when you go cloud.")
 
-    def tier_card(col, name: str, price: str, sub: str, perks: list[str], cta: str | None = None):
+    pp1, pp2, pp3, pp4 = st.columns(4)
+
+    def tier_card(col, tier_key: str, name: str, price: str, sub: str,
+                  perks: list[str], cta: str | None = None, cta_href: str | None = None):
+        is_current = (tier_key == current_tier)
+        is_featured = (tier_key == "pro")
         with col:
             features = "".join(
-                f'<li style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:3px;">{escape(p)}</li>'
+                f'<li style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:2px;">{escape(p)}</li>'
                 for p in perks
             )
-            cta_html = (
-                f'<div style="margin-top:10px; font-size:0.78rem; color:var(--text-secondary);">{escape(cta)}</div>'
-                if cta else ""
-            )
+            badge = ""
+            if is_current:
+                badge = ('<div style="background:#00E5A0; color:#0A0A0F; font-size:0.65rem; '
+                         'font-weight:700; padding:2px 8px; border-radius:99px; display:inline-block; '
+                         'margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Current</div>')
+            elif is_featured:
+                badge = ('<div style="background:rgba(0,229,160,0.15); color:#00E5A0; font-size:0.65rem; '
+                         'font-weight:700; padding:2px 8px; border-radius:99px; display:inline-block; '
+                         'margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Most popular</div>')
+            border = "2px solid #00E5A0" if is_current else ("1px solid var(--pulse-dim, #00C58A)" if is_featured else "1px solid var(--border)")
+            cta_html = ""
+            if cta and cta_href:
+                cta_html = (
+                    f'<a href="{escape(cta_href)}" target="_blank" rel="noopener" '
+                    f'style="display:block; text-align:center; margin-top:10px; padding:7px; '
+                    f'background:{"#00E5A0" if is_featured else "transparent"}; '
+                    f'color:{"#0A0A0F" if is_featured else "var(--text-primary)"}; '
+                    f'border:1px solid {"#00E5A0" if is_featured else "var(--border)"}; '
+                    f'border-radius:6px; text-decoration:none; font-size:0.78rem; font-weight:600;">'
+                    f'{escape(cta)}</a>'
+                )
+            elif cta:
+                cta_html = (
+                    f'<div style="margin-top:10px; font-size:0.72rem; color:var(--text-muted); '
+                    f'text-align:center;">{escape(cta)}</div>'
+                )
             st.markdown(
-                f'<div style="background:var(--bg-card); border:1px solid var(--border); '
-                f'border-radius:10px; padding:14px; height:100%; min-height:280px;">'
+                f'<div style="background:var(--bg-card); border:{border}; '
+                f'border-radius:10px; padding:14px; height:100%; min-height:330px; '
+                f'display:flex; flex-direction:column;">'
+                f'{badge}'
                 f'<div style="font-size:0.7rem; color:var(--text-secondary); text-transform:uppercase; '
                 f'letter-spacing:0.05em; font-weight:600;">{escape(name)}</div>'
-                f'<div style="font-size:1.5rem; font-weight:700; color:var(--text-primary); '
+                f'<div style="font-size:1.4rem; font-weight:700; color:var(--text-primary); '
                 f'margin-top:4px;">{escape(price)}</div>'
-                f'<div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:10px;">{escape(sub)}</div>'
-                f'<ul style="padding-left:18px; margin:0;">{features}</ul>'
+                f'<div style="font-size:0.74rem; color:var(--text-secondary); margin-bottom:10px;">{escape(sub)}</div>'
+                f'<ul style="padding-left:16px; margin:0; flex:1;">{features}</ul>'
                 f'{cta_html}'
                 f'</div>',
                 unsafe_allow_html=True,
             )
 
-    tier_card(pp1, "Free", "$0", "forever, local",
-              ["Subscription tracker", "AI token analytics (Claude Code)",
-               "App usage tracking", "Windows alerts", "CSV export",
-               "Local backup", "1 device"],
-              cta="You are here.")
-    tier_card(pp2, "Pro", "$9 / mo", "billed monthly or $89/yr",
-              ["Everything in Free", "Cloud sync (encrypted)",
-               "Mobile companion app", "Web dashboard",
-               "AI assistant — Ask Pulse", "Cross-provider tracking (OpenAI, Gemini, Cursor)",
-               "Receipt OCR", "Email digest + push",
-               "Unlimited devices, unlimited history"],
-              cta="Coming Q3 2026 — join waitlist below")
-    tier_card(pp3, "Team", "$19 /user/mo", "for small teams & families",
-              ["Everything in Pro", "Shared subscription pool",
-               "Per-user attribution", "Approval workflow",
-               "Tax categorization", "Annual tax pack PDF",
-               "Slack/LINE integrations"],
-              cta="Coming Q4 2026")
+    tier_card(pp1, "free", "Free", "$0", "forever, local",
+              ["Subscription tracker", "AI token analytics", "Activity tracking",
+               "Browser extension", "Multi-currency (30+)", "CSV/ICS export",
+               "1 device"],
+              cta="You are here." if current_tier == "free" else None)
+    tier_card(pp2, "pro", "Pro", "$9", "/ month",
+              ["Everything in Free", "E2E cloud sync", "Mobile PWA",
+               "Multi-provider live (OpenAI/Gemini/Cursor/Copilot)",
+               "Friend leaderboard", "Ask pulse AI", "3 devices"],
+              cta="Join waitlist →" if current_tier == "free" else "Active",
+              cta_href="https://mintforai.com/#waitlist" if current_tier == "free" else None)
+    tier_card(pp3, "team", "Team", "$19", "/ seat / month (min 3)",
+              ["Everything in Pro", "Team dashboard", "Per-user attribution",
+               "Slack/Teams/Discord", "Admin controls", "1yr audit log",
+               "Unlimited devices"],
+              cta="Contact sales →" if current_tier in ("free", "pro") else "Active",
+              cta_href="mailto:sales@mintforai.com?subject=pulse%20Team%20inquiry" if current_tier in ("free", "pro") else None)
+    tier_card(pp4, "enterprise", "Enterprise", "Custom", "50+ seats",
+              ["Everything in Team", "SSO (SAML + OIDC)", "SOC 2 Type II",
+               "Custom roles", "7yr audit retention", "Dedicated CSM + SLA",
+               "On-prem deploy"],
+              cta="Talk to us →" if current_tier != "enterprise" else "Active",
+              cta_href="mailto:enterprise@mintforai.com?subject=pulse%20Enterprise%20inquiry" if current_tier != "enterprise" else None)
+
+    st.markdown("---")
+
+    # ── Billing ─────────────────────────────────────────────
+    st.markdown("##### Billing")
+    if current_tier == "free":
+        st.caption(
+            "You're on Free — no billing. Upgrade to unlock cloud sync, mobile, "
+            "and team features."
+        )
+    else:
+        member_since = account.get_account_age_days()
+        bc1, bc2, bc3 = st.columns(3)
+        with bc1:
+            st.markdown(
+                f'<div style="font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; '
+                f'letter-spacing:0.05em;">Plan</div>'
+                f'<div style="font-size:1.1rem; font-weight:700; color:var(--text-primary);">'
+                f'{escape(current_disp["name"])} · {escape(current_disp["price_label"])}</div>',
+                unsafe_allow_html=True,
+            )
+        with bc2:
+            st.markdown(
+                f'<div style="font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; '
+                f'letter-spacing:0.05em;">Member since</div>'
+                f'<div style="font-size:1.1rem; font-weight:700; color:var(--text-primary);">'
+                f'{member_since} days</div>',
+                unsafe_allow_html=True,
+            )
+        with bc3:
+            portal_url = get_setting("stripe_portal_url", "") or "mailto:hi@mintforai.com?subject=Manage%20subscription"
+            st.markdown(
+                f'<div style="font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; '
+                f'letter-spacing:0.05em;">Subscription</div>'
+                f'<a href="{escape(portal_url)}" target="_blank" rel="noopener" '
+                f'style="font-size:0.9rem; color:#00E5A0; font-weight:600; text-decoration:none;">'
+                f'Manage in customer portal →</a>',
+                unsafe_allow_html=True,
+            )
+        st.caption(
+            "The customer portal is hosted by Stripe. Update payment, download invoices, "
+            "or cancel any time — your local data stays untouched."
+        )
 
     st.markdown("---")
 
@@ -3908,16 +4050,82 @@ def render_pulse_pro_section():
 def render_settings():
     page_header("Settings", f"{APP_NAME} · v1.0 · Local-first, private by design")
 
-    tab_prefs, tab_pro, tab_data = st.tabs(
-        ["Preferences", "Pulse Pro", "Data & backup"]
+    tab_prefs, tab_pro, tab_integrations, tab_data = st.tabs(
+        ["Preferences", "Plans & billing", "Integrations", "Data & backup"]
     )
 
     with tab_prefs:
         _render_settings_preferences()
     with tab_pro:
         render_pulse_pro_section()
+    with tab_integrations:
+        _render_settings_integrations()
     with tab_data:
         _render_settings_data()
+
+
+def _render_settings_integrations():
+    """Integration setup for Slack/Teams/Discord (Team tier) + SSO (Enterprise)."""
+    st.markdown("##### Slack, Teams, Discord webhooks")
+    st.caption(
+        "Pipe daily/weekly digests to your team chat. Webhook URLs are stored locally; "
+        "messages render natively in each platform."
+    )
+
+    if not tier_lock_banner(
+        "slack_integration",
+        "Team plan unlocks Slack, Microsoft Teams, and Discord webhook integrations.",
+    ):
+        st.markdown("---")
+    else:
+        with st.form("webhooks_form"):
+            wh1, wh2 = st.columns(2)
+            with wh1:
+                slack_url = st.text_input(
+                    "Slack incoming webhook URL",
+                    value=get_setting("slack_webhook_url", ""),
+                    type="password",
+                    placeholder="https://hooks.slack.com/services/...",
+                )
+                teams_url = st.text_input(
+                    "Microsoft Teams webhook URL",
+                    value=get_setting("teams_webhook_url", ""),
+                    type="password",
+                    placeholder="https://outlook.office.com/webhook/...",
+                )
+            with wh2:
+                discord_url = st.text_input(
+                    "Discord webhook URL",
+                    value=get_setting("discord_webhook_url", ""),
+                    type="password",
+                    placeholder="https://discord.com/api/webhooks/...",
+                )
+                digest_freq = st.selectbox(
+                    "Digest frequency",
+                    ["off", "daily 9:00", "weekly Mon 9:00"],
+                    index=["off", "daily 9:00", "weekly Mon 9:00"].index(
+                        get_setting("integrations_digest_freq", "off") or "off"
+                    ),
+                )
+            if st.form_submit_button("Save integrations", type="primary"):
+                for key, val in [
+                    ("slack_webhook_url",   slack_url),
+                    ("teams_webhook_url",   teams_url),
+                    ("discord_webhook_url", discord_url),
+                ]:
+                    set_setting(key, val.strip())
+                set_setting("integrations_digest_freq", digest_freq)
+                st.success("Integration webhooks saved.")
+
+    st.markdown("---")
+    st.markdown("##### SSO (Enterprise)")
+    if not tier_lock_banner(
+        "sso_saml",
+        "Enterprise unlocks SAML 2.0 + OIDC single sign-on with Okta, Azure AD, Google Workspace.",
+    ):
+        pass
+    else:
+        st.success("SSO is enabled for your org. Manage at sales@mintforai.com.")
 
 
 def _render_settings_preferences():
@@ -4044,8 +4252,14 @@ def _render_settings_preferences():
 
     st.markdown("---")
 
-    # ── CLOUD SIGN-IN (D1 — closes the loop on cloud module) ──────
+    # ── CLOUD SIGN-IN (D1 — Pro-gated cloud sync) ──────
     st.markdown("##### Pulse Cloud")
+    if not tier_lock_banner(
+        "cloud_sync",
+        "Pro unlocks end-to-end encrypted cloud sync across all your devices.",
+    ):
+        return  # banner handles the rest; skip the cloud signin/session UI for Free users
+
     try:
         from cloud import auth as cloud_auth
         cloud_ready = cloud_auth.is_configured()

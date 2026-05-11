@@ -161,14 +161,31 @@ function Features() {
 }
 
 function Pricing() {
-  const tiers = [
+  const tiers: Array<{
+    name: string;
+    price: string;
+    sub: string;
+    tagline: string;
+    perks: string[];
+    cta: string;
+    href: string;
+    featured: boolean;
+  }> = [
     {
       name: "Free",
       price: "$0",
       sub: "forever",
       tagline: "Local use, all features",
-      perks: ["All v1.0 features", "Local SQLite", "No account", "Windows tray (macOS soon)"],
+      perks: [
+        "All v1.0 features",
+        "Subscription tracker + AI usage + activity",
+        "Local SQLite, no account, no telemetry",
+        "Windows + macOS (Q3) + Linux (Q4)",
+        "Browser extension capture",
+        "Source available (MIT)",
+      ],
       cta: "Download",
+      href: "https://github.com/walight999/pulse/releases",
       featured: false,
     },
     {
@@ -176,8 +193,17 @@ function Pricing() {
       price: "$9",
       sub: "/mo",
       tagline: "Cross-device sync + mobile",
-      perks: ["E2E encrypted cloud sync", "Mobile PWA", "Friend leaderboard", "Multi-provider (OpenAI, Cursor, Gemini, Copilot)", "Ask pulse AI assistant"],
+      perks: [
+        "Everything in Free",
+        "E2E encrypted cloud sync",
+        "Mobile PWA (iOS + Android)",
+        "Friend leaderboard (opt-in)",
+        "Multi-provider live (OpenAI, Cursor, Gemini, Copilot)",
+        "Ask pulse AI assistant",
+        "Cancel any time",
+      ],
       cta: "Join waitlist",
+      href: "#waitlist",
       featured: true,
     },
     {
@@ -185,30 +211,109 @@ function Pricing() {
       price: "$19",
       sub: "/seat/mo",
       tagline: "5-50 dev teams",
-      perks: ["Shared dashboard", "Per-user attribution", "Slack/Teams/Discord webhooks", "Admin controls", "Min 3 seats"],
+      perks: [
+        "Everything in Pro",
+        "Shared team dashboard",
+        "Per-user attribution",
+        "Slack + Teams + Discord webhooks",
+        "Admin controls + audit log (1yr)",
+        "Priority email support",
+        "Min 3 seats",
+      ],
       cta: "Contact sales",
+      href: "mailto:sales@mintforai.com?subject=pulse%20Team%20inquiry",
       featured: false,
     },
     {
       name: "Enterprise",
-      price: "$199",
-      sub: "/seat/mo",
-      tagline: "50+ orgs",
-      perks: ["SSO/SAML", "SOC 2", "Custom roles", "Dedicated support", "SLA"],
+      price: "Custom",
+      sub: "",
+      tagline: "50+ seats · regulated industries",
+      perks: [
+        "Everything in Team",
+        "SSO (SAML 2.0 + OIDC)",
+        "SOC 2 Type II",
+        "Custom roles + audit retention (7yr)",
+        "Dedicated CSM + 99.9% SLA",
+        "On-prem / VPC deploy option",
+        "EU/US data residency",
+      ],
       cta: "Talk to us",
+      href: "mailto:enterprise@mintforai.com?subject=pulse%20Enterprise%20inquiry",
       featured: false,
     },
   ];
+
+  const matrix: Array<{ row: string; cells: [boolean | string, boolean | string, boolean | string, boolean | string] }> = [
+    { row: "Local desktop app", cells: ["✓", "✓", "✓", "✓"] },
+    { row: "Subscription tracker", cells: ["✓", "✓", "✓", "✓"] },
+    { row: "AI usage + Plan ROI", cells: ["✓", "✓", "✓", "✓"] },
+    { row: "Activity + categories", cells: ["✓", "✓", "✓", "✓"] },
+    { row: "Browser extension", cells: ["✓", "✓", "✓", "✓"] },
+    { row: "Multi-currency (30+)", cells: ["✓", "✓", "✓", "✓"] },
+    { row: "Cloud sync (E2E encrypted)", cells: [false, "✓", "✓", "✓"] },
+    { row: "Mobile PWA", cells: [false, "✓", "✓", "✓"] },
+    { row: "Multi-provider live", cells: [false, "✓", "✓", "✓"] },
+    { row: "Friend leaderboard", cells: [false, "✓", "✓", "✓"] },
+    { row: "Ask pulse AI", cells: [false, "✓", "✓", "✓"] },
+    { row: "Devices per account", cells: ["1", "3", "Unlimited", "Unlimited"] },
+    { row: "Team dashboard + roles", cells: [false, false, "✓", "✓"] },
+    { row: "Slack/Teams/Discord", cells: [false, false, "✓", "✓"] },
+    { row: "Per-user attribution", cells: [false, false, "✓", "✓"] },
+    { row: "Audit log retention", cells: ["30d local", "90d", "1yr", "7yr"] },
+    { row: "Admin controls", cells: [false, false, "Standard", "Custom roles"] },
+    { row: "SSO (SAML / OIDC)", cells: [false, false, false, "✓"] },
+    { row: "SOC 2 Type II", cells: [false, false, false, "✓"] },
+    { row: "Custom data residency", cells: [false, false, false, "✓"] },
+    { row: "Dedicated CSM + SLA", cells: [false, false, "Email", "99.9% SLA"] },
+  ];
+
+  const faqs: Array<[string, string]> = [
+    [
+      "Is Free really free forever?",
+      "Yes. The local desktop app is MIT-licensed open source. We commit to never paywalling features that already exist in v1.0. Revenue comes from cloud sync, team dashboards, and enterprise services — not from selling binaries.",
+    ],
+    [
+      "Why do you charge for Pro if everything is open-source?",
+      "You're paying for the cloud infrastructure (encrypted sync server, mobile PWA hosting, friend leaderboard ranking, AI assistant API). You can self-host the cloud server from the same repo for free.",
+    ],
+    [
+      "Can I cancel any time?",
+      "Yes. Pro is month-to-month. Team has a 14-day money-back guarantee. Enterprise contracts are annual with 30-day exit clauses. If you cancel, your local data stays — you only lose cloud sync.",
+    ],
+    [
+      "Do you offer student / open-source maintainer discounts?",
+      "Yes — 50% off Pro for verified students (.edu) and open-source maintainers with 100+ stars. Email hi@mintforai.com.",
+    ],
+    [
+      "Is there a Team annual discount?",
+      "Yes. Team = $19/seat/mo or $190/seat/yr (2 months free). Min 3 seats either way.",
+    ],
+    [
+      "How does data residency work for Enterprise?",
+      "We offer EU (Frankfurt) + US (Virginia) + on-prem deployment via Helm chart. The data never crosses regions unless you opt in.",
+    ],
+    [
+      "What's your refund policy?",
+      "Pro: cancel anytime, no questions. Team: 14-day money-back. Enterprise: pro-rated refund for unused term if you cancel within first 60 days.",
+    ],
+    [
+      "When does Pro launch?",
+      "Q3 2026. Waitlist signups get 1 month free + early access to friend leaderboard invite codes.",
+    ],
+  ];
+
   return (
     <section id="pricing" className="bg-zinc-950 border-y border-zinc-900 py-24">
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="text-2xl md:text-4xl font-bold text-center mb-3">Pricing</h2>
         <p className="text-zinc-400 text-center mb-14">Free forever for local use. Pay only when you go cloud.</p>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {tiers.map((t, i) => (
             <div
               key={i}
-              className={`rounded-2xl p-7 transition ${
+              className={`rounded-2xl p-7 transition flex flex-col ${
                 t.featured
                   ? "bg-mint-900/20 border-2 border-mint-500 shadow-lg shadow-mint-500/10 scale-[1.02]"
                   : "bg-black border border-zinc-900"
@@ -223,15 +328,17 @@ function Pricing() {
                 <span className="text-4xl font-bold">{t.price}</span>
                 <span className="text-zinc-500 ml-1 text-sm">{t.sub}</span>
               </div>
-              <ul className="space-y-2 mb-7 text-sm text-zinc-300">
+              <ul className="space-y-2 mb-7 text-sm text-zinc-300 flex-1">
                 {t.perks.map((p, j) => (
                   <li key={j} className="flex items-start gap-2">
-                    <span className="text-mint-400 mt-0.5">●</span> <span>{p}</span>
+                    <span className="text-mint-400 mt-0.5 flex-shrink-0">●</span> <span>{p}</span>
                   </li>
                 ))}
               </ul>
               <a
-                href="#waitlist"
+                href={t.href}
+                target={t.href.startsWith("http") ? "_blank" : undefined}
+                rel={t.href.startsWith("http") ? "noopener" : undefined}
                 className={`block text-center font-semibold py-3 rounded-lg transition ${
                   t.featured
                     ? "bg-mint-500 hover:bg-mint-600 text-white"
@@ -242,6 +349,61 @@ function Pricing() {
               </a>
             </div>
           ))}
+        </div>
+
+        <div className="mt-20 text-center text-zinc-500 text-sm">
+          All plans include: MIT-licensed local app · 30+ currencies · privacy-by-default · open audit trail · cancel any time
+        </div>
+
+        <div className="mt-20">
+          <h3 className="text-xl md:text-2xl font-bold text-center mb-3">Compare every feature</h3>
+          <p className="text-zinc-500 text-center text-sm mb-10">Honest comparison, no hidden gotchas.</p>
+          <div className="overflow-x-auto rounded-xl border border-zinc-900 bg-black/40">
+            <table className="w-full text-sm">
+              <thead className="bg-zinc-950 border-b border-zinc-900">
+                <tr>
+                  <th className="text-left font-semibold text-zinc-300 px-4 py-3">Feature</th>
+                  <th className="font-semibold text-zinc-400 px-4 py-3">Free</th>
+                  <th className="font-semibold text-mint-400 px-4 py-3">Pro</th>
+                  <th className="font-semibold text-zinc-300 px-4 py-3">Team</th>
+                  <th className="font-semibold text-zinc-300 px-4 py-3">Enterprise</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-900">
+                {matrix.map((m, i) => (
+                  <tr key={i} className="hover:bg-zinc-950/40">
+                    <td className="text-left text-zinc-300 px-4 py-2.5">{m.row}</td>
+                    {m.cells.map((c, j) => (
+                      <td key={j} className="text-center px-4 py-2.5">
+                        {c === false ? (
+                          <span className="text-zinc-700">—</span>
+                        ) : c === "✓" ? (
+                          <span className="text-mint-400 font-bold">✓</span>
+                        ) : (
+                          <span className="text-zinc-400 text-xs">{c}</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="mt-20 max-w-3xl mx-auto">
+          <h3 className="text-xl md:text-2xl font-bold text-center mb-10">Frequently asked questions</h3>
+          <div className="space-y-3">
+            {faqs.map(([q, a], i) => (
+              <details key={i} className="group rounded-xl border border-zinc-900 bg-black/40 open:bg-zinc-950/60 transition">
+                <summary className="cursor-pointer px-5 py-4 text-zinc-200 font-medium flex items-center justify-between hover:text-white transition">
+                  <span>{q}</span>
+                  <span className="text-zinc-600 group-open:text-mint-400 transition text-lg">+</span>
+                </summary>
+                <div className="px-5 pb-4 pt-1 text-zinc-400 text-sm leading-relaxed">{a}</div>
+              </details>
+            ))}
+          </div>
         </div>
       </div>
     </section>
