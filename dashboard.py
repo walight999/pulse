@@ -22,12 +22,13 @@ from sync_tokens import sync_all, get_sync_status
 
 init_db()
 
+_BRAND_ICON = Path(__file__).parent / "static" / "brand" / "app-icon.png"
 st.set_page_config(
-    page_title="Pulse",
-    page_icon=None,
+    page_title="pulse — Mint for the AI era",
+    page_icon=str(_BRAND_ICON) if _BRAND_ICON.exists() else "💚",
     layout="wide",
     initial_sidebar_state="expanded",
-    menu_items={"About": "Pulse — your money & time, in rhythm."},
+    menu_items={"About": "pulse — Mint for the AI era. https://pulse.app"},
 )
 
 # ============================================================
@@ -808,15 +809,42 @@ st.markdown(
         /* Streak chip — glow animation when streak hits 30+ days.
            Glow radius kept small so it doesn't overlap with the H1 title next to it. */
         @keyframes pulse-streak-glow {
-            0%, 100% { box-shadow: 0 0 0 0 var(--accent-bg), 0 0 4px 0 var(--accent-bg); }
-            50%      { box-shadow: 0 0 0 2px transparent, 0 0 8px 1px var(--accent-bg); }
+            0%, 100% { box-shadow: 0 0 0 0 var(--accent-bg), 0 0 4px 0 var(--accent); }
+            50%      { box-shadow: 0 0 0 2px transparent, 0 0 10px 1px var(--accent); }
         }
         .pulse-streak-chip {
             position: relative;
-            top: -1px;          /* fine-tune vertical alignment with H1 */
+            top: -1px;
         }
         .pulse-streak-elite {
             animation: pulse-streak-glow 2.4s ease-in-out infinite !important;
+        }
+
+        /* ECG / heartbeat line — Pulse signature visual.
+           Use as decorative element between sections or behind hero numbers. */
+        @keyframes pulse-ecg-flow {
+            0%   { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .pulse-ecg-line {
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                var(--accent) 18%,
+                var(--accent-hover) 24%,
+                var(--accent) 30%,
+                transparent 50%,
+                var(--accent) 68%,
+                var(--accent-hover) 74%,
+                var(--accent) 80%,
+                transparent 100%);
+            background-size: 200% 100%;
+            animation: pulse-ecg-flow 6s linear infinite;
+            border-radius: 1px;
+            opacity: 0.7;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .pulse-ecg-line { animation: none !important; }
         }
 
         /* Skeleton shimmer — reusable loading placeholder */
@@ -1815,9 +1843,11 @@ with st.sidebar:
 
     brand_col, toggle_col = st.columns([1, 0.32])
     with brand_col:
+        # Logomark "P" + pulse line are rendered via CSS pseudo-elements
+        # (see .pulse-logo-mark in the CSS block above). Empty div = clean DOM.
         st.markdown(
             f'<div class="pulse-brand-row">'
-            f'<div class="pulse-logo-mark">P</div>'
+            f'<div class="pulse-logo-mark"></div>'
             f'<div class="pulse-brand-name">{APP_NAME}</div>'
             f'</div>',
             unsafe_allow_html=True,
