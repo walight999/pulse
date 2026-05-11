@@ -6,16 +6,28 @@ const config: Config = {
     extend: {
       colors: {
         // Pulse brand
+        // Pulse Brand Core v1 — exact tokens
+        ink: "#0A0A0F",
+        "ink-soft": "#17171C",
+        paper: "#FAFAF7",
+        slate: "#6B6B6B",
+        pulse: {
+          DEFAULT: "#00E5A0",   // PULSE — vivid mint
+          dim:     "#00C58A",   // light-bg AA-safe variant
+          hover:   "#33EBB8",
+          bg:      "#022820",
+          border:  "#065F46",
+        },
+        // Tailwind compat aliases
         mint: {
-          50:  "#ecfdf5",
-          100: "#d1fae5",
-          300: "#6ee7b7",
-          400: "#34d399",
-          500: "#10b981",
-          600: "#059669",
-          700: "#047857",
-          800: "#065f46",
-          900: "#022c22",
+          50:  "#E6FFF5",
+          100: "#9FF0CC",
+          400: "#33EBB8",
+          500: "#00E5A0",
+          600: "#00C58A",
+          700: "#00A076",
+          800: "#065F46",
+          900: "#022820",
         },
       },
       fontFamily: {

@@ -53,3 +53,6 @@ node_modules/
 _test_*.py
 *.tmp
 .cache/
+pulse-brand-core/output/
+pulse-brand-core/fonts/
+pulse-brand-core/pulse-brand-core-v1.zip

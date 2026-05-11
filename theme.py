@@ -11,30 +11,31 @@ from db import get_setting
 
 # ────────────────── Color tokens ──────────────────
 LIGHT = {
-    "bg_primary":   "#ffffff",
-    "bg_secondary": "#f6f7f9",
-    "bg_card":      "#ffffff",
-    "bg_input":     "#ffffff",
-    "bg_hover":     "#f1f3f5",
+    # Pulse Brand Core v1 — exact tokens (PAPER bg, INK text, PULSE accent)
+    "bg_primary":   "#FAFAF7",     # PAPER
+    "bg_secondary": "#F4F4F0",
+    "bg_card":      "#FFFFFF",
+    "bg_input":     "#FFFFFF",
+    "bg_hover":     "#EFEFEC",
 
-    "text_primary":   "#0a0b0f",
-    "text_secondary": "#5a6172",
-    "text_muted":     "#9ca3af",
-    "text_invert":    "#ffffff",
+    "text_primary":   "#0A0A0F",   # INK
+    "text_secondary": "#6B6B6B",   # SLATE
+    "text_muted":     "#9C9C9C",
+    "text_invert":    "#FAFAF7",
 
-    "border":         "#e5e7eb",
-    "border_strong":  "#d1d5db",
-    "border_subtle":  "#f3f4f6",
+    "border":         "#E4E4DF",
+    "border_strong":  "#CFCFCA",
+    "border_subtle":  "#EFEFEC",
 
-    # Pulse brand — mint/emerald accent (matches logomark pulse line)
-    "accent":         "#10b981",
-    "accent_hover":   "#059669",
-    "accent_bg":      "#ecfdf5",
-    "accent_border":  "#a7f3d0",
+    # Pulse green — accent (use sparingly per brand guidelines)
+    "accent":         "#00C58A",   # slightly muted PULSE for light bg AA contrast
+    "accent_hover":   "#00A076",
+    "accent_bg":      "#E6FFF5",
+    "accent_border":  "#9FF0CC",
 
-    "success":        "#10b981",
-    "success_bg":     "#ecfdf5",
-    "success_border": "#a7f3d0",
+    "success":        "#00C58A",
+    "success_bg":     "#E6FFF5",
+    "success_border": "#9FF0CC",
 
     "warning":        "#d97706",
     "warning_bg":     "#fef3c7",
@@ -53,31 +54,31 @@ LIGHT = {
 }
 
 DARK = {
-    # Pulse brand dark — pure black canvas with mint accent (matches logomark).
-    "bg_primary":   "#000000",   # true black to match logo
-    "bg_secondary": "#0a0b0f",   # sidebar / subtle raised
-    "bg_card":      "#111317",   # card surface
-    "bg_input":     "#0a0b0f",   # inputs (recessed)
-    "bg_hover":     "#1a1d23",   # interactive hover
+    # Pulse Brand Core v1 — INK canvas with vivid PULSE accent
+    "bg_primary":   "#0A0A0F",     # INK (Brand Core master)
+    "bg_secondary": "#11111A",
+    "bg_card":      "#17171C",     # INK_SOFT
+    "bg_input":     "#0A0A0F",
+    "bg_hover":     "#1F1F26",
 
-    "text_primary":   "#ffffff",   # pure white (matches logo P)
-    "text_secondary": "#a3a4ae",
-    "text_muted":     "#6a6b76",
-    "text_invert":    "#000000",
+    "text_primary":   "#FAFAF7",   # PAPER
+    "text_secondary": "#A3A3A0",
+    "text_muted":     "#6B6B6B",   # SLATE
+    "text_invert":    "#0A0A0F",
 
-    "border":         "#22252c",   # subtle on black
-    "border_strong":  "#393c44",
-    "border_subtle":  "#15171c",
+    "border":         "#22222A",
+    "border_strong":  "#3A3A42",
+    "border_subtle":  "#15151C",
 
-    # Pulse brand mint — vivid emerald that pops on pure black
-    "accent":         "#34d399",   # emerald-400 (the logo pulse line color)
-    "accent_hover":   "#6ee7b7",   # emerald-300 brighter for hover
-    "accent_bg":      "#022c22",   # deep emerald tint
-    "accent_border":  "#065f46",   # emerald-800
+    # Pulse green — vivid PULSE accent (the logomark pulse line)
+    "accent":         "#00E5A0",   # PULSE (Brand Core master)
+    "accent_hover":   "#33EBB8",
+    "accent_bg":      "#022820",
+    "accent_border":  "#065F46",
 
-    "success":        "#34d399",
-    "success_bg":     "#022c22",
-    "success_border": "#065f46",
+    "success":        "#00E5A0",
+    "success_bg":     "#022820",
+    "success_border": "#065F46",
 
     "warning":        "#fbbf24",
     "warning_bg":     "#2a1c05",
