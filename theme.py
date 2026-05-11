@@ -12,28 +12,29 @@ from db import get_setting
 # ────────────────── Color tokens ──────────────────
 LIGHT = {
     "bg_primary":   "#ffffff",
-    "bg_secondary": "#f8fafc",
+    "bg_secondary": "#f6f7f9",
     "bg_card":      "#ffffff",
     "bg_input":     "#ffffff",
-    "bg_hover":     "#f1f5f9",
+    "bg_hover":     "#f1f3f5",
 
-    "text_primary":   "#0f172a",
-    "text_secondary": "#64748b",
-    "text_muted":     "#94a3b8",
+    "text_primary":   "#0a0b0f",
+    "text_secondary": "#5a6172",
+    "text_muted":     "#9ca3af",
     "text_invert":    "#ffffff",
 
-    "border":         "#e2e8f0",
-    "border_strong":  "#cbd5e1",
-    "border_subtle":  "#f1f5f9",
+    "border":         "#e5e7eb",
+    "border_strong":  "#d1d5db",
+    "border_subtle":  "#f3f4f6",
 
-    "accent":         "#6366f1",
-    "accent_hover":   "#4f46e5",
-    "accent_bg":      "#eef2ff",
-    "accent_border":  "#c7d2fe",
+    # Pulse brand — mint/emerald accent (matches logomark pulse line)
+    "accent":         "#10b981",
+    "accent_hover":   "#059669",
+    "accent_bg":      "#ecfdf5",
+    "accent_border":  "#a7f3d0",
 
-    "success":        "#16a34a",
-    "success_bg":     "#dcfce7",
-    "success_border": "#86efac",
+    "success":        "#10b981",
+    "success_bg":     "#ecfdf5",
+    "success_border": "#a7f3d0",
 
     "warning":        "#d97706",
     "warning_bg":     "#fef3c7",
@@ -45,38 +46,38 @@ LIGHT = {
 
     "amber":          "#9a6700",
     "blue":           "#0969da",
-    "gray":           "#64748b",
+    "gray":           "#5a6172",
 
-    "shadow_sm":  "0 1px 2px rgba(15, 23, 42, 0.04)",
-    "shadow_md":  "0 1px 3px rgba(15, 23, 42, 0.08)",
+    "shadow_sm":  "0 1px 2px rgba(10, 11, 15, 0.04)",
+    "shadow_md":  "0 1px 3px rgba(10, 11, 15, 0.08)",
 }
 
 DARK = {
-    # Modern dark — near-black with subtle cool tint, layered elevation.
-    # Inspired by Linear / Vercel / Notion dark themes.
-    "bg_primary":   "#0a0b0f",   # near-black canvas
-    "bg_secondary": "#111217",   # sidebar / subtle raised
-    "bg_card":      "#16181d",   # card surface
-    "bg_input":     "#0e1014",   # inputs (recessed look)
-    "bg_hover":     "#1f2128",   # interactive hover
+    # Pulse brand dark — pure black canvas with mint accent (matches logomark).
+    "bg_primary":   "#000000",   # true black to match logo
+    "bg_secondary": "#0a0b0f",   # sidebar / subtle raised
+    "bg_card":      "#111317",   # card surface
+    "bg_input":     "#0a0b0f",   # inputs (recessed)
+    "bg_hover":     "#1a1d23",   # interactive hover
 
-    "text_primary":   "#e8e8ec",   # off-white, easier on eyes
+    "text_primary":   "#ffffff",   # pure white (matches logo P)
     "text_secondary": "#a3a4ae",
     "text_muted":     "#6a6b76",
-    "text_invert":    "#0a0b0f",
+    "text_invert":    "#000000",
 
-    "border":         "#26272e",   # ~10% white
-    "border_strong":  "#393a44",   # ~16% white
-    "border_subtle":  "#1a1c22",
+    "border":         "#22252c",   # subtle on black
+    "border_strong":  "#393c44",
+    "border_subtle":  "#15171c",
 
-    "accent":         "#a5b4fc",   # indigo-300 — pops on dark
-    "accent_hover":   "#c7d2fe",
-    "accent_bg":      "#1a1c3d",   # deep indigo tint
-    "accent_border":  "#4338ca",
+    # Pulse brand mint — vivid emerald that pops on pure black
+    "accent":         "#34d399",   # emerald-400 (the logo pulse line color)
+    "accent_hover":   "#6ee7b7",   # emerald-300 brighter for hover
+    "accent_bg":      "#022c22",   # deep emerald tint
+    "accent_border":  "#065f46",   # emerald-800
 
-    "success":        "#4ade80",
-    "success_bg":     "#0a2418",
-    "success_border": "#15803d",
+    "success":        "#34d399",
+    "success_bg":     "#022c22",
+    "success_border": "#065f46",
 
     "warning":        "#fbbf24",
     "warning_bg":     "#2a1c05",
@@ -90,8 +91,8 @@ DARK = {
     "blue":           "#60a5fa",
     "gray":           "#a3a4ae",
 
-    "shadow_sm":  "0 1px 2px rgba(0, 0, 0, 0.5)",
-    "shadow_md":  "0 4px 12px rgba(0, 0, 0, 0.6)",
+    "shadow_sm":  "0 1px 2px rgba(0, 0, 0, 0.6)",
+    "shadow_md":  "0 4px 14px rgba(0, 0, 0, 0.7)",
 }
 
 

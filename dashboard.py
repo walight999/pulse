@@ -33,8 +33,8 @@ st.set_page_config(
 # ============================================================
 # Brand & colors
 # ============================================================
-APP_NAME = "Pulse"
-APP_TAGLINE = "Your money & time, in rhythm"
+APP_NAME = "pulse"          # lowercase wordmark per brand identity
+APP_TAGLINE = "Mint for the AI era"
 
 COLOR_HEX = {
     "green":  "#16a34a",
@@ -329,33 +329,65 @@ st.markdown(
             background: var(--bg-hover);
         }
 
-        /* Brand row — logo + name aligned with theme toggle */
+        /* Brand row — Pulse logomark + lowercase wordmark.
+           Logo is inline SVG: black square + white "P" + mint pulse line.
+           Matches the brand identity (logomark.png / app-icon.png). */
         .pulse-brand-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             height: 38px;
         }
         .pulse-logo-mark {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 35%, #ec4899 70%, #6366f1 100%);
+            background: #000000;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 0.85rem;
             flex-shrink: 0;
-            box-shadow: 0 1px 4px rgba(99, 102, 241, 0.35);
+            box-shadow: 0 1px 4px rgba(16, 185, 129, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .pulse-logo-mark::before {
+            /* The white "P" letter */
+            content: "P";
+            color: #ffffff;
+            font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+            font-weight: 800;
+            font-size: 1.15rem;
+            line-height: 1;
+            letter-spacing: -0.04em;
+            z-index: 1;
+        }
+        .pulse-logo-mark::after {
+            /* The mint pulse line cutting horizontally through the P */
+            content: "";
+            position: absolute;
+            left: 0; right: 0;
+            top: 55%;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                #34d399 12%,
+                #34d399 35%,
+                #6ee7b7 50%,
+                #34d399 65%,
+                #34d399 88%,
+                transparent 100%);
+            box-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
+            z-index: 2;
         }
         .pulse-brand-name {
-            font-size: 1.18rem;
+            font-size: 1.32rem;
             font-weight: 700;
             color: var(--text-primary);
-            letter-spacing: -0.015em;
+            letter-spacing: -0.03em;
             line-height: 1;
+            text-transform: lowercase;
+            font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
         }
 
         /* Theme toggle — icon button, fills its column slot cleanly */
@@ -1696,10 +1728,15 @@ def run_onboarding() -> bool:
 
     st.markdown(
         '<div style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">'
-        '<div style="width:40px; height:40px; border-radius:10px; '
-        'background: linear-gradient(135deg, #6366f1, #a855f7); '
+        '<div style="width:40px; height:40px; border-radius:10px; background:#000; '
         'display:flex; align-items:center; justify-content:center; color:white; '
-        'font-weight:700; font-size:1.3rem;">P</div>'
+        'font-weight:800; font-size:1.4rem; letter-spacing:-0.04em; '
+        'position:relative; overflow:hidden; '
+        'box-shadow:0 1px 6px rgba(16,185,129,0.3);">'
+        'P<span style="position:absolute; left:0; right:0; top:55%; height:2.5px; '
+        'background:linear-gradient(90deg, transparent, #34d399 15%, #6ee7b7 50%, '
+        '#34d399 85%, transparent); box-shadow:0 0 8px rgba(52,211,153,0.6);"></span>'
+        '</div>'
         f'<h1 style="margin:0;">Welcome to {APP_NAME}</h1>'
         '</div>',
         unsafe_allow_html=True,
@@ -3334,21 +3371,22 @@ def render_token_view(period: str, pricing_mode: str) -> None:
             pal = theme.get_palette()
             # Heatmap gradient — multi-stop intensity scale, theme-aware.
             # Low usage = bg-secondary (blends in), high = vivid accent gradient.
+            # Pulse brand — mint/emerald heatmap intensity scale
             if get_setting("theme", "light") == "dark":
                 heatmap_scale = [
-                    [0.00, pal["bg_secondary"]],   # empty cells blend with surface
-                    [0.15, "#1e1b3d"],              # dim indigo
-                    [0.40, "#4338ca"],              # mid indigo
-                    [0.70, "#818cf8"],              # bright indigo
-                    [1.00, "#c7d2fe"],              # peak — almost white-violet
+                    [0.00, pal["bg_secondary"]],    # empty cells blend with black
+                    [0.15, "#022c22"],               # whisper emerald
+                    [0.40, "#065f46"],               # mid emerald
+                    [0.70, "#10b981"],               # vivid emerald
+                    [1.00, "#34d399"],               # peak — bright mint
                 ]
             else:
                 heatmap_scale = [
-                    [0.00, "#f8fafc"],              # empty
-                    [0.15, "#e0e7ff"],              # whisper indigo
-                    [0.40, "#a5b4fc"],              # mid indigo
-                    [0.70, "#6366f1"],              # vivid indigo
-                    [1.00, "#3730a3"],              # peak — deep
+                    [0.00, "#f6f7f9"],
+                    [0.15, "#d1fae5"],               # whisper mint
+                    [0.40, "#6ee7b7"],               # mid mint
+                    [0.70, "#10b981"],               # vivid emerald
+                    [1.00, "#065f46"],               # peak — deep
                 ]
 
             fig_hm = go.Figure(data=go.Heatmap(
@@ -4098,13 +4136,18 @@ def _render_settings_advanced():
 # PAGE: HEALTH
 # ============================================================
 def render_health():
-    # Marketing-style about page
+    # Marketing-style about page — full Pulse brand identity
     st.markdown(
         f'<div style="display:flex; align-items:center; gap:14px; margin-bottom:8px;">'
-        f'<div style="width:56px; height:56px; border-radius:14px; '
-        f'background: linear-gradient(135deg, #6366f1, #a855f7); '
+        f'<div style="width:56px; height:56px; border-radius:14px; background:#000; '
         f'display:flex; align-items:center; justify-content:center; color:white; '
-        f'font-weight:700; font-size:1.8rem;">P</div>'
+        f'font-weight:800; font-size:2rem; letter-spacing:-0.04em; '
+        f'position:relative; overflow:hidden; '
+        f'box-shadow:0 2px 10px rgba(16,185,129,0.35);">'
+        f'P<span style="position:absolute; left:0; right:0; top:55%; height:3px; '
+        f'background:linear-gradient(90deg, transparent, #34d399 15%, #6ee7b7 50%, '
+        f'#34d399 85%, transparent); box-shadow:0 0 10px rgba(52,211,153,0.7);"></span>'
+        f'</div>'
         f'<div>'
         f'<h1 style="margin:0;">{APP_NAME}</h1>'
         f'<div style="color:var(--text-secondary); font-size:0.95rem;">{APP_TAGLINE}</div>'

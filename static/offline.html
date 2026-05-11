@@ -19,23 +19,28 @@
     .logo {
       width: 56px; height: 56px;
       border-radius: 14px; margin: 0 auto 20px;
-      background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+      background: #000; position: relative; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
       color: white; font-weight: 700; font-size: 1.6rem;
     }
     h1 { font-size: 1.2rem; margin: 0 0 8px; }
     p { color: #a3a4ae; margin: 0 0 18px; line-height: 1.5; font-size: 0.92rem; }
     button {
-      background: #6366f1; color: white; border: none;
+      background: #10b981; color: white; border: none;
       padding: 10px 20px; border-radius: 8px; cursor: pointer;
       font-size: 0.9rem; font-weight: 600;
     }
-    button:hover { background: #4f46e5; }
+    button:hover { background: #059669; }
+    .logo::after {
+      content: ""; position: absolute; left: 0; right: 0; top: 55%;
+      height: 3px; background: linear-gradient(90deg, transparent, #34d399 15%, #6ee7b7 50%, #34d399 85%, transparent);
+      box-shadow: 0 0 10px rgba(52,211,153,0.7);
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="logo">P</div>
+    <div class="logo" style="font-weight:800; letter-spacing:-0.04em;">P</div>
     <h1>You're offline</h1>
     <p>Pulse needs an internet connection to sync. Your local data is safe — reconnect to see the latest.</p>
     <button onclick="location.reload()">Try again</button>

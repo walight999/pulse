@@ -1,6 +1,14 @@
-# Pulse
+<div align="center">
 
-**Mint for AI.** A local-first desktop dashboard for your AI spend, subscriptions, and productivity.
+<img src="static/brand/logomark.png" alt="Pulse logomark" width="120" />
+
+# pulse
+
+### Mint for the AI era.
+
+</div>
+
+A local-first desktop dashboard for your AI spend, subscriptions, and productivity.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20soon-lightgrey)
