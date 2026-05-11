@@ -19,6 +19,7 @@ The operational runbook for launching + scaling Pulse. Everything in this folder
 | `reddit-crosspost-templates.md` | 5 subreddit-specific posts |
 | `discord-server-template.md` | 8-channel setup + 4 roles |
 | `browser-extension-store-listing.md` | Chrome/Edge store submission |
+| `vercel-deploy.md` | **Click-by-click Vercel + Cloudflare DNS for `mintforai.com`** |
 | `welcome-email.html` | Waitlist confirmation email |
 | `email-signature.html` | Founder email signature |
 | `invoice-template.html` | Stripe-renderable customer invoice |
@@ -38,9 +39,9 @@ The operational runbook for launching + scaling Pulse. Everything in this folder
 
 **Critical bottleneck**. Cannot launch without `mintforai.com` live.
 
-- [ ] Register `mintforai.com` on Cloudflare ($14/yr) — 30 min
-- [ ] `cd landing && npm install && vercel --prod` — 30 min
-- [ ] Custom domain `mintforai.com` in Vercel + DNS — 10 min
+- [x] Register `mintforai.com` on Cloudflare — DONE 2026-05-11
+- [x] `landing/` builds clean on Next 14.2.35 (verified 2026-05-11, 91kB First Load JS, zero warnings)
+- [ ] Vercel deploy + custom domain — see `operations/vercel-deploy.md` for step-by-step
 - [ ] Wire waitlist endpoint to Supabase (or Formspree initially) — 1 hr
 - [ ] Lighthouse ≥ 95 audit — 30 min
 - [ ] Mobile responsiveness check — 30 min

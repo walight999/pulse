@@ -41,11 +41,13 @@
 
 ---
 
-## Top 3 TODOs (from lean-launch-audit.md)
+## Top 3 TODOs (post-domain registration)
 
-1. ⚠️ Audit code for unauthorized telemetry: `grep -r "requests.post\|httpx.post\|analytics" *.py` — **before Show HN**
-2. ⚠️ Verify cloud features are opt-in only (run UI with cloud disabled, full feature parity for local)
-3. Add Code of Conduct + GitHub issue templates → better first impression for HN traffic
+1. **Vercel deploy `landing/` + point `mintforai.com`** — full step-by-step in `operations/vercel-deploy.md` (build verified clean 2026-05-11)
+2. Reserve Twitter handle (`@mintforai` / `@mintforai_ai` / `@pulse_dashboard`) + start `twitter-warmup-tweets.md` cadence
+3. Beta tester recruitment — 5+ DMs/day for 6 days per `beta-tester-outreach.md`
+
+**Done (older TODOs):** ✅ Telemetry audited (no unauthorized POST) · ✅ Cloud opt-in verified · ✅ CoC + 3 issue templates + PR template added · ✅ `mintforai.com` domain registered
 
 ---
 
@@ -83,6 +85,7 @@
 
 | Date | Update |
 |---|---|
+| 2026-05-11 | `mintforai.com` registered on Cloudflare; all 38 repo refs swapped from `pulse.app`; landing build verified clean (Next 14.2.35, 91kB First Load JS, zero warnings); pytest 44/44; open-core model documented in README |
 | 2026-05-11 | Pipeline v2 upgrade: added lean-launch-audit + CLAUDE.md + STATE.md |
 | 2026-05-11 | No deploy-readiness (correctly skipped — no agent roster) |
 | Earlier | Active codebase development (Streamlit + landing + browser-ext) |

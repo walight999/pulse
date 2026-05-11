@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mintforai.com"),
   title: "pulse — Mint for the AI era",
   description:
     "Local-first personal-finance dashboard for the AI era. Track every recurring AI subscription, every Claude token, every hour of focused work — and prove your $200/mo plan returns $4,000 in API-equivalent value.",
@@ -24,6 +25,9 @@ export const metadata: Metadata = {
     icon: "/brand/app-icon.png",
     apple: "/brand/app-icon.png",
   },
+};
+
+export const viewport: Viewport = {
   themeColor: "#10b981",
 };
 

@@ -176,9 +176,23 @@ Pulse desktop (Windows tray)
 - **FX**: frankfurter.dev (ECB rates, no API key needed)
 - **Pricing**: Anthropic public pricing matrix (Opus/Sonnet/Haiku × 5m/1h cache)
 
+## Open-core model
+
+Pulse follows the [Logseq](https://logseq.com) / [Plausible](https://plausible.io) / [Cal.com](https://cal.com) playbook:
+
+| | What | Price |
+|---|---|---|
+| **Open-source local app** | Everything in this repo. SQLite + Streamlit, no signup, no cloud, no telemetry. | Free forever (MIT) |
+| **Pulse Pro (Cloud)** | Cross-device sync, mobile PWA, shared dashboards, friend leaderboard | $9/mo (planned) |
+| **Pulse Team** | Per-user attribution, Slack/Teams integration, audit retention | $19/seat/mo (planned) |
+
+The **free local app** is fully featured for one device on its own. The cloud tier is purely additive — if you never want sync, you never need to pay.
+
+We open-source the desktop client because we believe a privacy-tracking app must be audit-able. If you can read the code, you know it can't phone home.
+
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+MIT — see [`LICENSE`](LICENSE). All current code is permissively licensed. The future hosted cloud service (`cloud/`, `api/`, mobile apps) will remain open under the same license; revenue comes from running the infrastructure, not from license fees.
 
 ## Contributing
 
