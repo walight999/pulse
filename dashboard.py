@@ -3119,34 +3119,35 @@ def render_budget_status(period: str, today_cost_usd: float, month_cost_usd: flo
     daily_budget = setting_float("token_daily_budget_usd", 0)
     monthly_budget = setting_float("token_monthly_budget_usd", 0)
 
+    def _render_bar(label: str, used: float, budget: float, pct: float, color: str) -> None:
+        """Themed budget bar with breathing room above and below."""
+        st.markdown(
+            f'<div style="margin: 8px 0 18px;">'
+            f'<div style="display:flex; justify-content:space-between; '
+            f'font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px;">'
+            f'<span>{label}: <strong style="color:var(--text-primary);">'
+            f'{fmt_local(used, 0)}</strong> '
+            f'<span style="color:var(--text-muted);">/ {fmt_local(budget, 0)}</span></span>'
+            f'<span style="color:{color}; font-weight:700;">{pct:.0f}%</span>'
+            f'</div>'
+            f'<div style="background:var(--bg-hover); border-radius:4px; height:8px; '
+            f'overflow:hidden; position:relative;">'
+            f'<div style="background:linear-gradient(90deg, {color}, var(--accent-hover)); '
+            f'height:100%; width:{min(pct, 100):.0f}%; '
+            f'transition: width 0.4s ease;"></div>'
+            f'</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
     if period == "today" and daily_budget > 0:
         pct = today_cost_usd / daily_budget * 100
         color = "var(--success)" if pct < 70 else ("var(--warning)" if pct < 100 else "var(--danger)")
-        st.markdown(
-            f'<div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:4px;">'
-            f'Daily budget: {fmt_local(today_cost_usd, 0)} / {fmt_local(daily_budget, 0)} '
-            f'<span style="color:{color}; font-weight:600;">({pct:.0f}%)</span>'
-            f'</div>'
-            f'<div style="background:var(--border); border-radius:4px; height:6px; '
-            f'margin-bottom:10px; overflow:hidden;">'
-            f'<div style="background:{color}; height:100%; width:{min(pct, 100):.0f}%;"></div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+        _render_bar("Daily budget", today_cost_usd, daily_budget, pct, color)
     if period == "month" and monthly_budget > 0:
         pct = month_cost_usd / monthly_budget * 100
         color = "var(--success)" if pct < 70 else ("var(--warning)" if pct < 100 else "var(--danger)")
-        st.markdown(
-            f'<div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:4px;">'
-            f'Monthly budget: {fmt_local(month_cost_usd, 0)} / {fmt_local(monthly_budget, 0)} '
-            f'<span style="color:{color}; font-weight:600;">({pct:.0f}%)</span>'
-            f'</div>'
-            f'<div style="background:var(--border); border-radius:4px; height:6px; '
-            f'margin-bottom:10px; overflow:hidden;">'
-            f'<div style="background:{color}; height:100%; width:{min(pct, 100):.0f}%;"></div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+        _render_bar("Monthly budget", month_cost_usd, monthly_budget, pct, color)
 
 
 def render_forecast(period: str, cost_usd: float) -> None:
@@ -4539,10 +4540,10 @@ def render_overview():
     st.markdown("")
 
     # ----- Two-column: upcoming renewals + insights — equal widths + matched boxes -----
-    # Shared box style so both columns feel balanced visually.
+    # Both columns use identical fixed-height boxes so visual rhythm matches.
     BOX_STYLE = (
-        "padding:12px 14px; border-radius:8px; margin-bottom:8px; "
-        "min-height:62px; box-sizing:border-box;"
+        "padding:14px 16px; border-radius:10px; margin-bottom:10px; "
+        "height:72px; box-sizing:border-box;"
     )
     cl, cr = st.columns([1, 1])
     with cl:
