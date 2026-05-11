@@ -8,15 +8,58 @@
 // approximate token count from char-length / 4, timestamp). Never message text.
 
 const INGEST_URL = "http://localhost:8000/v1/ingest/web-session";
+const WS_URL = "ws://localhost:8000/v1/ws/ingest";
 const BUFFER_KEY = "pulse_pending_events";
 const SYNC_INTERVAL_MIN = 5;
+
+// Persistent WebSocket — re-connect on failure with exponential backoff
+let ws = null;
+let wsReconnectMs = 1000;
+const wsReconnectMax = 60000;
+
+function tryConnectWs() {
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+    return;
+  }
+  try {
+    ws = new WebSocket(WS_URL);
+    ws.onopen = () => {
+      wsReconnectMs = 1000;  // reset backoff on successful connect
+      flushBufferOverWs();   // drain any HTTP-bound buffer immediately
+    };
+    ws.onmessage = (e) => {
+      // Server echoed an ingest receipt — could surface in popup
+    };
+    ws.onclose = () => {
+      ws = null;
+      setTimeout(tryConnectWs, wsReconnectMs);
+      wsReconnectMs = Math.min(wsReconnectMs * 2, wsReconnectMax);
+    };
+    ws.onerror = () => { /* will trigger onclose */ };
+  } catch (e) {
+    // Desktop not running — silently retry later via alarm
+  }
+}
+
+async function flushBufferOverWs() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  const { [BUFFER_KEY]: buffer = [] } = await chrome.storage.local.get(BUFFER_KEY);
+  if (!buffer.length) return;
+  try {
+    ws.send(JSON.stringify({ events: buffer }));
+    await chrome.storage.local.set({ [BUFFER_KEY]: [] });
+  } catch {}
+}
 
 chrome.runtime.onInstalled.addListener(async () => {
   await chrome.alarms.create("pulse-sync", {
     delayInMinutes: 1,
     periodInMinutes: SYNC_INTERVAL_MIN,
   });
+  // Kick off WebSocket connection attempt right away
+  tryConnectWs();
 });
+chrome.runtime.onStartup?.addListener(tryConnectWs);
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg?.type === "pulse:capture") {
@@ -34,14 +77,24 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 async function enqueueEvent(event) {
+  const enriched = { ...event, captured_at: new Date().toISOString() };
+
+  // Try WebSocket real-time push first
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    try {
+      ws.send(JSON.stringify({ events: [enriched] }));
+      return;   // success — no need to buffer
+    } catch {}
+  }
+
+  // Fallback: append to HTTP buffer (flushed every 5min by alarm)
   const { [BUFFER_KEY]: buffer = [] } = await chrome.storage.local.get(BUFFER_KEY);
-  buffer.push({
-    ...event,
-    captured_at: new Date().toISOString(),
-  });
-  // Cap buffer at 1000 events to avoid runaway memory if desktop offline
+  buffer.push(enriched);
   if (buffer.length > 1000) buffer.splice(0, buffer.length - 1000);
   await chrome.storage.local.set({ [BUFFER_KEY]: buffer });
+
+  // Trigger reconnect attempt in case desktop just came back online
+  tryConnectWs();
 }
 
 async function flushBuffer() {

@@ -158,3 +158,11 @@ def trigger_export(format: str = Query("csv"),
 def health() -> dict:
     return {"status": "ok", "service": "pulse-api", "version": "1.0.0",
             "ts": datetime.now(timezone.utc).isoformat()}
+
+
+# Mount the WebSocket bridge for browser-extension real-time ingestion
+try:
+    from api.ws_bridge import router as ws_router
+    app.include_router(ws_router)
+except ImportError:
+    pass

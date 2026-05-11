@@ -1,0 +1,17 @@
+{
+  "name": "pulse-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:landing": "playwright test specs/landing.spec.ts",
+    "test:dashboard": "playwright test specs/dashboard.spec.ts",
+    "install:browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0",
+    "@types/node": "^20.14.10",
+    "typescript": "^5.5.3"
+  }
+}
