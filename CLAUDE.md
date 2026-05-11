@@ -55,11 +55,12 @@ life-tracker/                       # repo root (named "pulse" in README)
 
 ## Read Order for New Sessions
 
-1. `README.md` — product overview
-2. `ROADMAP.md` — current vs upcoming
-3. `lean-launch-audit.md` — Step 0 capacity warning + Step 3 anti-pattern flags (telemetry audit + cloud opt-in verification)
-4. `docs/LAUNCH_CHECKLIST.md` — pre-Show-HN tasks
-5. `docs/SHOW_HN.md` — drafted Show HN post
+1. **`STATE.md`** ← read first (single-page state — stage, capacity, next gate, top 3 TODOs, Notion sync)
+2. `README.md` — product overview
+3. `ROADMAP.md` — current vs upcoming
+4. `lean-launch-audit.md` — Step 0 capacity warning + Step 3 anti-pattern flags (telemetry audit + cloud opt-in verification)
+5. `docs/LAUNCH_CHECKLIST.md` — pre-Show-HN tasks
+6. `docs/SHOW_HN.md` — drafted Show HN post
 
 ---
 
@@ -90,8 +91,24 @@ Top 3 before Show HN post:
 
 ---
 
-## When to Run Skill Pipeline
+## Skill Pipeline Status
 
-- **`/lean-launch-stack`** — re-run if adding Pro tier (compliance for accepting payment), or if cloud sync ships (then there IS infra to audit)
+- **`/lean-launch-stack`** — ✅ ran 2026-05-11 → `lean-launch-audit.md` + this file
+  - 3 action items: ✅ telemetry audited (no unauthorized POST) · ✅ cloud opt-in verified (leaderboard, telemetry, sync all opt-in) · ✅ CoC + 3 issue templates + PR template added
+  - Re-run if adding Pro tier (Stripe compliance) or when cloud sync ships
+- **`/deploy-agent-routines`** — ✅ Path 1 ready 2026-05-11 → `.claude/agents/` (8 agents) + `deploy-readiness.md`
+  - Solo founder can invoke `/ceo`, `/pm`, `/marketing`, `/designer`, `/dev`, `/ops` with pulse-specific context loaded
+  - Path 2 (Make.com cron + LINE brief) deferred until >100 stars
+  - Path 3 (full autonomy + Notion DBs) deferred until >1,000 stars
 - **`/idea-to-mvp`** — only if Pulse pivots to multi-person team or full company structure (currently solo OSS — overkill)
-- **`/deploy-agent-routines`** — N/A (no agents) unless a Pulse-specific agent team gets added in v2.0
+
+---
+
+## Notion HQ (verified 2026-05-11)
+
+Pulse **does** have a Notion HQ — discovered during Pipeline v2 sync. HQ tracks build progress v1.0 → v1.5 + Show HN launch playbook.
+
+- **HQ root:** https://www.notion.so/35d9defb952981848312e64e6823571b
+- **Pipeline v2 sub-page:** https://www.notion.so/35d9defb952981b8aa92de940faca7c5
+
+Earlier note in STATE.md said "no Notion HQ" — that was incorrect. Pulse HQ exists and v2 update has been pushed there. Solo-OSS model still applies (no agent roster, no `deploy-readiness.md`).

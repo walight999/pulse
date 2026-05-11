@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discord community
+    url: https://discord.gg/pulse-app
+    about: General questions, casual chat, feature discussion
+  - name: 📖 Documentation
+    url: https://github.com/walight999/pulse/blob/main/README.md
+    about: Installation, usage, and architecture docs
+  - name: 🛡️ Security vulnerability
+    url: https://github.com/walight999/pulse/blob/main/SECURITY.md
+    about: Report a security issue (please do NOT use public issues)
