@@ -1108,6 +1108,11 @@ st.markdown(
             font-size: 0.68rem;
             letter-spacing: 0.05em;
             white-space: nowrap;
+            /* Sticky header: stays visible while body rows scroll under it */
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            box-shadow: 0 1px 0 var(--border);
         }
         .pulse-table thead th.num { text-align: right; }
         .pulse-table tbody td {
@@ -1129,7 +1134,14 @@ st.markdown(
         .pulse-table-wrap {
             max-height: 420px;
             overflow-y: auto;
-            border-radius: 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            /* When wrap is used, table border is redundant — collapse it inside */
+            position: relative;
+        }
+        .pulse-table-wrap .pulse-table {
+            border: none;
+            border-radius: 0;
         }
 
         /* Top apps list — single redesigned view replacing chart+table */
