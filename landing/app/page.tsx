@@ -144,40 +144,51 @@ function Hero() {
 }
 
 function Compare() {
-  const rows: Array<[string, boolean, boolean, boolean]> = [
-    ["Subscription + AI usage + activity in one view", true, false, false],
-    ["Local-first, zero setup", true, false, false],
-    ["Multi-currency native (30+)", true, false, false],
-    ["Plan ROI vs API equivalent", true, false, false],
-    ["Cancellation savings tracker", true, false, false],
-    ["Per-developer attribution", true, true, false],
-    ["Friend leaderboard (opt-in)", true, false, false],
-    ["Browser extension web capture", true, false, false],
-    ["Per-cache TTL pricing (5m + 1h)", true, false, true],
-    ["Works on Bedrock / Vertex", true, true, false],
+  type Status = "available" | "pro-q3" | "roadmap";
+  const rows: Array<{ label: string; status: Status; pulse: boolean; cm: boolean; ac: boolean }> = [
+    { label: "Subscription + AI usage + activity in one view", status: "available", pulse: true,  cm: false, ac: false },
+    { label: "Local-first, zero setup",                         status: "available", pulse: true,  cm: false, ac: false },
+    { label: "Multi-currency native (30+)",                     status: "available", pulse: true,  cm: false, ac: false },
+    { label: "Plan ROI vs API equivalent",                      status: "available", pulse: true,  cm: false, ac: false },
+    { label: "Cancellation savings tracker",                    status: "available", pulse: true,  cm: false, ac: false },
+    { label: "Per-cache TTL pricing (5m + 1h)",                 status: "available", pulse: true,  cm: false, ac: true  },
+    { label: "Per-developer attribution",                       status: "pro-q3",    pulse: true,  cm: true,  ac: false },
+    { label: "Friend leaderboard (opt-in)",                     status: "pro-q3",    pulse: true,  cm: false, ac: false },
+    { label: "Browser extension web capture",                   status: "pro-q3",    pulse: true,  cm: false, ac: false },
+    { label: "Works on Bedrock / Vertex",                       status: "roadmap",   pulse: true,  cm: true,  ac: false },
   ];
+
+  const tag = (status: Status) => {
+    if (status === "available") return <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-mint-900/40 text-mint-400 border border-mint-800/50">Available</span>;
+    if (status === "pro-q3")    return <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-900/40 text-amber-400 border border-amber-800/50">Pro · Q3</span>;
+    return                              <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">Roadmap</span>;
+  };
+
   return (
     <section className="bg-zinc-950 border-y border-zinc-900 py-20">
       <div className="max-w-5xl mx-auto px-6">
         <h2 className="text-2xl md:text-4xl font-bold text-center mb-3">Why pulse wins</h2>
-        <p className="text-zinc-400 text-center mb-12">Other tools give you fragments. pulse gives you the picture.</p>
-        <div className="overflow-x-auto">
+        <p className="text-zinc-400 text-center mb-3">Other tools give you fragments. pulse gives you the picture.</p>
+        <p className="text-zinc-600 text-center text-xs mb-12">Status legend: <span className="text-mint-400 font-semibold">Available</span> = shipped in v1.0 today · <span className="text-amber-400 font-semibold">Pro · Q3</span> = launches Q3 2026 · <span className="text-zinc-400 font-semibold">Roadmap</span> = planned, no ETA</p>
+        <div className="overflow-x-auto rounded-xl border border-zinc-900 bg-black/30">
           <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-zinc-800">
+            <thead className="bg-zinc-950 border-b border-zinc-800">
+              <tr>
                 <th className="text-left py-4 px-3 font-semibold text-zinc-300">Feature</th>
+                <th className="text-center py-4 px-3 font-semibold text-zinc-500 w-28">Status</th>
                 <th className="text-center py-4 px-3 font-semibold text-mint-400">pulse</th>
                 <th className="text-center py-4 px-3 font-semibold text-zinc-500">ClaudeMetrics</th>
                 <th className="text-center py-4 px-3 font-semibold text-zinc-500">Anthropic Console</th>
               </tr>
             </thead>
-            <tbody>
-              {rows.map(([label, p, c, a], i) => (
-                <tr key={i} className="border-b border-zinc-900/60">
-                  <td className="py-4 px-3 text-zinc-300">{label}</td>
-                  <td className="text-center py-4 px-3">{p ? <span className="text-mint-400">●</span> : <span className="text-zinc-700">—</span>}</td>
-                  <td className="text-center py-4 px-3">{c ? <span className="text-zinc-400">●</span> : <span className="text-zinc-700">—</span>}</td>
-                  <td className="text-center py-4 px-3">{a ? <span className="text-zinc-400">●</span> : <span className="text-zinc-700">—</span>}</td>
+            <tbody className="divide-y divide-zinc-900/60">
+              {rows.map((r, i) => (
+                <tr key={i} className="hover:bg-zinc-950/40">
+                  <td className="py-3.5 px-3 text-zinc-300">{r.label}</td>
+                  <td className="text-center py-3.5 px-3">{tag(r.status)}</td>
+                  <td className="text-center py-3.5 px-3">{r.pulse ? <span className="text-mint-400">●</span> : <span className="text-zinc-700">—</span>}</td>
+                  <td className="text-center py-3.5 px-3">{r.cm    ? <span className="text-zinc-400">●</span> : <span className="text-zinc-700">—</span>}</td>
+                  <td className="text-center py-3.5 px-3">{r.ac    ? <span className="text-zinc-400">●</span> : <span className="text-zinc-700">—</span>}</td>
                 </tr>
               ))}
             </tbody>
@@ -383,6 +394,34 @@ function Pricing() {
       "When does Pro launch?",
       "Q3 2026. Waitlist signups get 1 month free + early access to friend leaderboard invite codes.",
     ],
+    [
+      "Is there a lifetime deal?",
+      "Yes — Lifetime Pro $199 (one-time) for the first 500 customers. After that, the deal closes permanently and Pro reverts to monthly/annual only. Lifetime includes every future Pro feature: cloud sync, mobile PWA, multi-provider live, friend leaderboard, Ask pulse AI, and anything we ship under Pro through pulse v9.x.",
+    ],
+    [
+      "What's the difference between pulse and ClaudeMetrics?",
+      "ClaudeMetrics requires manual export upload and is Claude-only. pulse runs locally, parses ~/.claude/projects/*.jsonl directly with no upload step, and combines AI usage with subscription tracking + activity tracking in one dashboard. Both are valid tools — pulse is for the developer who wants the full picture in real time.",
+    ],
+    [
+      "Does pulse work without internet?",
+      "Yes. The local app needs internet only twice: (1) on first run to fetch FX rates from frankfurter.dev, cached for 24h, and (2) optionally to check for updates. Subscription tracking + AI usage parsing + activity tracking all work fully offline.",
+    ],
+    [
+      "Will pulse phone home? Track me? Sell my data?",
+      "No, no, and no. Local mode has zero outbound calls except the FX rate fetch. Telemetry is opt-in and defaults to OFF. Cloud features (Pro+) are opt-in per metric, and synced data is end-to-end encrypted (AES-256-GCM + Argon2id) — the server cannot read your data even if compromised. We're MIT-licensed; audit the source.",
+    ],
+    [
+      "What platforms does pulse support?",
+      "Today: Windows 10 + 11 (system tray app via pystray + Win32 APIs). Q3 2026: native macOS (Apple Silicon + Intel universal2 build). Q4 2026: Linux (AppImage). The cross-platform shim (platform_compat.py) is already in the repo — macOS and Linux work from source today, just unsigned.",
+    ],
+    [
+      "Can I self-host the cloud server?",
+      "Yes. The cloud server (cloud/auth.py, cloud/sync.py, api/server.py) is MIT-licensed and ships in the same repo. Bring your own Supabase project, set SUPABASE_URL + SUPABASE_ANON_KEY, deploy. No paywall, no rate limit. We charge for hosting + maintenance, not for the right to use the software.",
+    ],
+    [
+      "What AI providers does pulse track?",
+      "v1.0 (today): Claude Code via local ~/.claude/projects/*.jsonl parser. v1.1 (Q3 2026): OpenAI (ChatGPT + API), Cursor (local state DB), Google Gemini (Studio + app), GitHub Copilot (flat + audit log). Browser extension (v1.2) captures web sessions for ChatGPT, Claude.ai, Gemini, Perplexity.",
+    ],
   ];
 
   return (
@@ -433,7 +472,34 @@ function Pricing() {
           ))}
         </div>
 
-        <div className="mt-20 text-center text-zinc-500 text-sm">
+        <div className="mt-12 rounded-2xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-950/30 via-black to-mint-950/20 p-6 md:p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+            <div className="flex-1">
+              <div className="inline-flex items-center gap-2 mb-2 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" aria-hidden></span>
+                Early-adopter unlock · first 500 only
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold tracking-tight">
+                Lifetime Pro for <span className="text-amber-400 tabular-nums">$199</span>
+              </h3>
+              <p className="mt-2 text-zinc-400 text-sm max-w-xl leading-relaxed">
+                One-time payment. Pulse Pro forever — cloud sync, mobile PWA, multi-provider live, friend leaderboard, Ask pulse AI, and every future Pro feature through v9.x. After 500 buyers, this deal closes permanently.
+              </p>
+            </div>
+            <a
+              href="#waitlist"
+              className="flex-shrink-0 bg-amber-500 hover:bg-amber-400 text-black font-bold px-7 py-3.5 rounded-xl transition shadow-lg shadow-amber-500/30 text-sm whitespace-nowrap"
+            >
+              Reserve a lifetime seat →
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-10 flex flex-col md:flex-row items-center justify-center gap-x-8 gap-y-3 text-center text-sm text-zinc-500">
+          <div>🎓 <span className="text-zinc-300">50% off Pro</span> for verified students (.edu) and OSS maintainers with 100+ stars</div>
+        </div>
+
+        <div className="mt-12 text-center text-zinc-500 text-sm">
           All plans include: MIT-licensed local app · 30+ currencies · privacy-by-default · open audit trail · cancel any time
         </div>
 

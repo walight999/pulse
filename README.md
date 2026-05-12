@@ -1,52 +1,94 @@
 <div align="center">
 
-<img src="static/brand/logomark.png" alt="Pulse logomark" width="120" />
+<img src="static/brand/logomark.png" width="80" alt="pulse" />
 
 # pulse
 
-### Mint for the AI era.
+### The cost console Claude Code never gave you.
+
+Local-first dashboard that proves your $200 Claude Max plan returns $4,000 in API value — with accurate cache TTL pricing, plan ROI scoring, and zero telemetry.
+
+[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/walight999/pulse/total)](https://github.com/walight999/pulse/releases)
+[![Stars](https://img.shields.io/github/stars/walight999/pulse?style=social)](https://github.com/walight999/pulse/stargazers)
+[![Twitter Follow](https://img.shields.io/twitter/follow/mintforai?style=social)](https://twitter.com/mintforai)
+
+[Download for Windows](https://github.com/walight999/pulse/releases/latest) · [Website](https://mintforai.com) · [Discord](https://discord.gg/pulse) · [Changelog](https://mintforai.com/changelog)
 
 </div>
 
-A local-first desktop dashboard for your AI spend, subscriptions, and productivity.
-
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20soon-lightgrey)
-![Privacy](https://img.shields.io/badge/privacy-100%25%20local-success)
-![Status](https://img.shields.io/badge/status-v1.0%20preview-orange)
-
-Pulse is the only personal-finance app built for the AI era. Track every recurring AI subscription, every Claude token, every hour of focused work — all in one local-first dashboard. Discover that your $200/mo Claude Max plan returns $4,000 in API-equivalent value. Cancel the dead subscriptions automatically detected from your inbox. See your stack health at a glance.
-
-> Built for individuals who pay real money for AI tools and want to know if it's worth it.
-
 ---
 
-## Why Pulse
+<!-- Demo GIF appears here once recorded — see operations/demo-script.md -->
+<!-- ![pulse dashboard demo](docs/assets/demo.gif) -->
 
-Other tools give you fragments:
+## What pulse does
 
-| Tool | What it shows | What's missing |
-|------|--------------|----------------|
-| **Anthropic Console** | Per-org Claude usage | No personal view, no other providers, no subscriptions |
-| **ClaudeMetrics.com** | Conversation analytics | Manual export upload, Claude-only, no subscriptions |
-| **Bank apps** | All subscriptions | No AI-specific breakdown, no usage correlation |
-| **Time trackers** | Hours per app | No financial context, no AI link |
+**You pay $200/month for Claude Max.** You have no idea if it's worth it. pulse answers that question — and shows you exactly how much value you're getting back.
 
-**Pulse is the only tool that connects all three** — subscription cost, AI token spend, and actual app usage time — into one personal-finance dashboard.
+In one local dashboard, pulse shows:
 
-## What's unique
+- 💎 **Plan ROI score** — 5-tier rating from "Idle" to "Legendary value 10×+"
+- ⚡ **Accurate cache pricing** — split 5min vs 1hr Anthropic cache rates (most tools are off by 11%+)
+- 📊 **Per-model + per-project breakdown** — see where your tokens actually go
+- 🔥 **Streak gamification** — daily AI use tracking with glow effect at 30+ days
+- 💸 **Cost-per-hour-of-use** — link Claude to your actual coding sessions
+- 🌍 **Multi-currency** — 30+ currencies with live ECB rates
+- 🔒 **100% local** — SQLite + Streamlit, zero cloud, zero signup, zero telemetry
 
-- 🏆 **Plan ROI hero** — 5-tier rating from "Legendary value" (10x+ return) to "Plan idle" with stars, savings number, and visual coverage bar
-- 💎 **Cancellation savings tracker** — "You've saved ฿18,500 by cancelling 3 subs since you started using Pulse"
-- 🔥 **Streak gamification** — daily AI use streak with glow effect at 30+ days
-- 📊 **Cost-per-hour-of-use** — link a subscription to its app; Pulse computes ROI from your real usage
-- 🌍 **Multi-currency native** — 30+ currencies with live ECB rates; pay in THB, see in USD reference
-- ⚡ **Accurate cache TTL pricing** — split 5min vs 1hr cache rates (most tools are off by 11%)
-- 🔒 **Local-first** — SQLite + Streamlit + Windows tray; zero cloud, zero signup, zero proxy
+## Why pulse exists
+
+Anthropic Console shows org-level usage. ClaudeMetrics requires manual upload. Time trackers ignore AI costs. Bank apps don't know the difference between Claude Code and Cursor.
+
+**pulse is the only tool built for the developer who wants to know: "Is my $200/month plan worth it?"**
+
+The answer, for most Claude Code power users, is yes — and pulse proves it with hard numbers, not vibes.
+
+## Install
+
+### Windows (recommended)
+
+Download the latest `.exe` from [Releases](https://github.com/walight999/pulse/releases/latest).
+
+Double-click, follow the installer. pulse appears in your system tray. Click to open the dashboard.
+
+First-run wizard takes 30 seconds: pick currency, set monthly budget, choose alerts. Done.
+
+See [INSTALL.md](INSTALL.md) for detailed install steps. See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) if anything goes wrong.
+
+### macOS
+
+Coming Q3 2026 — native Apple Silicon + Intel build. The `platform_compat.py` shim is ready; needs codesigning + Apple Developer account testing.
+
+[Join the macOS waitlist →](https://mintforai.com/#waitlist)
+
+### From source (developers)
+
+```bash
+git clone https://github.com/walight999/pulse
+cd pulse
+pip install -r requirements.txt
+python app.py
+```
+
+Requires Python 3.12+. SQLite + Streamlit handled automatically.
+
+## How it works
+
+1. **First launch** — pulse detects `~/.claude/projects/*.jsonl` and reads your Claude Code history (read-only, never modified)
+2. **Background tracking** — system tray app monitors foreground apps with idle awareness (no keystroke logging)
+3. **Live FX rates** — `frankfurter.dev` ECB rates cached for 24h
+4. **Cache TTL pricing** — pulse implements the exact Anthropic pricing matrix (Opus/Sonnet/Haiku × 5m/1h cache × input/output)
+5. **Dashboard** — Streamlit UI, theme switcher, smooth charts
+
+All data stays on your machine. There is no account. There is no cloud. There is no telemetry by default.
+
+(Pro tier with optional encrypted cross-device sync launches Q3 2026 — see [ROADMAP.md](ROADMAP.md))
 
 ## Features
 
 ### Subscriptions
+
 - Auto-detect status: active monthly / late payment / probably yearly / likely cancelled
 - Smart classification: "monthly but not charged 60+ days = probably yearly or cancelled"
 - Renewal alerts (Windows toast 3 days before)
@@ -56,125 +98,44 @@ Other tools give you fragments:
 - Multi-currency with live FX rates
 - Tag system (business / personal / family) for tax-time review
 
-### AI usage
-- Imports Claude Code logs from `~/.claude/projects/*.jsonl` automatically
+### AI usage (Claude Code in v1.0)
+
+- Auto-imports Claude Code logs from `~/.claude/projects/*.jsonl`
 - Today / This month / All time tabs with hourly + daily granularity
 - Per-model + per-project cost breakdown
 - Plan ROI hero card with celebratory tiers
 - Daily + monthly budgets with spike alerts
-- 7-day x 24h heatmap (when do you actually use AI?)
+- 7-day × 24h heatmap (when do you actually use AI?)
 - Forecast for end-of-month projected spend
-- Leaderboard preview (Phase 3)
+- Cache hit rate display (most tools skip this)
 
 ### Activity
-- Foreground app tracking, idle-aware (pauses after 5 min of no input)
-- Auto-categorization (Productivity, Browser, Distraction, Development, etc.)
+
+- Foreground app tracking, idle-aware (pauses after 5min of no input)
+- Auto-categorization (Productivity, Browser, Distraction, Development)
 - Top apps list with gradient bars (productive vs distraction)
-- Cross-references with subscriptions for ROI
+- Cross-references with subscriptions for ROI calculation
+- Toggle-able anytime (privacy-first)
 
 ### System
+
 - Windows system tray app — runs in background, dashboard one click away
 - 4 background daemons: token sync (6h), alerts (30min), backup (24h), maintenance (weekly)
 - SQLite backup with rotation (last 7 kept)
 - Single-instance lock via socket bind (no duplicate processes)
 - Light + dark themes with smooth transitions
+- 30-second first-run wizard
 
-## Install
+## Roadmap (high-level)
 
-```powershell
-git clone https://github.com/walight999/pulse
-cd pulse
-pip install -r requirements.txt
-python app.py
-```
+- **v1.0 (now)** — Local Windows + Claude Code parser + all features above
+- **v1.1 (Q3 2026)** — macOS port + 4 more providers (Cursor, OpenAI, Copilot, Gemini)
+- **v1.2 (Q3 2026)** — Browser extension for web capture + PWA mobile install
+- **v2.0 (Q4 2026)** — Pulse Cloud opt-in: encrypted cross-device sync, friend leaderboard, mobile push, AI assistant
+- **v3.0 (Q1 2027)** — Pulse for Teams: per-user attribution, Slack/Teams/Discord, admin controls
+- **v4.0+ (Y2)** — Pulse OS: OpenAI-compatible routing + caching gateway (Phase 6, see [Roadmap on Notion](https://www.notion.so/35e9defb95298136ac5ffad90764cd49))
 
-Pulse appears in your Windows system tray. Click to open the dashboard.
-
-**First run**: 30-second onboarding to pick currency, set monthly AI plan budget, and choose which alerts to enable.
-
-## Roadmap
-
-### v1.0 — Local-first preview (now)
-- All features above on Windows
-
-### v1.1 — Multi-provider (next 30 days)
-- OpenAI / ChatGPT Plus usage detection
-- Cursor Pro tracking
-- Gemini Advanced
-- GitHub Copilot
-- Perplexity / Replit / v0 / Lovable
-- Universal "AI subscription" category in dashboard
-
-### v1.2 — Cross-platform (60 days)
-- macOS port (system tray, idle detection, foreground app)
-- Linux support (best-effort)
-- Progressive Web App (install on iOS/Android home screen)
-
-### v2.0 — Pulse Cloud (Q3 2026)
-- Optional account for cross-device sync
-- Mobile companion app (PWA, then native)
-- Friend invite system + AI usage leaderboard (5 categories: Best ROI, Longest streak, Token wizard, Power day, Project depth)
-- Slack / Teams / Discord weekly digest
-- Bank integration (Plaid US, KBank / SCB Thailand)
-- Receipt OCR (photo of subscription receipt → auto-add)
-
-### v3.0 — Pulse for Teams (Q4 2026)
-- Multi-user dashboard with per-developer attribution
-- Role-based access (admin / member / viewer)
-- SSO/SAML for enterprise
-- SOC2 Type I compliance
-- Pulse SDK — embed cost widgets in Notion / Linear / Slack
-- Pulse API — programmatic access to your own data
-
-See [`ROADMAP.md`](ROADMAP.md) for the full architecture spec.
-
-## Pricing
-
-- **Pulse Free** — local-only, all current features, forever
-- **Pulse Pro** ($9/mo) — cloud sync, mobile, leaderboard, cross-provider, AI assistant ("Ask Pulse")
-- **Pulse Team** ($19/seat/mo, min 3 seats) — shared dashboard, per-user attribution, Slack integration, admin controls
-- **Pulse Enterprise** ($199/seat/mo) — SSO, SOC2, custom roles, dedicated support, SLA
-
-Pro and above launch with Phase 2. Join the waitlist in Settings → Pulse Pro.
-
-## Privacy
-
-Pulse is **local-first by design**. Your subscription data, AI logs, and activity tracking stay on your machine. There is no cloud, no telemetry, no signup, no account.
-
-When Pulse Cloud launches (v2.0), syncing will be **opt-in**. End-to-end encryption is the default. Aggregate stats (rankings, streaks) require explicit consent per metric.
-
-See [`PRIVACY.md`](PRIVACY.md) for details.
-
-## Architecture
-
-```
-Pulse desktop (Windows tray)
-├── app.py — system tray + background daemons + Streamlit launcher
-├── dashboard.py — Streamlit UI (Overview, Subscriptions, Activity, AI usage, Settings)
-├── tracker.py — foreground app + idle tracking via Win32 APIs
-├── sync_tokens.py — Claude Code log parser with exact cache TTL pricing
-├── db.py — SQLite schema + idempotent migrations
-├── theme.py — light/dark CSS variable system
-├── fx.py — frankfurter.dev FX rates with 24h cache
-├── notifications.py — Windows toast via PowerShell + Windows.UI.Notifications
-├── backup.py — SQLite backup API with rotation
-├── alerts.py — renewal + cost spike + dead-sub alerts
-├── categories.py — app categorization rules
-├── providers/ — multi-provider adapters (Phase 2)
-├── cloud/ — auth, sync, billing scaffolding (Phase 2)
-├── assistant/ — "Ask Pulse" tool definitions (Phase 3)
-└── integrations/ — Plaid, Slack, Teams (Phase 2-3)
-```
-
-## Tech stack
-
-- **Frontend**: Streamlit 1.57 + custom CSS (theme variables, gradient animations, Material icons)
-- **Backend**: Python 3.12 + SQLite + pandas
-- **Charts**: Plotly (themed, no rescaling)
-- **Tray**: pystray + pythonw.exe
-- **Native**: ctypes for Win32 APIs (foreground window, idle detection)
-- **FX**: frankfurter.dev (ECB rates, no API key needed)
-- **Pricing**: Anthropic public pricing matrix (Opus/Sonnet/Haiku × 5m/1h cache)
+See [ROADMAP.md](ROADMAP.md) for detailed phases + [CHANGELOG.md](CHANGELOG.md) for shipped releases.
 
 ## Open-core model
 
@@ -183,30 +144,89 @@ Pulse follows the [Logseq](https://logseq.com) / [Plausible](https://plausible.i
 | | What | Price |
 |---|---|---|
 | **Open-source local app** | Everything in this repo. SQLite + Streamlit, no signup, no cloud, no telemetry. | Free forever (MIT) |
-| **Pulse Pro (Cloud)** | Cross-device sync, mobile PWA, shared dashboards, friend leaderboard | $9/mo (planned) |
-| **Pulse Team** | Per-user attribution, Slack/Teams integration, audit retention | $19/seat/mo (planned) |
+| **Pulse Pro (Cloud)** | Cross-device sync, mobile PWA, friend leaderboard | $9/mo (launching Q3 2026) |
+| **Pulse Team** | Per-user attribution, Slack/Teams integration, audit retention | $19/seat/mo (launching Q4 2026) |
+| **Pulse Enterprise** | SSO (SAML/OIDC), SOC 2, on-prem, custom retention | Custom |
 
 The **free local app** is fully featured for one device on its own. The cloud tier is purely additive — if you never want sync, you never need to pay.
 
-We open-source the desktop client because we believe a privacy-tracking app must be audit-able. If you can read the code, you know it can't phone home.
+**Special offers:**
 
-## License
+- 🎓 **50% off Pro** for verified students (.edu) and OSS maintainers with 100+ stars
+- 💎 **Lifetime Pro $199** one-time for first 500 customers (early-adopter unlock)
 
-MIT — see [`LICENSE`](LICENSE). All current code is permissively licensed. The future hosted cloud service (`cloud/`, `api/`, mobile apps) will remain open under the same license; revenue comes from running the infrastructure, not from license fees.
+We open-source the desktop client because we believe a privacy-tracking app must be auditable. If you can read the code, you know it can't phone home.
+
+## Privacy
+
+pulse is **local-first by design**. Your subscription data, AI logs, and activity stay on your machine. There is no cloud connection, no telemetry, no signup, no account.
+
+When Pulse Cloud launches (v2.0), syncing will be **opt-in per metric**. End-to-end encryption is the default. Aggregate stats (leaderboard rankings) require explicit consent.
+
+See [PRIVACY.md](PRIVACY.md) for full details and [SECURITY.md](SECURITY.md) for the threat model.
+
+## Architecture
+
+```
+pulse desktop (Windows tray)
+├── app.py             — system tray + background daemons + Streamlit launcher
+├── dashboard.py       — Streamlit UI (Overview, Subscriptions, AI usage, Activity, Settings)
+├── tracker.py         — foreground app + idle tracking via Win32 APIs
+├── sync_tokens.py     — Claude Code log parser with exact cache TTL pricing
+├── db.py              — SQLite schema + idempotent migrations + audit log
+├── theme.py           — light/dark CSS variable system
+├── fx.py              — frankfurter.dev FX rates with 24h cache
+├── account.py         — tier feature flag system (free/pro/team/enterprise + 26 flags)
+├── notifications.py   — Windows toast via PowerShell + Windows.UI.Notifications
+├── backup.py          — SQLite backup API with rotation
+├── alerts.py          — renewal + cost spike + dead-sub alerts
+├── categories.py      — app categorization rules
+├── cloud/             — Phase 2 cloud sync (Supabase + AES-256-GCM + Argon2id)
+├── api/               — FastAPI REST server + WebSocket bridge
+├── integrations/      — Slack / Teams / Discord webhook clients (stdlib only)
+├── providers/         — multi-provider parsers (OpenAI / Cursor / Gemini / Copilot)
+├── sdk/python/        — programmatic access library
+├── browser-ext/       — Chrome/Edge Manifest V3 extension
+└── landing/           — Next.js 14 marketing site (deploys to mintforai.com)
+```
+
+## Tech stack
+
+- **Frontend**: Streamlit 1.57 + custom CSS (theme variables, gradient animations, Material icons)
+- **Backend**: Python 3.12 + SQLite + pandas
+- **Charts**: Plotly (themed, no rescaling)
+- **Tray**: pystray + pythonw.exe
+- **Native APIs**: ctypes for Win32 (foreground window, idle detection)
+- **FX**: frankfurter.dev (ECB rates, no API key needed)
+- **Pricing**: Anthropic public pricing matrix (Opus/Sonnet/Haiku × 5m/1h cache)
+- **Cloud (Phase 2)**: Supabase + FastAPI + AES-256-GCM + Argon2id
+- **Landing**: Next.js 14 App Router + Tailwind + Vercel
 
 ## Contributing
 
-Pulse is a personal project but PRs are welcome. Focus areas:
+PRs welcome. Priority areas:
 
-- macOS / Linux port (especially `tracker.py` for foreground + idle)
-- Additional provider parsers in `providers/`
-- Subscription detection heuristics for non-English receipt emails
-- Theme variants
+1. **macOS port** — `tracker.py` for foreground app + idle detection via AppKit/IOKit
+2. **Additional provider parsers** — Cursor, OpenAI, Copilot, Gemini (see `providers/` scaffold)
+3. **Subscription detection heuristics** — non-English receipt emails
+4. **Theme variants** — community-contributed light/dark/seasonal themes
+5. **Translations** — Japanese, German, Korean, Spanish prioritized
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) (coming soon).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup + style guide.
+
+## Community
+
+- [GitHub Discussions](https://github.com/walight999/pulse/discussions) — questions + ideas
+- [Discord](https://discord.gg/pulse) — chat + support (coming soon)
+- [Twitter / X](https://twitter.com/mintforai) — updates
+- [hi@mintforai.com](mailto:hi@mintforai.com) — anything else
+
+## License
+
+MIT — see [LICENSE](LICENSE). All current code is permissively licensed. The future hosted cloud service (`cloud/`, `api/`, mobile apps) will remain open under the same license; revenue comes from running the infrastructure, not from license fees.
 
 ## Acknowledgements
 
-Inspired by Mint (R.I.P., 2009-2024), the original personal-finance dashboard that taught a generation to see their money. Pulse aims to do the same for AI spend.
+Inspired by Mint (R.I.P., 2009–2024), the original personal-finance dashboard that taught a generation to see their money. pulse aims to do the same for AI spend.
 
-Built in Bangkok.
+Built in Bangkok 🇹🇭 by [@walight999](https://github.com/walight999).

@@ -1,0 +1,193 @@
+name: release
+
+# Triggers when a tag matching v* is pushed (e.g. v1.0.0, v1.0.1, v1.1.0).
+# Builds Windows .exe via PyInstaller + (optional) code-signs + creates a
+# GitHub Release with binaries attached.
+#
+# Code signing:
+#   To enable, add these GitHub Secrets to the repo:
+#     - WINDOWS_CERT_BASE64  (PFX cert encoded as base64)
+#     - WINDOWS_CERT_PASS    (PFX cert password)
+#   Without them, the binary still builds but isn't signed (Windows
+#   SmartScreen will warn first-time users until reputation builds).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build (e.g. v1.0.0). Required for manual runs."
+        required: true
+        type: string
+
+permissions:
+  contents: write  # needed to create GitHub Release
+
+jobs:
+  build-windows:
+    name: Build Windows .exe
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve tag
+        id: tag
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "ref=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "version=${{ inputs.tag }}" | sed 's/v//' >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+            echo "version=$(echo '${{ github.ref_name }}' | sed 's/v//')" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller pillow
+
+      - name: Run tests (must pass before release)
+        run: pytest -q tests/
+
+      - name: Build .exe
+        run: pyinstaller --clean pulse.spec
+
+      - name: Decode signing certificate (if provided)
+        id: cert
+        if: ${{ secrets.WINDOWS_CERT_BASE64 != '' }}
+        shell: pwsh
+        run: |
+          $bytes = [Convert]::FromBase64String("${{ secrets.WINDOWS_CERT_BASE64 }}")
+          $certPath = "$env:RUNNER_TEMP\pulse-cert.pfx"
+          [IO.File]::WriteAllBytes($certPath, $bytes)
+          echo "path=$certPath" >> $env:GITHUB_OUTPUT
+
+      - name: Sign .exe (if cert available)
+        if: ${{ steps.cert.outputs.path != '' }}
+        shell: pwsh
+        run: |
+          $signtool = (Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter signtool.exe |
+                       Where-Object { $_.FullName -like "*\x64\*" } |
+                       Sort-Object FullName -Descending |
+                       Select-Object -First 1).FullName
+          & "$signtool" sign `
+            /f "${{ steps.cert.outputs.path }}" `
+            /p "${{ secrets.WINDOWS_CERT_PASS }}" `
+            /tr "http://timestamp.digicert.com" `
+            /td sha256 /fd sha256 `
+            "dist\pulse\pulse.exe"
+
+      - name: Package portable .zip
+        shell: pwsh
+        run: |
+          $version = "${{ steps.tag.outputs.version }}"
+          Compress-Archive -Path "dist\pulse\*" `
+            -DestinationPath "dist\pulse-$version-windows-portable.zip" `
+            -CompressionLevel Optimal
+
+      - name: Build Inno Setup installer (if available)
+        id: installer
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          # Inno Setup is pre-installed on GitHub Actions windows runners
+          if (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe") {
+            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "scripts\installer.iss"
+            $exe = Get-ChildItem "scripts\Output\pulse-setup-*.exe" | Select-Object -First 1
+            if ($exe) {
+              echo "path=$($exe.FullName)" >> $env:GITHUB_OUTPUT
+              echo "Installer built: $($exe.FullName)"
+            }
+          } else {
+            echo "Inno Setup not found — skipping installer build"
+          }
+
+      - name: Upload portable .zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulse-windows-portable
+          path: dist/pulse-*-windows-portable.zip
+          retention-days: 90
+
+      - name: Upload installer (if built)
+        if: ${{ steps.installer.outputs.path != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulse-windows-installer
+          path: ${{ steps.installer.outputs.path }}
+          retention-days: 90
+
+      - name: Generate release notes from CHANGELOG.md
+        id: notes
+        shell: bash
+        run: |
+          version="${{ steps.tag.outputs.version }}"
+          # Extract the section for this version. Each version starts with ## v
+          notes=$(awk "/^## v$version/,/^## v[0-9]/{ if (/^## v[0-9]/ && \$0 !~ /^## v$version/) exit; print }" CHANGELOG.md | sed '$d')
+          if [[ -z "$notes" ]]; then
+            notes="Release v$version. See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details."
+          fi
+          # Save to file (GitHub Actions has issues with multiline outputs)
+          echo "$notes" > release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.ref }}
+          name: pulse ${{ steps.tag.outputs.ref }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(steps.tag.outputs.ref, '-') }}
+          files: |
+            dist/pulse-*-windows-portable.zip
+            scripts/Output/pulse-setup-*.exe
+
+      - name: Summary
+        shell: bash
+        run: |
+          echo "## Released pulse ${{ steps.tag.outputs.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Artifacts:" >> $GITHUB_STEP_SUMMARY
+          echo "- pulse-${{ steps.tag.outputs.version }}-windows-portable.zip" >> $GITHUB_STEP_SUMMARY
+          if [[ -n "${{ steps.installer.outputs.path }}" ]]; then
+            echo "- pulse-setup-${{ steps.tag.outputs.version }}.exe" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.tag.outputs.ref }}" >> $GITHUB_STEP_SUMMARY
+
+  # Optional: trigger macOS build once Apple Developer cert is set up.
+  # Currently gated — runs only when secret APPLE_BUILD_ENABLED is set to "1".
+  build-macos:
+    name: Build macOS .app
+    runs-on: macos-latest
+    if: ${{ secrets.APPLE_BUILD_ENABLED == '1' }}
+    needs: [build-windows]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: |
+          pip install -r requirements.txt pyinstaller pillow rumps
+          chmod +x scripts/build_macos.sh
+          ./scripts/build_macos.sh
+        env:
+          APPLE_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pulse-macos
+          path: dist/pulse-macos-*.zip
+          retention-days: 90
