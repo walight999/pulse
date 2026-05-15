@@ -12,6 +12,8 @@ export default function Home() {
       <Screenshots />
       <Compare />
       <Features />
+      <Personas />
+      <Integrations />
       <Pricing />
       <Waitlist />
       <Footer />
@@ -29,10 +31,10 @@ function Header() {
           <span className="text-lg font-bold tracking-tight lowercase">pulse</span>
         </a>
         <div className="hidden md:flex items-center gap-6 text-sm text-zinc-400">
-          <a href="#features" className="hover:text-white">Features</a>
-          <a href="#pricing" className="hover:text-white">Pricing</a>
           <Link href="/download" className="hover:text-white">Download</Link>
+          <a href="#pricing" className="hover:text-white">Pricing</a>
           <Link href="/methodology" className="hover:text-white">Methodology</Link>
+          <Link href="/roadmap" className="hover:text-white">Roadmap</Link>
           <a href="https://github.com/walight999/pulse" target="_blank" rel="noopener" className="hover:text-white">GitHub</a>
           <a href="#waitlist" className="bg-mint-500 hover:bg-mint-600 text-white font-semibold px-4 py-2 rounded-lg transition">Get early access</a>
         </div>
@@ -63,10 +65,10 @@ function Header() {
       {open && (
         <div id="mobile-menu" className="md:hidden border-t border-zinc-900 bg-black/95 backdrop-blur">
           <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-3 text-sm text-zinc-300">
-            <a href="#features" onClick={() => setOpen(false)} className="py-2 hover:text-white">Features</a>
-            <a href="#pricing" onClick={() => setOpen(false)} className="py-2 hover:text-white">Pricing</a>
             <Link href="/download" onClick={() => setOpen(false)} className="py-2 hover:text-white">Download</Link>
+            <a href="#pricing" onClick={() => setOpen(false)} className="py-2 hover:text-white">Pricing</a>
             <Link href="/methodology" onClick={() => setOpen(false)} className="py-2 hover:text-white">Methodology</Link>
+            <Link href="/roadmap" onClick={() => setOpen(false)} className="py-2 hover:text-white">Roadmap</Link>
             <Link href="/changelog" onClick={() => setOpen(false)} className="py-2 hover:text-white">Changelog</Link>
             <a href="https://github.com/walight999/pulse" target="_blank" rel="noopener" className="py-2 hover:text-white">GitHub</a>
             <a href="#waitlist" onClick={() => setOpen(false)} className="mt-2 bg-mint-500 hover:bg-mint-600 text-white text-center font-semibold px-4 py-3 rounded-lg transition">Get early access</a>
@@ -337,6 +339,163 @@ function Features() {
   );
 }
 
+function Personas() {
+  const cards: Array<{ title: string; subtitle: string; jobs: string[]; cta: string; ctaHref: string }> = [
+    {
+      title: "Solo AI power users",
+      subtitle: "Claude Max + ChatGPT Plus + Cursor + ...",
+      jobs: [
+        "See total monthly AI spend across every tool in one number",
+        "Prove Claude Max is paying for itself vs API rates",
+        "Cost per active hour, per subscription",
+        "Cut tools you stopped using without noticing",
+      ],
+      cta: "Download local app →",
+      ctaHref: "/download",
+    },
+    {
+      title: "Developers",
+      subtitle: "Token-aware, log-aware, source-readable",
+      jobs: [
+        "Parse ~/.claude/projects/*.jsonl on disk — no upload",
+        "Cache TTL 5m + 1h pricing computed separately",
+        "Export raw usage to CSV for your own analysis",
+        "Audit the ROI formulas in sync_tokens.py yourself",
+      ],
+      cta: "View source on GitHub →",
+      ctaHref: "https://github.com/walight999/pulse",
+    },
+    {
+      title: "Founders & operators",
+      subtitle: "Company AI spend, no spreadsheet maintenance",
+      jobs: [
+        "Single dashboard for every AI SaaS line-item",
+        "Monthly budget vs actual",
+        "Flag underused subscriptions for cancellation",
+        "Productivity ROI tied to actual time spent",
+      ],
+      cta: "Join Pro waitlist (Q3) →",
+      ctaHref: "#waitlist",
+    },
+    {
+      title: "Teams (Q3 2026)",
+      subtitle: "Per-developer attribution + shared dashboard",
+      jobs: [
+        "Per-user AI spend attribution",
+        "Slack / Teams / Discord renewal alerts",
+        "Admin controls + audit log",
+        "Budget alerts at department level",
+      ],
+      cta: "Request Team early access →",
+      ctaHref: "mailto:sales@mintforai.com?subject=pulse%20Team%20early%20access",
+    },
+  ];
+  return (
+    <section className="bg-zinc-950 border-y border-zinc-900 py-20 md:py-24">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl md:text-4xl font-bold mb-3">Built for the people who actually pay for AI</h2>
+          <p className="text-zinc-400 leading-relaxed">
+            Same dashboard, different jobs-to-be-done. Pick the one closest to you.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {cards.map((c, i) => (
+            <div key={i} className="rounded-2xl border border-zinc-900 bg-black/40 p-6 hover:border-mint-800 transition flex flex-col">
+              <div className="text-lg font-semibold mb-1">{c.title}</div>
+              <div className="text-xs text-zinc-500 mb-4">{c.subtitle}</div>
+              <ul className="space-y-2 text-sm text-zinc-300 mb-5 flex-1">
+                {c.jobs.map((j, k) => (
+                  <li key={k} className="flex items-start gap-2">
+                    <span className="text-mint-400 mt-0.5 flex-shrink-0" aria-hidden>·</span>
+                    <span>{j}</span>
+                  </li>
+                ))}
+              </ul>
+              <a
+                href={c.ctaHref}
+                target={c.ctaHref.startsWith("http") ? "_blank" : undefined}
+                rel={c.ctaHref.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="text-sm text-mint-400 hover:text-mint-300 font-medium"
+              >
+                {c.cta}
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Integrations() {
+  type Status = "available" | "coming-q3" | "coming-q4" | "planned";
+  const rows: Array<{ provider: string; status: Status; source: string; accuracy: string; notes: string }> = [
+    { provider: "Claude Code",         status: "available", source: "Local ~/.claude/projects/*.jsonl",        accuracy: "Exact",     notes: "Local parser, no API key" },
+    { provider: "Anthropic Admin API", status: "coming-q3", source: "Admin API key (user-provided)",            accuracy: "Exact",     notes: "For team-level attribution" },
+    { provider: "OpenAI API",          status: "coming-q3", source: "Admin API / usage export",                 accuracy: "Exact",     notes: "Requires user-provided API key" },
+    { provider: "ChatGPT Plus",        status: "coming-q3", source: "Settings → Export your data",              accuracy: "Estimate",  notes: "Flat plan — message counts only" },
+    { provider: "Cursor",              status: "coming-q3", source: "Local state DB + dashboard session",       accuracy: "Estimate",  notes: "Needs session cookie from devtools" },
+    { provider: "Google Gemini",       status: "planned",   source: "AI Studio + app export",                   accuracy: "TBD",       notes: "Export format under review" },
+    { provider: "GitHub Copilot",      status: "planned",   source: "Audit log export (Business / Enterprise)", accuracy: "Estimate",  notes: "Flat plan, per-seat attribution only" },
+    { provider: "Browser extension",   status: "coming-q4", source: "Web session capture (opt-in)",             accuracy: "Estimate",  notes: "Captures usage on chat.openai.com, claude.ai, etc." },
+  ];
+  const badge = (s: Status) => {
+    if (s === "available")   return <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-mint-900/40 text-mint-400 border border-mint-800/50">Available now</span>;
+    if (s === "coming-q3")   return <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-900/40 text-amber-400 border border-amber-800/50">Coming Q3 2026</span>;
+    if (s === "coming-q4")   return <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-900/30 text-amber-300 border border-amber-800/40">Coming Q4 2026</span>;
+    return                          <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">Planned</span>;
+  };
+  return (
+    <section className="max-w-6xl mx-auto px-6 py-20 md:py-24">
+      <div className="text-center max-w-2xl mx-auto mb-10">
+        <h2 className="text-2xl md:text-4xl font-bold mb-3">Integration coverage</h2>
+        <p className="text-zinc-400 leading-relaxed">
+          What pulse tracks today vs what's on deck. <strong className="text-zinc-200">Exact</strong> means
+          counts come straight from a log file or API; <strong className="text-zinc-200">Estimate</strong> means
+          message counts or flat-plan derivations without per-token data.
+        </p>
+      </div>
+      <div className="overflow-x-auto rounded-xl border border-zinc-900 bg-black/40">
+        <table className="w-full text-sm">
+          <thead className="bg-zinc-950 border-b border-zinc-900 text-zinc-400">
+            <tr>
+              <th className="text-left font-semibold px-4 py-3">Provider</th>
+              <th className="text-left font-semibold px-4 py-3 w-40">Status</th>
+              <th className="text-left font-semibold px-4 py-3">Data source</th>
+              <th className="text-center font-semibold px-4 py-3 w-24">Accuracy</th>
+              <th className="text-left font-semibold px-4 py-3">Notes</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-900 text-zinc-300">
+            {rows.map((r, i) => (
+              <tr key={i} className="hover:bg-zinc-950/40">
+                <td className="px-4 py-2.5 font-medium text-zinc-100">{r.provider}</td>
+                <td className="px-4 py-2.5">{badge(r.status)}</td>
+                <td className="px-4 py-2.5 text-xs text-zinc-400">{r.source}</td>
+                <td className="px-4 py-2.5 text-center text-xs">
+                  {r.accuracy === "Exact" ? (
+                    <span className="text-mint-400 font-semibold">{r.accuracy}</span>
+                  ) : r.accuracy === "TBD" ? (
+                    <span className="text-zinc-500">{r.accuracy}</span>
+                  ) : (
+                    <span className="text-amber-400">{r.accuracy}</span>
+                  )}
+                </td>
+                <td className="px-4 py-2.5 text-xs text-zinc-400">{r.notes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-5 text-xs text-zinc-500 text-center">
+        Want a provider added? Open an issue at{" "}
+        <a href="https://github.com/walight999/pulse/issues" target="_blank" rel="noopener noreferrer" className="text-mint-400 hover:text-mint-300">github.com/walight999/pulse/issues</a> — community votes shape the order.
+      </p>
+    </section>
+  );
+}
+
 function Pricing() {
   type TierStatus = "available" | "coming-q3" | "roadmap";
   const tiers: Array<{
@@ -578,7 +737,64 @@ function Pricing() {
           ))}
         </div>
 
-        <div className="mt-12 rounded-2xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-950/30 via-black to-mint-950/20 p-6 md:p-8">
+        <div className="mt-12 rounded-2xl border border-zinc-900 bg-black/40 p-6 md:p-8">
+          <h3 className="text-lg md:text-xl font-bold tracking-tight mb-1">Why would I pay $9 when the code is MIT-licensed?</h3>
+          <p className="text-zinc-400 text-sm mb-6 max-w-3xl">
+            You're paying for hosted cloud sync, mobile PWA hosting, and maintenance — not for the
+            right to run the software. The local desktop app is free forever. The cloud server is
+            also MIT-licensed and shipped in the same repo: bring your own Supabase project and
+            self-host with zero rate limit.
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-zinc-900 bg-black/40">
+            <table className="w-full text-sm">
+              <thead className="bg-zinc-950 border-b border-zinc-900 text-zinc-400">
+                <tr>
+                  <th className="text-left font-semibold px-4 py-3">Option</th>
+                  <th className="text-left font-semibold px-4 py-3">Best for</th>
+                  <th className="text-left font-semibold px-4 py-3">What you run</th>
+                  <th className="text-right font-semibold px-4 py-3">Your cost</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-900 text-zinc-300">
+                <tr>
+                  <td className="px-4 py-2.5 font-medium text-zinc-100">Local Free</td>
+                  <td className="px-4 py-2.5 text-xs text-zinc-400">One person, one machine</td>
+                  <td className="px-4 py-2.5 text-xs text-zinc-400">Desktop app only</td>
+                  <td className="px-4 py-2.5 text-right text-mint-400 font-semibold">$0</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-medium text-zinc-100">Self-host Cloud <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-900/40 text-amber-400 border border-amber-800/50 ml-1">Q3 2026</span></td>
+                  <td className="px-4 py-2.5 text-xs text-zinc-400">Devs who want sync without paying us</td>
+                  <td className="px-4 py-2.5 text-xs text-zinc-400">Desktop app + your Supabase project</td>
+                  <td className="px-4 py-2.5 text-right text-zinc-400 text-xs">Supabase free tier (typically $0)</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-medium text-zinc-100">Pro Hosted <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-900/40 text-amber-400 border border-amber-800/50 ml-1">Q3 2026</span></td>
+                  <td className="px-4 py-2.5 text-xs text-zinc-400">Don't want to manage infra</td>
+                  <td className="px-4 py-2.5 text-xs text-zinc-400">Desktop app — we run the sync server</td>
+                  <td className="px-4 py-2.5 text-right text-mint-400 font-semibold">$9/mo</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-medium text-zinc-100">Team Hosted <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-900/40 text-amber-400 border border-amber-800/50 ml-1">Q3 2026</span></td>
+                  <td className="px-4 py-2.5 text-xs text-zinc-400">5-50 devs, shared dashboard</td>
+                  <td className="px-4 py-2.5 text-xs text-zinc-400">Multi-seat workspace + Slack/Teams alerts</td>
+                  <td className="px-4 py-2.5 text-right text-zinc-300 text-xs">$19/seat/mo</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-medium text-zinc-100">Enterprise <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800 ml-1">Roadmap</span></td>
+                  <td className="px-4 py-2.5 text-xs text-zinc-400">Regulated / on-prem / SSO required</td>
+                  <td className="px-4 py-2.5 text-xs text-zinc-400">VPC or on-prem deploy, custom support</td>
+                  <td className="px-4 py-2.5 text-right text-zinc-400 text-xs">Custom</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-xs text-zinc-500">
+            The software stays open-source at every tier. Paid tiers are about <em>who runs the cloud</em>, not <em>who can use pulse</em>.
+          </p>
+        </div>
+
+        <div className="mt-8 rounded-2xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-950/30 via-black to-mint-950/20 p-6 md:p-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
             <div className="flex-1">
               <div className="inline-flex items-center gap-2 mb-2 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
@@ -935,6 +1151,7 @@ function Footer() {
               <li><a href="#pricing" className="text-zinc-400 hover:text-white">Pricing</a></li>
               <li><Link href="/download" className="text-zinc-400 hover:text-white">Download</Link></li>
               <li><Link href="/methodology" className="text-zinc-400 hover:text-white">ROI methodology</Link></li>
+              <li><Link href="/roadmap" className="text-zinc-400 hover:text-white">Roadmap</Link></li>
               <li><Link href="/changelog" className="text-zinc-400 hover:text-white">Changelog</Link></li>
               <li><a href="#waitlist" className="text-zinc-400 hover:text-white">Pro waitlist</a></li>
             </ul>

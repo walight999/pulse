@@ -258,6 +258,7 @@ python app.py`}
           <div className="flex items-center gap-5">
             <a href={RELEASES_URL} target="_blank" rel="noopener noreferrer" className="hover:text-white">All releases</a>
             <Link href="/methodology" className="hover:text-white">Methodology</Link>
+            <Link href="/roadmap" className="hover:text-white">Roadmap</Link>
             <Link href="/security" className="hover:text-white">Security</Link>
             <Link href="/privacy" className="hover:text-white">Privacy</Link>
           </div>
