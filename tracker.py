@@ -1,4 +1,10 @@
-"""Background tracker — logs foreground app + periodic system snapshots."""
+"""Background tracker — logs foreground app + periodic system snapshots.
+
+Privacy-respecting: reads `activity_tracking_enabled`, `activity_titles_enabled`,
+`activity_paused_until` (ISO timestamp), and `activity_blocklist` (semicolon-separated
+process names) from app_settings on every poll. Defaults to OFF — tracking only
+happens when the user explicitly opts in via onboarding or Settings.
+"""
 import time
 import ctypes
 from ctypes import wintypes
@@ -16,6 +22,32 @@ IDLE_THRESHOLD_SEC = 120  # don't count foreground time after 2 min of no input
 LOG_PATH = Path(__file__).parent / "logs" / "tracker.log"
 
 user32 = ctypes.windll.user32
+
+
+def _tracking_active_now() -> tuple[bool, bool]:
+    """Returns (tracking_enabled, titles_enabled). Honors pause + blocklist signals."""
+    if get_setting("activity_tracking_enabled", "0") != "1":
+        return False, False
+    paused_until = get_setting("activity_paused_until", "").strip()
+    if paused_until:
+        try:
+            if datetime.fromisoformat(paused_until) > datetime.now():
+                return False, False
+        except ValueError:
+            pass  # malformed pause — treat as not paused
+    titles = get_setting("activity_titles_enabled", "0") == "1"
+    return True, titles
+
+
+def _is_blocked(app: str | None) -> bool:
+    """Check the user-defined process blocklist (semicolon-separated, case-insensitive)."""
+    if not app:
+        return False
+    raw = get_setting("activity_blocklist", "").strip()
+    if not raw:
+        return False
+    parts = [p.strip().lower() for p in raw.split(";") if p.strip()]
+    return app.lower() in parts
 
 
 def log(msg: str) -> None:
@@ -72,6 +104,8 @@ def main():
     last_snapshot = 0.0
     last_setting_check = 0.0
     idle_threshold = IDLE_THRESHOLD_SEC
+    tracking_enabled = False
+    titles_enabled = False
 
     log(f"Tracker started")
     print(f"Tracker started — logging to {LOG_PATH.parent / 'tracker.log'}")
@@ -80,18 +114,45 @@ def main():
         try:
             now_iso = datetime.now().isoformat(timespec="seconds")
 
-            # Refresh idle_threshold from settings every 60s (no restart needed)
+            # Refresh settings every 60s (no restart needed). User can toggle
+            # tracking + titles from the dashboard and changes take effect within 1 min.
             if time.time() - last_setting_check > 60:
                 raw = get_setting("idle_threshold_sec", str(IDLE_THRESHOLD_SEC))
                 try:
                     idle_threshold = max(30, int(raw))
                 except (ValueError, TypeError):
                     idle_threshold = IDLE_THRESHOLD_SEC
+                tracking_enabled, titles_enabled = _tracking_active_now()
                 last_setting_check = time.time()
+
+            # If user hasn't opted in (or has paused), skip everything except the snapshot logic.
+            if not tracking_enabled:
+                if current_id is not None:
+                    # Close any open activity row before going quiet.
+                    started_dt = datetime.fromisoformat(current_started)
+                    duration = max(0, int((datetime.now() - started_dt).total_seconds()))
+                    cursor.execute(
+                        "UPDATE app_activity SET ended_at = ?, duration_seconds = ? WHERE id = ?",
+                        (now_iso, duration, current_id),
+                    )
+                    conn.commit()
+                    current_id = None
+                    current_app = None
+                    current_started = None
+                time.sleep(POLL_INTERVAL)
+                continue
 
             # Idle detection — pause foreground tracking when user inactive
             user_idle = idle_seconds() > idle_threshold
             app, title = (None, None) if user_idle else get_foreground_app()
+
+            # Respect user's app blocklist (e.g. password manager, finance app, personal email)
+            if app and _is_blocked(app):
+                app, title = None, None
+
+            # If titles are disabled, never write them — keep the column blank.
+            if not titles_enabled:
+                title = ""
 
             if app and app != current_app:
                 if current_id is not None:

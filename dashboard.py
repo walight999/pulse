@@ -1904,6 +1904,18 @@ def page_header(title: str, caption: str, action_label: str | None = None, actio
 # ============================================================
 # First-run onboarding
 # ============================================================
+def _detect_claude_logs() -> tuple[int, str]:
+    """Returns (file_count, path_display). Looks at ~/.claude/projects/*.jsonl."""
+    try:
+        log_dir = Path.home() / ".claude" / "projects"
+        if not log_dir.exists():
+            return 0, str(log_dir)
+        count = sum(1 for _ in log_dir.rglob("*.jsonl"))
+        return count, str(log_dir)
+    except Exception:
+        return 0, "~/.claude/projects/"
+
+
 def run_onboarding() -> bool:
     """Returns True if onboarding is shown (and the rest of the page should skip)."""
     if get_setting("onboarded", "") == "1":
@@ -1919,24 +1931,64 @@ def run_onboarding() -> bool:
         '</div>',
         unsafe_allow_html=True,
     )
-    st.caption("30 seconds to set up. Everything is editable later in Settings.")
+    st.caption(
+        "30 seconds to set up. Everything is editable later in Settings. "
+        "Nothing leaves your machine — pulse is local-first by default."
+    )
+
+    # Detect Claude logs before the form so the message is shown above it.
+    claude_count, claude_path = _detect_claude_logs()
 
     with st.form("onboarding"):
-        st.markdown("##### Where do you live?")
+        st.markdown("##### 1. Where do you live?")
         currencies = ["THB", "USD", "EUR", "GBP", "JPY", "SGD", "MYR",
                       "CNY", "KRW", "AUD", "CAD", "HKD", "INR", "PHP", "IDR"]
         c = st.selectbox(
             "Display currency", currencies,
-            help="All money will be shown in this currency. (FX auto-fetched daily.)"
+            help="All money will be shown in this currency. (FX auto-fetched daily from frankfurter.dev.)"
         )
 
-        st.markdown("##### Your AI subscription (optional)")
+        st.markdown("##### 2. Your AI subscription (optional)")
         plan = st.number_input(
             "Plan price per month (USD)", min_value=0.0, value=200.0, step=10.0,
-            help="What you pay for Claude Max / ChatGPT Pro / similar. Used to compute ROI vs API equivalent.",
+            help="What you pay for Claude Max / ChatGPT Pro / similar. Used to compute Plan ROI vs API equivalent.",
         )
 
-        st.markdown("##### Budget alerts (optional — set 0 to disable)")
+        st.markdown("##### 3. Claude Code logs")
+        if claude_count > 0:
+            st.success(
+                f"✓ Found {claude_count} Claude Code log file"
+                f"{'s' if claude_count != 1 else ''} at `{claude_path}`. "
+                "Pulse will parse these locally to compute Plan ROI — nothing is uploaded."
+            )
+        else:
+            st.info(
+                f"No Claude Code logs found yet at `{claude_path}`. "
+                "Pulse will auto-detect them next time you use Claude Code. "
+                "You can also import logs manually in Settings → AI usage."
+            )
+
+        st.markdown("##### 4. Activity tracking (opt-in)")
+        st.caption(
+            "Optional — measures foreground time per app so pulse can show "
+            "cost-per-active-hour. Off by default. Data stays on this device."
+        )
+        track_on = st.checkbox(
+            "Track foreground app time",
+            value=False,
+            help="When on, pulse logs which app was in focus and for how long. Idle time is excluded.",
+        )
+        titles_on = st.checkbox(
+            "Also store window titles",
+            value=False,
+            help=(
+                "Window titles can include document names, tab titles, customer names. "
+                "Off = pulse stores only the process name (e.g. 'chrome.exe'), not the title. "
+                "Recommended off unless you specifically need title-level breakdown."
+            ),
+        )
+
+        st.markdown("##### 5. Budget alerts (optional — set 0 to disable)")
         c1, c2 = st.columns(2)
         with c1:
             daily = st.number_input("Daily token budget (USD)", min_value=0.0, value=50.0, step=10.0)
@@ -1948,7 +2000,7 @@ def run_onboarding() -> bool:
             min_value=2.0, max_value=10.0, value=3.0, step=0.5,
         )
 
-        st.markdown("##### Notifications")
+        st.markdown("##### 6. Notifications")
         nc1, nc2, nc3 = st.columns(3)
         with nc1:
             n_renew = st.checkbox("Renewal alerts", value=True)
@@ -1956,6 +2008,13 @@ def run_onboarding() -> bool:
             n_spike = st.checkbox("Cost spike alerts", value=True)
         with nc3:
             n_dead = st.checkbox("Unused-sub alerts", value=True)
+
+        st.markdown("---")
+        st.caption(
+            "**Privacy summary.** Pulse stores everything in a local SQLite database. "
+            "The only outbound call is the daily FX rate fetch from frankfurter.dev (cached 24h). "
+            "Telemetry and cloud sync are opt-in only — never enabled by this wizard."
+        )
 
         if st.form_submit_button("Get started", use_container_width=True, type="primary"):
             set_setting("display_currency", c)
@@ -1966,6 +2025,8 @@ def run_onboarding() -> bool:
             set_setting("alerts_renewals_enabled", "1" if n_renew else "0")
             set_setting("alerts_token_spike_enabled", "1" if n_spike else "0")
             set_setting("alerts_dead_subs_enabled", "1" if n_dead else "0")
+            set_setting("activity_tracking_enabled", "1" if track_on else "0")
+            set_setting("activity_titles_enabled", "1" if (track_on and titles_on) else "0")
             set_setting("onboarded", "1")
             st.rerun()
         return True
@@ -4196,6 +4257,93 @@ def _render_settings_preferences():
             set_setting("alerts_token_spike_enabled", "1" if n_spike else "0")
             set_setting("alerts_dead_subs_enabled", "1" if n_dead else "0")
             st.success("Saved")
+
+    st.markdown("---")
+
+    # ── PRIVACY & ACTIVITY TRACKING ──────────────────────────────
+    st.markdown("##### Privacy & activity tracking")
+    st.caption(
+        "Activity tracking is opt-in. When off, pulse stops logging which app you're using. "
+        "All data stays on this device unless you turn on cloud sync (Pro, not yet shipped)."
+    )
+
+    paused_until_raw = get_setting("activity_paused_until", "").strip()
+    paused_until_dt = None
+    if paused_until_raw:
+        try:
+            paused_until_dt = datetime.fromisoformat(paused_until_raw)
+            if paused_until_dt <= datetime.now():
+                paused_until_dt = None
+        except ValueError:
+            paused_until_dt = None
+
+    if paused_until_dt:
+        st.warning(
+            f"⏸ Activity tracking is paused until "
+            f"**{paused_until_dt.strftime('%Y-%m-%d %H:%M')}**. "
+            "Foreground time and window titles are not being recorded."
+        )
+        if st.button("Resume tracking now", key="resume_tracking_now"):
+            set_setting("activity_paused_until", "")
+            st.success("Tracking resumed")
+            st.rerun()
+
+    with st.form("activity_privacy_form"):
+        ap1, ap2 = st.columns(2)
+        with ap1:
+            tracking_on = st.checkbox(
+                "Track foreground app time",
+                value=setting_bool("activity_tracking_enabled", False),
+                help="Off = pulse stops logging app activity. Cost-per-active-hour values will stop updating.",
+            )
+        with ap2:
+            titles_on = st.checkbox(
+                "Also store window titles",
+                value=setting_bool("activity_titles_enabled", False),
+                help=(
+                    "Off = only the process name is stored (e.g. 'chrome.exe'), never the window title. "
+                    "Window titles can include document names, tab titles, customer names — leave off "
+                    "unless you specifically need title-level breakdown."
+                ),
+            )
+        blocklist = st.text_input(
+            "Blocklist (process names, semicolon-separated)",
+            value=get_setting("activity_blocklist", ""),
+            placeholder="e.g. 1password.exe; bitwarden.exe; thunderbird.exe",
+            help="These apps are never logged, even when tracking is on. Case-insensitive.",
+        )
+        if st.form_submit_button("Save privacy settings", type="primary"):
+            set_setting("activity_tracking_enabled", "1" if tracking_on else "0")
+            set_setting("activity_titles_enabled", "1" if (tracking_on and titles_on) else "0")
+            set_setting("activity_blocklist", blocklist.strip())
+            st.success("Privacy settings saved (tracker picks up changes within 60 seconds).")
+            st.rerun()
+
+    pause_c1, pause_c2, pause_c3, pause_c4 = st.columns(4)
+    with pause_c1:
+        if st.button("Pause 1 hour", key="pause_1h", use_container_width=True, disabled=bool(paused_until_dt)):
+            until = (datetime.now() + timedelta(hours=1)).isoformat(timespec="seconds")
+            set_setting("activity_paused_until", until)
+            st.rerun()
+    with pause_c2:
+        if st.button("Pause until tomorrow", key="pause_today", use_container_width=True, disabled=bool(paused_until_dt)):
+            tomorrow = (datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1))
+            set_setting("activity_paused_until", tomorrow.isoformat(timespec="seconds"))
+            st.rerun()
+    with pause_c3:
+        if st.button("Pause 1 week", key="pause_week", use_container_width=True, disabled=bool(paused_until_dt)):
+            until = (datetime.now() + timedelta(days=7)).isoformat(timespec="seconds")
+            set_setting("activity_paused_until", until)
+            st.rerun()
+    with pause_c4:
+        confirm = st.checkbox("Confirm delete", key="confirm_delete_activity", value=False)
+        if st.button("Delete activity history", key="delete_activity_history",
+                     use_container_width=True, disabled=not confirm):
+            conn = get_conn()
+            conn.execute("DELETE FROM app_activity")
+            conn.commit()
+            st.success("Activity history cleared")
+            st.rerun()
 
     st.markdown("---")
 
