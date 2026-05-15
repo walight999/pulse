@@ -1,7 +1,7 @@
 # STATE — pulse (life-tracker)
 
 > Single-page project state. Standardized format across all v2-upgraded projects.
-> **Last updated:** 2026-05-11
+> **Last updated:** 2026-05-15
 > **Pipeline version:** v2
 
 ---
@@ -41,13 +41,13 @@
 
 ---
 
-## Top 3 TODOs (post-domain registration)
+## Top 3 TODOs (post-website-audit)
 
-1. **Vercel deploy `landing/` + point `mintforai.com`** — full step-by-step in `operations/vercel-deploy.md` (build verified clean 2026-05-11)
-2. Reserve Twitter handle (`@mintforai` / `@mintforai_ai` / `@pulse_dashboard`) + start `twitter-warmup-tweets.md` cadence
-3. Beta tester recruitment — 5+ DMs/day for 6 days per `beta-tester-outreach.md`
+1. **Set Vercel env vars + deploy** — for the new pluggable `/api/waitlist`: `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (create table per `landing/WAITLIST_SETUP.md` SQL), `RESEND_API_KEY` + `WAITLIST_FROM_EMAIL`. Endpoint works without these (logs to Vercel), so this is plug-when-ready.
+2. **Reserve Twitter handle** (`@mintforai` / `@mintforai_ai` / `@pulse_dashboard`) + start `twitter-warmup-tweets.md` cadence
+3. **Beta tester recruitment** — 5+ DMs/day for 6 days per `beta-tester-outreach.md`
 
-**Done (older TODOs):** ✅ Telemetry audited (no unauthorized POST) · ✅ Cloud opt-in verified · ✅ CoC + 3 issue templates + PR template added · ✅ `mintforai.com` domain registered
+**Done (older TODOs):** ✅ Telemetry audited (no unauthorized POST) · ✅ Cloud opt-in verified · ✅ CoC + 3 issue templates + PR template added · ✅ `mintforai.com` domain registered · ✅ Landing audit Phases 1-4 (honesty / activation / credibility / plumbing) — see commits d174044, a2fef41, 75ec298, 26774d7
 
 ---
 
@@ -85,6 +85,7 @@
 
 | Date | Update |
 |---|---|
+| 2026-05-15 | Landing audit Phases 1-4 shipped (15 routes static, pytest 51/51). Phase 1 (d174044) honesty pass: status badges on every claim, lifetime defused to interest-list, governing law named. Phase 2 (a2fef41) activation: `/download`, `/methodology`, segmented waitlist with referral code. Phase 3 (75ec298) credibility: personas, integrations matrix, self-host vs hosted, `/roadmap`. Phase 4 (26774d7) plumbing: pluggable `/api/waitlist` (Supabase + Resend opt-in), onboarding wizard collects activity-tracking consent, `tracker.py` honors the toggle end-to-end, Settings page has pause/blocklist/delete-history controls. |
 | 2026-05-11 | `mintforai.com` registered on Cloudflare; all 38 repo refs swapped from `pulse.app`; landing build verified clean (Next 14.2.35, 91kB First Load JS, zero warnings); pytest 44/44; open-core model documented in README |
 | 2026-05-11 | Pipeline v2 upgrade: added lean-launch-audit + CLAUDE.md + STATE.md |
 | 2026-05-11 | No deploy-readiness (correctly skipped — no agent roster) |
