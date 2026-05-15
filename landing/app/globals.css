@@ -2,8 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
+/* === Box model + overflow safety ===
+   Prevent horizontal scroll at 320–1440px. Applies the rules from the
+   Pulse website brief section 23 verbatim. */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 html { scroll-behavior: smooth; }
 body { background: #000; color: #fff; font-feature-settings: "ss01" on, "cv11" on; }
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+section, .container, .card, .grid, .table-wrapper, .pricing-grid, .footer {
+  min-width: 0;
+}
+
+h1, h2, h3, p, a, span, button, li {
+  overflow-wrap: break-word;
+}
+
+code, pre, .file-path, .api-name, .matrix-cell {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.table-wrapper { width: 100%; overflow-x: auto; }
+
+/* === Accessibility === */
+/* Skip-to-content target — the link is in page.tsx with .sr-only:focus styling. */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Visible focus ring on every interactive element (Tailwind's default is too subtle). */
+*:focus-visible {
+  outline: 2px solid #34d399 !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+/* Respect user's reduced-motion preference — disables decorative animations. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ecg-line { animation: none !important; background-position: 0 0 !important; }
+}
 
 .ecg-line {
   height: 2px;

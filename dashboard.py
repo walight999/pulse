@@ -1916,6 +1916,58 @@ def _detect_claude_logs() -> tuple[int, str]:
         return 0, "~/.claude/projects/"
 
 
+def _local_data_dirs() -> list[tuple[str, str]]:
+    """Returns [(label, path), …] for the user-facing 'where your data lives' display."""
+    try:
+        from db import DB_PATH
+        base = Path(DB_PATH).parent
+    except Exception:
+        base = Path(__file__).parent / "data"
+    return [
+        ("Database", str(base / "tracker.db")),
+        ("Backups", str(base.parent / "backups")),
+        ("Logs", str(base.parent / "logs")),
+        ("Claude logs (read)", str(Path.home() / ".claude" / "projects")),
+    ]
+
+
+def _seed_demo_subscriptions() -> int:
+    """Insert a few example subscriptions so the user can poke around immediately.
+    Returns count inserted. Safe to call multiple times — checks for an existing
+    'Demo: Claude Max' row to avoid duplicates."""
+    try:
+        conn = get_conn()
+        existing = conn.execute(
+            "SELECT 1 FROM subscriptions WHERE name = ? LIMIT 1",
+            ("Demo: Claude Max",),
+        ).fetchone()
+        if existing:
+            return 0
+        from datetime import date
+        today = date.today().isoformat()
+        demo_rows = [
+            ("Demo: Claude Max",   200.0, "USD", "monthly", today, "Anthropic",       1),
+            ("Demo: ChatGPT Plus",  20.0, "USD", "monthly", today, "OpenAI",          1),
+            ("Demo: Cursor Pro",    20.0, "USD", "monthly", today, "Cursor",          1),
+            ("Demo: GitHub Copilot",10.0, "USD", "monthly", today, "GitHub",          1),
+        ]
+        for name, price, currency, cycle, started, vendor, active in demo_rows:
+            try:
+                conn.execute(
+                    "INSERT INTO subscriptions (name, price, currency, billing_cycle, "
+                    "started_on, vendor, active) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (name, price, currency, cycle, started, vendor, active),
+                )
+            except Exception:
+                # Schema mismatch (older columns) — bail rather than half-seed
+                conn.rollback()
+                return 0
+        conn.commit()
+        return len(demo_rows)
+    except Exception:
+        return 0
+
+
 def run_onboarding() -> bool:
     """Returns True if onboarding is shown (and the rest of the page should skip)."""
     if get_setting("onboarded", "") == "1":
@@ -2009,9 +2061,25 @@ def run_onboarding() -> bool:
         with nc3:
             n_dead = st.checkbox("Unused-sub alerts", value=True)
 
+        st.markdown("##### 7. Want demo data to explore with?")
+        seed_demo = st.checkbox(
+            "Add 4 example subscriptions (Claude Max, ChatGPT Plus, Cursor Pro, Copilot)",
+            value=False,
+            help=(
+                "Inserts 4 demo rows so you can click around the dashboard immediately. "
+                "All marked 'Demo:' so they're easy to delete or replace with your real ones later."
+            ),
+        )
+
         st.markdown("---")
+        st.markdown("**Where your data lives** (all on this machine, never uploaded):")
+        for label, path in _local_data_dirs():
+            st.markdown(
+                f"- **{label}:** `{path}`",
+                unsafe_allow_html=False,
+            )
         st.caption(
-            "**Privacy summary.** Pulse stores everything in a local SQLite database. "
+            "Pulse stores everything in a local SQLite database. "
             "The only outbound call is the daily FX rate fetch from frankfurter.dev (cached 24h). "
             "Telemetry and cloud sync are opt-in only — never enabled by this wizard."
         )
@@ -2027,6 +2095,10 @@ def run_onboarding() -> bool:
             set_setting("alerts_dead_subs_enabled", "1" if n_dead else "0")
             set_setting("activity_tracking_enabled", "1" if track_on else "0")
             set_setting("activity_titles_enabled", "1" if (track_on and titles_on) else "0")
+            if seed_demo:
+                inserted = _seed_demo_subscriptions()
+                if inserted:
+                    st.toast(f"Added {inserted} demo subscriptions — look for rows starting with 'Demo:' on the Subscriptions tab.", icon=":material/info:")
             set_setting("onboarded", "1")
             st.rerun()
         return True
@@ -4306,20 +4378,27 @@ def _render_settings_preferences():
                     "unless you specifically need title-level breakdown."
                 ),
             )
+        allowlist = st.text_input(
+            "Allowlist (process names, semicolon-separated, optional)",
+            value=get_setting("activity_allowlist", ""),
+            placeholder="e.g. code.exe; cursor.exe; chrome.exe   (leave empty = allow all)",
+            help="If set, ONLY these apps are logged. Empty = allow all (then blocklist applies). Case-insensitive.",
+        )
         blocklist = st.text_input(
             "Blocklist (process names, semicolon-separated)",
             value=get_setting("activity_blocklist", ""),
             placeholder="e.g. 1password.exe; bitwarden.exe; thunderbird.exe",
-            help="These apps are never logged, even when tracking is on. Case-insensitive.",
+            help="These apps are never logged, even when tracking is on. Case-insensitive. Applied on top of allowlist.",
         )
         if st.form_submit_button("Save privacy settings", type="primary"):
             set_setting("activity_tracking_enabled", "1" if tracking_on else "0")
             set_setting("activity_titles_enabled", "1" if (tracking_on and titles_on) else "0")
+            set_setting("activity_allowlist", allowlist.strip())
             set_setting("activity_blocklist", blocklist.strip())
             st.success("Privacy settings saved (tracker picks up changes within 60 seconds).")
             st.rerun()
 
-    pause_c1, pause_c2, pause_c3, pause_c4 = st.columns(4)
+    pause_c1, pause_c2, pause_c3 = st.columns(3)
     with pause_c1:
         if st.button("Pause 1 hour", key="pause_1h", use_container_width=True, disabled=bool(paused_until_dt)):
             until = (datetime.now() + timedelta(hours=1)).isoformat(timespec="seconds")
@@ -4335,15 +4414,83 @@ def _render_settings_preferences():
             until = (datetime.now() + timedelta(days=7)).isoformat(timespec="seconds")
             set_setting("activity_paused_until", until)
             st.rerun()
-    with pause_c4:
-        confirm = st.checkbox("Confirm delete", key="confirm_delete_activity", value=False)
-        if st.button("Delete activity history", key="delete_activity_history",
-                     use_container_width=True, disabled=not confirm):
+
+    # ── DATA EXPORT + DESTRUCTIVE ACTIONS ──────────────────────────
+    st.markdown("**Activity data**")
+    data_c1, data_c2, data_c3 = st.columns(3)
+    with data_c1:
+        try:
+            conn_export = get_conn()
+            rows = conn_export.execute(
+                "SELECT started_at, ended_at, process_name, window_title, duration_seconds "
+                "FROM app_activity ORDER BY started_at DESC LIMIT 50000"
+            ).fetchall()
+            csv_lines = ["started_at,ended_at,process_name,window_title,duration_seconds"]
+            for r in rows:
+                title = (r["window_title"] or "").replace('"', "'").replace("\n", " ")
+                csv_lines.append(
+                    f'{r["started_at"] or ""},{r["ended_at"] or ""},{r["process_name"] or ""},'
+                    f'"{title}",{r["duration_seconds"] or 0}'
+                )
+            csv_bytes = "\n".join(csv_lines).encode("utf-8")
+        except Exception:
+            csv_bytes = b"started_at,ended_at,process_name,window_title,duration_seconds\n"
+        st.download_button(
+            "Export activity CSV",
+            data=csv_bytes,
+            file_name=f"pulse-activity-{datetime.now().strftime('%Y-%m-%d')}.csv",
+            mime="text/csv",
+            use_container_width=True,
+            key="export_activity_csv_btn",
+            help="Last 50,000 activity rows. Stored locally — never uploaded.",
+        )
+    with data_c2:
+        confirm_act = st.checkbox("Confirm delete activity", key="confirm_delete_activity_v2", value=False)
+        if st.button("Delete activity history", key="delete_activity_history_v2",
+                     use_container_width=True, disabled=not confirm_act):
             conn = get_conn()
             conn.execute("DELETE FROM app_activity")
             conn.commit()
             st.success("Activity history cleared")
             st.rerun()
+    with data_c3:
+        st.markdown("&nbsp;", unsafe_allow_html=True)  # spacer for alignment
+
+    # ── NUCLEAR: CLEAR ALL LOCAL DATA ──────────────────────────────
+    with st.expander("⚠ Danger zone — clear all local data"):
+        st.caption(
+            "This deletes every subscription, every AI usage row, every activity row, every snapshot, "
+            "and every setting from this machine's pulse database. **The pulse data folder is NOT "
+            "touched** — your backups remain. Use this only if you want to start from scratch or "
+            "before handing the device to someone else."
+        )
+        confirm_text = st.text_input(
+            "Type DELETE to confirm",
+            value="",
+            key="confirm_delete_all_text",
+            placeholder="DELETE",
+        )
+        if st.button(
+            "Clear all local data now",
+            key="clear_all_local_data_btn",
+            disabled=(confirm_text.strip() != "DELETE"),
+            type="primary",
+        ):
+            conn = get_conn()
+            for table in (
+                "app_activity", "system_snapshots", "subscriptions", "token_usage",
+                "alerts", "audit_log", "app_settings",
+            ):
+                try:
+                    conn.execute(f"DELETE FROM {table}")
+                except Exception:
+                    pass  # table may not exist on older schemas
+            conn.commit()
+            st.success(
+                "All local pulse data cleared. Backups in pulse/backups/ are untouched. "
+                "Restart pulse to re-run the first-run wizard."
+            )
+            st.stop()
 
     st.markdown("---")
 

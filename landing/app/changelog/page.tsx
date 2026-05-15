@@ -18,13 +18,133 @@ export default function ChangelogPage() {
     <LegalPage
       title="Changelog"
       subtitle="What's new in pulse. Versions follow semver; minor releases ship roughly every 4 weeks."
-      lastUpdated="2026-05-12"
+      lastUpdated="2026-05-15"
     >
       <p>
         Building in public — every release ships with a public PR + release notes on{" "}
         <a href="https://github.com/walight999/pulse/releases" target="_blank" rel="noopener noreferrer">
           GitHub
         </a>.
+      </p>
+
+      <h2 id="v1-6">v1.6 — Website audit + privacy plumbing (2026-05-15)</h2>
+      <p>
+        Five-phase audit of the website and end-to-end privacy plumbing. Site shipped from "explains
+        the vision well" to "honest about what's live today." Activity-tracking consent is now true
+        end-to-end, not just a marketing claim.
+      </p>
+      <h3>Phase 1 — Honesty</h3>
+      <ul>
+        <li>
+          Lifetime Pro defused to an interest-list with no commercial promise — removed "first 500",
+          "$199", and "every future Pro feature through v9.x". Final terms will be published before
+          any sale.
+        </li>
+        <li>Pricing tiers got <code>Available now</code> / <code>Coming Q3 2026</code> / <code>Roadmap</code> badges. CTAs softened on unreleased tiers.</li>
+        <li>New "What you can use today" 3-column section above Screenshots.</li>
+        <li>Pricing comparison matrix gained a Status column tagging every row.</li>
+        <li>
+          <code>/security</code> page: top status-legend callout + per-claim badges (Implemented · local
+          mode / Designed for Pro / Planned for Team / Enterprise roadmap / Not certified yet). New
+          "Service-level claims" section says no SLA today.
+        </li>
+        <li>Operator name and governing law (Thai law, Bangkok) added to footer and <code>/terms</code>.</li>
+      </ul>
+      <h3>Phase 2 — Activation</h3>
+      <ul>
+        <li>
+          <strong>New <code>/download</code> page</strong> — OS card matrix, 4-step install walkthrough, data-location table,
+          run-from-source snippet, troubleshooting accordion, SHA-256 verification guidance.
+        </li>
+        <li>
+          <strong>New <code>/methodology</code> page</strong> — Plan ROI formula, equivalent API value breakdown, full
+          Anthropic pricing table from <code>sync_tokens.py</code>, cache TTL explainer, cost-per-active-hour formula,
+          cancellation savings formula, exact-vs-estimate table, honest limitations section.
+        </li>
+        <li>
+          Waitlist form gained optional segmentation: persona, OS, AI tools, monthly spend, plan
+          interest, biggest pain. Success state replaced with a 3-step next-steps card + personal
+          referral link.
+        </li>
+      </ul>
+      <h3>Phase 3 — Credibility</h3>
+      <ul>
+        <li>
+          New Personas section: 5 cards — Solo AI users / Developers / Founders + Operators / Teams (Q3) /
+          Finance + Ops — each with persona-specific jobs-to-be-done and tailored CTAs.
+        </li>
+        <li>
+          New Integrations matrix: per-provider table (Claude Code, Anthropic Admin API, OpenAI, ChatGPT
+          Plus, Cursor, Gemini, Copilot, Browser extension) with Status / Data source / Accuracy / Notes.
+        </li>
+        <li>
+          Self-host vs hosted comparison added at the top of Pricing — 5 rows distinguishing Local Free /
+          Self-host Cloud / Pro Hosted / Team Hosted / Enterprise.
+        </li>
+        <li>
+          <strong>New <code>/roadmap</code> page</strong> — public Now / Next / Later / Under consideration board with
+          vote-via-Discussions CTA.
+        </li>
+      </ul>
+      <h3>Phase 4 — Plumbing</h3>
+      <ul>
+        <li>
+          <code>/api/waitlist</code> made pluggable. If <code>SUPABASE_URL</code> + <code>SUPABASE_SERVICE_ROLE_KEY</code> are set,
+          inserts to a <code>waitlist</code> table. If <code>RESEND_API_KEY</code> is set, sends a plain-text confirmation email
+          with the user's referral link. Both opt-in; falls back to Vercel logs if not configured.
+          UTM + referral params (<code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>, <code>r</code>) now captured.
+        </li>
+        <li>
+          New <code>landing/WAITLIST_SETUP.md</code> with the Supabase SQL schema + Resend domain verification +
+          Vercel env-var table.
+        </li>
+        <li>
+          <strong>First-run onboarding wizard expanded</strong>: from 4 sections to 7. Auto-detects Claude
+          Code logs at <code>~/.claude/projects/*.jsonl</code>, asks for explicit activity-tracking + window-title
+          consent (both default OFF), shows where your data lives, optional demo-data seed (4 example
+          subscriptions you can poke around with).
+        </li>
+        <li>
+          New Settings → Preferences → "Privacy & activity tracking" section: master tracking toggle,
+          store-titles toggle, allowlist + blocklist (semicolon-separated), pause buttons (1h / until
+          tomorrow / 1 week), export activity CSV, delete activity history. Plus a "Danger zone" expander
+          for full local-data wipe with type-DELETE confirmation.
+        </li>
+        <li>
+          <strong>Tracker honors privacy settings end-to-end</strong>. <code>tracker.py</code> refreshes settings every
+          60 seconds. If tracking is off or paused, no rows are inserted at all. If window-title storage
+          is off, the title column is always empty. Allowlist takes precedence over blocklist when both
+          are set.
+        </li>
+      </ul>
+      <h3>Phase 5 — Polish + production readiness</h3>
+      <ul>
+        <li>Trust strip below Hero: 100% local · MIT open-source · no telemetry · 1 outbound call · no account.</li>
+        <li>
+          <strong>New <code>/docs</code> hub</strong> — 9 sections × 4 cards each. Quickstart, importing data, privacy & security,
+          backup + export + data location, self-hosting, how pulse calculates things, security model,
+          troubleshooting, FAQ by audience (developer / non-technical / founder / privacy-conscious).
+        </li>
+        <li>
+          CSS safety rules applied verbatim from the website brief — <code>box-sizing: border-box</code>,
+          <code>overflow-x: clip</code> on html/body, <code>overflow-wrap: break-word</code> on text elements,
+          <code>word-break: anywhere</code> on code paths. No horizontal scroll at 320–1440px.
+        </li>
+        <li>
+          Accessibility: skip-to-content link at the top of <code>/</code>, <code>:focus-visible</code> mint outline on
+          every interactive element, <code>prefers-reduced-motion</code> media query that disables the ECG animation
+          for users who set the OS preference.
+        </li>
+        <li>
+          Vercel Analytics added (<code>@vercel/analytics</code>). Privacy-safe by default — no cookies, no PII.
+          Disabled at build time via <code>NEXT_PUBLIC_ANALYTICS_DISABLED=1</code> if you don't want it.
+        </li>
+      </ul>
+      <h3>Build verification</h3>
+      <p>
+        pytest 51/51 pass. Next 14.2.35 build clean (16 routes static at the end of Phase 5).
+        <code>/</code> at 116 kB First Load JS. <code>/docs</code>, <code>/download</code>, <code>/methodology</code>,
+        <code>/roadmap</code> all under 100 kB.
       </p>
 
       <h2 id="v1-5">v1.5 — Open-core + domain (2026-05-12)</h2>

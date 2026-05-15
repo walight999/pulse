@@ -18,6 +18,7 @@ type Payload = {
   planInterest?: string;
   biggestPain?: string;
   referrer?: string;
+  utm?: Record<string, string>;
 };
 
 type WaitlistRecord = {
@@ -29,6 +30,12 @@ type WaitlistRecord = {
   plan_interest: string;
   biggest_pain: string;
   referrer: string;
+  utm_source: string;
+  utm_medium: string;
+  utm_campaign: string;
+  utm_term: string;
+  utm_content: string;
+  referred_by: string;
   referral_code: string;
   ts: string;
 };
@@ -134,6 +141,7 @@ export async function POST(req: Request) {
     }
 
     const code = referralCode(email);
+    const utm = body.utm && typeof body.utm === "object" ? body.utm : {};
     const record: WaitlistRecord = {
       email,
       persona:       clip(body.persona, 40),
@@ -143,6 +151,12 @@ export async function POST(req: Request) {
       plan_interest: clip(body.planInterest, 24),
       biggest_pain:  clip(body.biggestPain, 64),
       referrer:      clip(body.referrer, 64),
+      utm_source:    clip(utm.utm_source, 64),
+      utm_medium:    clip(utm.utm_medium, 64),
+      utm_campaign:  clip(utm.utm_campaign, 64),
+      utm_term:      clip(utm.utm_term, 64),
+      utm_content:   clip(utm.utm_content, 64),
+      referred_by:   clip(utm.r, 16),
       referral_code: code,
       ts:            new Date().toISOString(),
     };

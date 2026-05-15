@@ -20,6 +20,12 @@ create table if not exists waitlist (
   plan_interest  text,
   biggest_pain   text,
   referrer       text,
+  utm_source     text,
+  utm_medium     text,
+  utm_campaign   text,
+  utm_term       text,
+  utm_content    text,
+  referred_by    text,
   referral_code  text not null,
   ts             timestamptz not null default now()
 );

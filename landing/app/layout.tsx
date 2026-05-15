@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -192,7 +193,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        {children}
+        {/* Privacy-safe analytics: no cookies, no PII. Disabled at build time
+            if NEXT_PUBLIC_ANALYTICS_DISABLED=1. See WAITLIST_SETUP.md. */}
+        {process.env.NEXT_PUBLIC_ANALYTICS_DISABLED !== "1" && <Analytics />}
+      </body>
     </html>
   );
 }

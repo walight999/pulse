@@ -5,9 +5,11 @@ import { useState } from "react";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main id="main" className="min-h-screen bg-black text-white">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-mint-500 focus:text-white focus:font-bold focus:px-4 focus:py-2 focus:rounded-lg">Skip to content</a>
       <Header />
       <Hero />
+      <TrustStrip />
       <WhatWorksToday />
       <Screenshots />
       <Compare />
@@ -33,7 +35,7 @@ function Header() {
         <div className="hidden md:flex items-center gap-6 text-sm text-zinc-400">
           <Link href="/download" className="hover:text-white">Download</Link>
           <a href="#pricing" className="hover:text-white">Pricing</a>
-          <Link href="/methodology" className="hover:text-white">Methodology</Link>
+          <Link href="/docs" className="hover:text-white">Docs</Link>
           <Link href="/roadmap" className="hover:text-white">Roadmap</Link>
           <a href="https://github.com/walight999/pulse" target="_blank" rel="noopener" className="hover:text-white">GitHub</a>
           <a href="#waitlist" className="bg-mint-500 hover:bg-mint-600 text-white font-semibold px-4 py-2 rounded-lg transition">Get early access</a>
@@ -67,6 +69,7 @@ function Header() {
           <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-3 text-sm text-zinc-300">
             <Link href="/download" onClick={() => setOpen(false)} className="py-2 hover:text-white">Download</Link>
             <a href="#pricing" onClick={() => setOpen(false)} className="py-2 hover:text-white">Pricing</a>
+            <Link href="/docs" onClick={() => setOpen(false)} className="py-2 hover:text-white">Docs</Link>
             <Link href="/methodology" onClick={() => setOpen(false)} className="py-2 hover:text-white">Methodology</Link>
             <Link href="/roadmap" onClick={() => setOpen(false)} className="py-2 hover:text-white">Roadmap</Link>
             <Link href="/changelog" onClick={() => setOpen(false)} className="py-2 hover:text-white">Changelog</Link>
@@ -76,6 +79,30 @@ function Header() {
         </div>
       )}
     </header>
+  );
+}
+
+function TrustStrip() {
+  const items: Array<{ label: string; sub: string }> = [
+    { label: "100% local",         sub: "SQLite on your machine" },
+    { label: "MIT open-source",    sub: "Audit every line" },
+    { label: "No telemetry",       sub: "Off by default" },
+    { label: "1 outbound call",    sub: "Daily FX rate fetch only" },
+    { label: "No account",         sub: "Run without signing in" },
+  ];
+  return (
+    <section aria-label="Trust signals" className="bg-zinc-950/40 border-y border-zinc-900 py-6">
+      <div className="max-w-6xl mx-auto px-6">
+        <ul className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+          {items.map((it, i) => (
+            <li key={i} className="min-w-0">
+              <div className="text-sm font-semibold text-mint-400 tabular-nums">{it.label}</div>
+              <div className="text-xs text-zinc-500 mt-0.5">{it.sub}</div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 
@@ -389,6 +416,19 @@ function Personas() {
       cta: "Request Team early access →",
       ctaHref: "mailto:sales@mintforai.com?subject=pulse%20Team%20early%20access",
     },
+    {
+      title: "Finance & Ops",
+      subtitle: "Reconciliation, forecasting, renewal alerts",
+      jobs: [
+        "Subscription reconciliation against bank exports",
+        "Monthly AI spend report (CSV) for accounting",
+        "Department-level tracking (Team tier, Q3)",
+        "Forecast next month's AI spend",
+        "Renewal alerts 3 days before charge",
+      ],
+      cta: "Read methodology →",
+      ctaHref: "/methodology",
+    },
   ];
   return (
     <section className="bg-zinc-950 border-y border-zinc-900 py-20 md:py-24">
@@ -399,7 +439,7 @@ function Personas() {
             Same dashboard, different jobs-to-be-done. Pick the one closest to you.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
           {cards.map((c, i) => (
             <div key={i} className="rounded-2xl border border-zinc-900 bg-black/40 p-6 hover:border-mint-800 transition flex flex-col">
               <div className="text-lg font-semibold mb-1">{c.title}</div>
@@ -905,6 +945,15 @@ function Waitlist() {
     e.preventDefault();
     setStatus("loading");
     try {
+      // Capture UTM + referral params from the URL so signups can be attributed.
+      const utm: Record<string, string> = {};
+      if (typeof window !== "undefined") {
+        const sp = new URLSearchParams(window.location.search);
+        for (const k of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "r"]) {
+          const v = sp.get(k);
+          if (v) utm[k] = v.slice(0, 64);
+        }
+      }
       const r = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -917,6 +966,7 @@ function Waitlist() {
           planInterest,
           biggestPain,
           referrer: typeof document !== "undefined" ? document.referrer.slice(0, 64) : "",
+          utm,
         }),
       });
       const data = (await r.json().catch(() => ({}))) as { ok?: boolean; referralCode?: string };
@@ -1150,6 +1200,7 @@ function Footer() {
               <li><a href="#features" className="text-zinc-400 hover:text-white">Features</a></li>
               <li><a href="#pricing" className="text-zinc-400 hover:text-white">Pricing</a></li>
               <li><Link href="/download" className="text-zinc-400 hover:text-white">Download</Link></li>
+              <li><Link href="/docs" className="text-zinc-400 hover:text-white">Docs</Link></li>
               <li><Link href="/methodology" className="text-zinc-400 hover:text-white">ROI methodology</Link></li>
               <li><Link href="/roadmap" className="text-zinc-400 hover:text-white">Roadmap</Link></li>
               <li><Link href="/changelog" className="text-zinc-400 hover:text-white">Changelog</Link></li>

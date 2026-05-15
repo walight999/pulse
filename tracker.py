@@ -50,6 +50,18 @@ def _is_blocked(app: str | None) -> bool:
     return app.lower() in parts
 
 
+def _is_allowlisted(app: str | None) -> bool:
+    """Returns True if the allowlist is empty (allow all) or the app is in it.
+    Allowlist takes precedence over blocklist when both are configured."""
+    if not app:
+        return False
+    raw = get_setting("activity_allowlist", "").strip()
+    if not raw:
+        return True  # no allowlist set → everything allowed (then blocklist applies)
+    parts = [p.strip().lower() for p in raw.split(";") if p.strip()]
+    return app.lower() in parts
+
+
 def log(msg: str) -> None:
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     line = f"[{datetime.now().isoformat(timespec='seconds')}] {msg}\n"
@@ -146,8 +158,10 @@ def main():
             user_idle = idle_seconds() > idle_threshold
             app, title = (None, None) if user_idle else get_foreground_app()
 
-            # Respect user's app blocklist (e.g. password manager, finance app, personal email)
-            if app and _is_blocked(app):
+            # Allowlist takes precedence — if set, only listed apps are logged.
+            # Blocklist still applies on top (so you can allow chrome.exe but block specific URLs
+            # via window title patterns elsewhere if you ever extend that).
+            if app and (not _is_allowlisted(app) or _is_blocked(app)):
                 app, title = None, None
 
             # If titles are disabled, never write them — keep the column blank.
