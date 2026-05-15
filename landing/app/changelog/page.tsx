@@ -27,6 +27,80 @@ export default function ChangelogPage() {
         </a>.
       </p>
 
+      <h2 id="v1-7">v1.7 — Multi-provider wiring + Ask pulse (2026-05-15)</h2>
+      <p>
+        Stop letting v1.1 scaffolding sit on disk. OpenAI + Cursor parsers were written months ago but
+        never wired into the sync loop; Copilot + Gemini + the assistant tools were stubs returning
+        <code>NotImplementedError</code>. This release ships them as real code so the integration matrix on
+        this site stops describing aspirations and starts describing what runs.
+      </p>
+      <h3>Added — multi-provider sync</h3>
+      <ul>
+        <li>
+          <strong>OpenAI <code>/v1/usage</code> sync</strong> — pulse pulls last-30-day GPT-5 / GPT-4o / o-series usage
+          from your account when you paste an API key. Real pricing math from the public rate table; cache
+          reads accounted for separately.
+        </li>
+        <li>
+          <strong>Cursor IDE local parser</strong> — read-only scan of Cursor's <code>state.vscdb</code> on Windows /
+          macOS / Linux. Approximate token counts from message char length; provider tagged as <code>cursor</code>.
+        </li>
+        <li>
+          <strong>GitHub Copilot org-level sync</strong> — for org admins. Daily suggestions-made /
+          suggestions-accepted / chat-turn counts via <code>/orgs/&lt;org&gt;/copilot/usage</code>, used to compute
+          cost-per-accepted-suggestion against the flat seat price.
+        </li>
+        <li>
+          <strong>Gemini API key validation</strong> — single test call confirms the key works. Google AI Studio
+          has no retrospective usage endpoint, so the parser inserts no historical rows and tells you to
+          install the browser extension for going-forward capture (honest, not aspirational).
+        </li>
+        <li>
+          All four wired into <code>sync_all()</code> so they run automatically in the 6-hour background loop
+          alongside the existing Claude Code log scan.
+        </li>
+      </ul>
+      <h3>Added — Ask pulse assistant</h3>
+      <ul>
+        <li>
+          <strong>New <em>Ask pulse</em> sidebar nav item.</strong> Natural-language Q&A against your local data,
+          powered by Anthropic Messages API + tool-use. User pastes their own Anthropic key in Settings;
+          pulse calls Anthropic directly, never proxies through a pulse server.
+        </li>
+        <li>
+          5 tool functions implemented in <code>assistant/tools.py</code>: <code>query_subscriptions</code>,
+          <code>query_token_usage</code>, <code>compute_savings</code>, <code>predict_monthly_total</code>,
+          <code>activity_summary</code>. All run read-only SQL against local SQLite — no writes, no uploads.
+        </li>
+        <li>
+          Multi-turn chat history persisted in session_state with a "Clear conversation" reset. Quick-action
+          buttons for the 3 most common questions (top subscriptions, AI spend last 30d, EOM forecast).
+          Tool-call log surfaced in an expander so you can see exactly what Claude queried.
+        </li>
+        <li>
+          Up to 4 tool-use round-trips per question to keep cost bounded. System prompt instructs Claude
+          to cite specific numbers from tool output rather than guessing.
+        </li>
+      </ul>
+      <h3>Added — Settings → Provider API keys</h3>
+      <ul>
+        <li>Anthropic API key field repurposed to power Ask pulse (in addition to Admin sync).</li>
+        <li>GitHub Copilot org PAT + org slug fields added for Copilot sync.</li>
+        <li>Mistral field tagged as planned (parser still pending Q3).</li>
+      </ul>
+      <h3>Changed — website</h3>
+      <ul>
+        <li>
+          Integration matrix on <code>/</code>: 7 rows now <strong>Available now</strong> (Claude Code, Anthropic
+          Admin API, OpenAI API, Cursor, Copilot org, browser extension, Ask pulse), 1 Coming Q3 (ChatGPT
+          Plus export), 2 Planned (Gemini retrospective — Google API limitation, Mistral).
+        </li>
+        <li>
+          <code>/roadmap</code> "Now" column expanded from 12 to 17 items. "Next" column slimmed to ship-able
+          Q3 work only (cloud sync, mobile PWA, ChatGPT Plus export, Mistral, leaderboard, Stripe).
+        </li>
+      </ul>
+
       <h2 id="v1-6">v1.6 — Website audit + privacy plumbing (2026-05-15)</h2>
       <p>
         Five-phase audit of the website and end-to-end privacy plumbing. Site shipped from "explains

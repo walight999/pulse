@@ -333,10 +333,123 @@ def get_sync_status() -> list[dict]:
     ]
 
 
+def sync_openai(verbose: bool = False) -> dict:
+    """Pull OpenAI API usage via /v1/usage. Requires `openai_api_key` setting (sk-...)."""
+    try:
+        from db import get_setting
+        api_key = (get_setting("openai_api_key", "") or "").strip()
+    except Exception:
+        api_key = ""
+
+    if not api_key or not api_key.startswith("sk-"):
+        return {"source": "openai_api", "rows_added": 0,
+                "note": "openai_api_key not set in Settings → Provider API keys"}
+
+    try:
+        from providers.openai_parser import sync_from_api as _openai_sync
+    except Exception as e:
+        return {"source": "openai_api", "rows_added": 0, "note": f"import error: {e}"}
+
+    try:
+        rows = _openai_sync(api_key)
+    except Exception as e:
+        return {"source": "openai_api", "rows_added": 0, "note": f"fetch error: {e}"}
+
+    conn = init_db()
+    n = insert_rows(conn, rows)
+    record_sync("openai_api", n, note=f"fetched {len(rows)} day-model buckets")
+    if verbose:
+        print(f"  + {n} OpenAI usage rows (from {len(rows)} fetched)")
+    return {"source": "openai_api", "rows_added": n, "fetched": len(rows)}
+
+
+def sync_cursor(verbose: bool = False) -> dict:
+    """Read Cursor IDE's local state DB and import chat-session usage rows."""
+    try:
+        from providers.cursor_parser import sync as _cursor_sync, is_cursor_installed
+    except Exception as e:
+        return {"source": "cursor_local", "rows_added": 0, "note": f"import error: {e}"}
+
+    if not is_cursor_installed():
+        return {"source": "cursor_local", "rows_added": 0,
+                "note": "Cursor not installed (no state.vscdb found)"}
+
+    try:
+        rows = _cursor_sync()
+    except Exception as e:
+        return {"source": "cursor_local", "rows_added": 0, "note": f"parse error: {e}"}
+
+    conn = init_db()
+    n = insert_rows(conn, rows)
+    record_sync("cursor_local", n, note=f"fetched {len(rows)} messages")
+    if verbose:
+        print(f"  + {n} Cursor rows (from {len(rows)} fetched)")
+    return {"source": "cursor_local", "rows_added": n, "fetched": len(rows)}
+
+
+def sync_copilot(verbose: bool = False) -> dict:
+    """Pull GitHub Copilot org-level usage. Requires `copilot_github_token` + `copilot_org` settings."""
+    try:
+        from db import get_setting
+        token = (get_setting("copilot_github_token", "") or "").strip()
+        org   = (get_setting("copilot_org", "") or "").strip()
+    except Exception:
+        return {"source": "copilot_api", "rows_added": 0, "note": "settings read failed"}
+
+    if not token or not org:
+        return {"source": "copilot_api", "rows_added": 0,
+                "note": "copilot_github_token + copilot_org not set (Settings → Provider API keys)"}
+
+    try:
+        from providers.copilot_parser import sync_from_github_api as _copilot_sync
+    except Exception as e:
+        return {"source": "copilot_api", "rows_added": 0, "note": f"import error: {e}"}
+
+    try:
+        rows = _copilot_sync(token, org=org)
+    except Exception as e:
+        return {"source": "copilot_api", "rows_added": 0, "note": f"fetch error: {e}"}
+
+    conn = init_db()
+    n = insert_rows(conn, rows)
+    record_sync("copilot_api", n, note=f"fetched {len(rows)} day-buckets")
+    if verbose:
+        print(f"  + {n} Copilot rows (from {len(rows)} fetched)")
+    return {"source": "copilot_api", "rows_added": n, "fetched": len(rows)}
+
+
+def sync_gemini(verbose: bool = False) -> dict:
+    """Validate Gemini API key. Google AI Studio doesn't expose retrospective usage —
+    pulse tracks Gemini going forward via the browser extension (if installed)."""
+    try:
+        from db import get_setting
+        api_key = (get_setting("gemini_api_key", "") or "").strip()
+    except Exception:
+        api_key = ""
+
+    if not api_key:
+        return {"source": "gemini_api", "rows_added": 0,
+                "note": "gemini_api_key not set"}
+
+    try:
+        from providers.gemini_parser import validate_api_key as _gemini_validate
+        ok = _gemini_validate(api_key)
+    except Exception as e:
+        return {"source": "gemini_api", "rows_added": 0, "note": f"validate error: {e}"}
+
+    note = "key validated; Google AI Studio has no retrospective usage API — install the browser extension to capture Gemini sessions going forward" if ok else "key invalid"
+    record_sync("gemini_api", 0, note=note)
+    return {"source": "gemini_api", "rows_added": 0, "note": note}
+
+
 def sync_all(verbose: bool = False) -> list[dict]:
     return [
         sync_claude_code_logs(verbose=verbose),
         sync_anthropic_admin(verbose=verbose),
+        sync_openai(verbose=verbose),
+        sync_cursor(verbose=verbose),
+        sync_copilot(verbose=verbose),
+        sync_gemini(verbose=verbose),
     ]
 
 

@@ -1946,20 +1946,21 @@ def _seed_demo_subscriptions() -> int:
         from datetime import date
         today = date.today().isoformat()
         demo_rows = [
-            ("Demo: Claude Max",   200.0, "USD", "monthly", today, "Anthropic",       1),
-            ("Demo: ChatGPT Plus",  20.0, "USD", "monthly", today, "OpenAI",          1),
-            ("Demo: Cursor Pro",    20.0, "USD", "monthly", today, "Cursor",          1),
-            ("Demo: GitHub Copilot",10.0, "USD", "monthly", today, "GitHub",          1),
+            # (name, cost, currency, billing_cycle, linked_process, tag, active)
+            ("Demo: Claude Max",    200.0, "USD", "monthly", "Claude.exe",  "ai",  1),
+            ("Demo: ChatGPT Plus",   20.0, "USD", "monthly", "chrome.exe",  "ai",  1),
+            ("Demo: Cursor Pro",     20.0, "USD", "monthly", "Cursor.exe",  "ai",  1),
+            ("Demo: GitHub Copilot", 10.0, "USD", "monthly", "code.exe",    "ai",  1),
         ]
-        for name, price, currency, cycle, started, vendor, active in demo_rows:
+        for name, cost, currency, cycle, linked, tag, active in demo_rows:
             try:
                 conn.execute(
-                    "INSERT INTO subscriptions (name, price, currency, billing_cycle, "
-                    "started_on, vendor, active) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    (name, price, currency, cycle, started, vendor, active),
+                    "INSERT INTO subscriptions (name, cost, currency, billing_cycle, "
+                    "linked_process, tag, active) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (name, cost, currency, cycle, linked, tag, active),
                 )
             except Exception:
-                # Schema mismatch (older columns) — bail rather than half-seed
+                # Schema mismatch — bail rather than half-seed
                 conn.rollback()
                 return 0
         conn.commit()
@@ -2155,7 +2156,7 @@ with st.sidebar:
     if "page" not in st.session_state:
         st.session_state["page"] = "Overview"
 
-    nav_items = ["Overview", "Subscriptions", "Activity", "AI usage"]
+    nav_items = ["Overview", "Subscriptions", "Activity", "AI usage", "Ask pulse"]
     for label in nav_items:
         is_active = st.session_state["page"] == label
         if st.button(
@@ -4180,6 +4181,182 @@ def render_pulse_pro_section():
             st.rerun()
 
 
+def render_assistant():
+    """Natural-language Q&A over local pulse data via Anthropic + tool-use.
+
+    Requires `anthropic_api_key` setting (user-provided). Every request and
+    response stays between the user's machine and Anthropic — pulse itself
+    has no cloud component.
+    """
+    import json as _json
+    import urllib.request, urllib.error
+    from assistant.tools import TOOLS_SCHEMA, execute_tool
+
+    page_header("Ask pulse", "Natural-language queries over your local data — Claude-powered, your API key, no pulse cloud.")
+
+    api_key = (get_setting("anthropic_api_key", "") or "").strip()
+    if not api_key:
+        st.warning(
+            "**Set your Anthropic API key first.** Ask pulse uses your own key to call Claude — "
+            "pulse never proxies the request through a server. Set it in **Settings → Provider API keys** "
+            "(field labelled *Anthropic API key*)."
+        )
+        if st.button("Open Settings", key="ask_open_settings"):
+            st.session_state["page"] = "Settings"
+            st.rerun()
+        return
+
+    model = get_setting("assistant_model", "claude-sonnet-4-6").strip() or "claude-sonnet-4-6"
+
+    if "assistant_history" not in st.session_state:
+        st.session_state["assistant_history"] = []
+    history = st.session_state["assistant_history"]
+
+    # ── render past turns ──────────────────────────────────────
+    for turn in history:
+        with st.chat_message(turn["role"]):
+            st.markdown(turn["display"])
+
+    # ── input ──────────────────────────────────────────────────
+    suggestions = [
+        "What are my most expensive subscriptions this month?",
+        "How much did I spend on Claude tokens last week?",
+        "If I cancel ChatGPT Plus, how much would I save per year?",
+        "Project my end-of-month AI bill at current pace",
+        "Which app did I spend the most foreground time in this week?",
+    ]
+    if not history:
+        st.caption("Examples: " + " · ".join(f"_{s}_" for s in suggestions[:3]))
+
+    user_msg = st.chat_input("Ask anything about your pulse data…")
+    if not user_msg:
+        # Quick-action buttons for common questions
+        cc1, cc2, cc3 = st.columns(3)
+        with cc1:
+            if st.button("Top subscriptions", key="ask_quick_subs", use_container_width=True):
+                user_msg = "Show me my top 5 most expensive active subscriptions."
+        with cc2:
+            if st.button("AI spend (30d)", key="ask_quick_ai", use_container_width=True):
+                user_msg = "How much have I spent on AI tokens in the last 30 days, grouped by provider?"
+        with cc3:
+            if st.button("EOM forecast", key="ask_quick_forecast", use_container_width=True):
+                user_msg = "Forecast my end-of-month AI spend at the current pace."
+
+    if not user_msg:
+        return
+
+    # Append user message to history (display only — we rebuild the API messages list below)
+    history.append({"role": "user", "display": user_msg, "content": user_msg})
+    with st.chat_message("user"):
+        st.markdown(user_msg)
+
+    # ── build Anthropic messages list from history ─────────────
+    # The assistant supports multi-turn but we keep it simple: send the running
+    # user/assistant transcript (display-only text), not tool-use scaffolding from
+    # prior turns. Each new turn re-runs tool calls fresh.
+    messages: list[dict] = []
+    for turn in history:
+        if turn["role"] == "user":
+            messages.append({"role": "user", "content": turn["content"]})
+        elif turn["role"] == "assistant" and "content" in turn:
+            messages.append({"role": "assistant", "content": turn["content"]})
+
+    system_prompt = (
+        "You are 'Ask pulse', an analytics assistant embedded in the user's local pulse dashboard. "
+        "You have read-only tools to query their subscriptions, AI token usage, foreground app activity, "
+        "and to compute hypothetical savings. The data is on the user's machine; never claim it was "
+        "uploaded. Always cite specific numbers (cost, hours, percentages) from the tools — don't guess. "
+        "Format answers as short markdown with bullet points when listing things, and a one-sentence TL;DR "
+        "at the top. Today's date is " + datetime.now().strftime("%Y-%m-%d") + "."
+    )
+
+    def _call_anthropic(msgs: list[dict]) -> dict:
+        payload = {
+            "model": model,
+            "max_tokens": 2048,
+            "system": system_prompt,
+            "tools": TOOLS_SCHEMA,
+            "messages": msgs,
+        }
+        body = _json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            "https://api.anthropic.com/v1/messages",
+            data=body,
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+                "User-Agent": "pulse/1.6 (Ask pulse)",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            return _json.loads(resp.read().decode("utf-8"))
+
+    final_text_parts: list[str] = []
+    tool_log: list[str] = []
+    placeholder = st.chat_message("assistant").empty()
+    placeholder.markdown("_Thinking…_")
+
+    try:
+        # Tool-use loop — up to 4 round-trips to avoid runaway costs
+        for _ in range(4):
+            resp = _call_anthropic(messages)
+            content_blocks = resp.get("content", [])
+            stop_reason = resp.get("stop_reason", "end_turn")
+
+            # Append assistant turn to messages so Claude has its own prior context
+            messages.append({"role": "assistant", "content": content_blocks})
+
+            if stop_reason != "tool_use":
+                for block in content_blocks:
+                    if block.get("type") == "text":
+                        final_text_parts.append(block.get("text", ""))
+                break
+
+            # Collect tool_use blocks, run them, append a single user turn with tool_results
+            tool_results = []
+            for block in content_blocks:
+                if block.get("type") != "tool_use":
+                    continue
+                tname = block.get("name", "")
+                targs = block.get("input", {}) or {}
+                result = execute_tool(tname, targs)
+                tool_log.append(f"`{tname}({_json.dumps(targs, default=str)})` → {len(_json.dumps(result, default=str))} chars")
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": block.get("id"),
+                    "content": _json.dumps(result, default=str),
+                })
+            messages.append({"role": "user", "content": tool_results})
+
+        answer = "\n".join(final_text_parts).strip() or "_(no text response)_"
+
+        display = answer
+        if tool_log:
+            display += "\n\n<details><summary><em>Tool calls used ({n})</em></summary>\n\n".replace("{n}", str(len(tool_log)))
+            for line in tool_log:
+                display += f"- {line}\n"
+            display += "</details>"
+
+        placeholder.markdown(display, unsafe_allow_html=True)
+        history.append({"role": "assistant", "display": display, "content": answer})
+
+    except urllib.error.HTTPError as e:
+        err = e.read().decode("utf-8", errors="replace")[:400] if hasattr(e, "read") else str(e)
+        placeholder.error(f"Anthropic API error {e.code}: {err}")
+        history.append({"role": "assistant", "display": f"_API error {e.code}_", "content": ""})
+    except Exception as e:
+        placeholder.error(f"Failed: {e}")
+        history.append({"role": "assistant", "display": f"_Failed: {e}_", "content": ""})
+
+    # Reset button at the very bottom — outside the conversation so it doesn't compete for attention
+    if history:
+        if st.button("Clear conversation", key="ask_clear_history"):
+            st.session_state["assistant_history"] = []
+            st.rerun()
+
+
 def render_settings():
     page_header("Settings", f"{APP_NAME} · v1.0 · Local-first, private by design")
 
@@ -4517,29 +4694,44 @@ def _render_settings_preferences():
                 value=get_setting("gemini_api_key", ""),
                 type="password",
                 placeholder="AIza...",
-                help="Get from https://aistudio.google.com/app/apikey",
-            )
-        with k2:
-            new_mistral_key = st.text_input(
-                "Mistral key",
-                value=get_setting("mistral_api_key", ""),
-                type="password",
-                placeholder="...",
-                help="Get from https://console.mistral.ai/api-keys",
+                help="Get from https://aistudio.google.com/app/apikey. Validates the key; Google has no retrospective usage API (use the browser extension to capture going-forward Gemini sessions).",
             )
             new_anth_key = st.text_input(
-                "Anthropic API key (optional)",
+                "Anthropic API key (for Ask pulse + Admin API)",
                 value=get_setting("anthropic_api_key", ""),
                 type="password",
                 placeholder="sk-ant-...",
-                help="Only needed for cross-machine Claude tracking. Local logs work without it.",
+                help="Used by the Ask pulse assistant and (optionally) Admin API sync. Local Claude Code logs work without it.",
+            )
+        with k2:
+            new_mistral_key = st.text_input(
+                "Mistral key (planned)",
+                value=get_setting("mistral_api_key", ""),
+                type="password",
+                placeholder="...",
+                help="Get from https://console.mistral.ai/api-keys. Parser planned for Q3 2026.",
+            )
+            new_copilot_pat = st.text_input(
+                "GitHub Copilot org PAT",
+                value=get_setting("copilot_github_token", ""),
+                type="password",
+                placeholder="ghp_...",
+                help="Personal access token with `manage_billing:copilot` scope. Org admins only — pulls /orgs/<org>/copilot/usage daily metrics.",
+            )
+            new_copilot_org = st.text_input(
+                "GitHub Copilot org slug",
+                value=get_setting("copilot_org", ""),
+                placeholder="my-company",
+                help="Your GitHub organization slug (visible in the URL: github.com/<slug>).",
             )
         if st.form_submit_button("Save API keys", type="primary"):
             for key, val in [
-                ("openai_api_key",    new_openai_key),
-                ("gemini_api_key",    new_gemini_key),
-                ("mistral_api_key",   new_mistral_key),
-                ("anthropic_api_key", new_anth_key),
+                ("openai_api_key",       new_openai_key),
+                ("gemini_api_key",       new_gemini_key),
+                ("mistral_api_key",      new_mistral_key),
+                ("anthropic_api_key",    new_anth_key),
+                ("copilot_github_token", new_copilot_pat),
+                ("copilot_org",          new_copilot_org),
             ]:
                 set_setting(key, val.strip())
             st.toast("API keys saved locally", icon=":material/check_circle:")
@@ -5592,6 +5784,7 @@ PAGE_RENDERERS = {
     "Subscriptions": render_subscriptions,
     "Activity":      render_apps,
     "AI usage":      render_tokens,
+    "Ask pulse":     render_assistant,
     "Settings":      render_settings,
 }
 

@@ -474,14 +474,16 @@ function Personas() {
 function Integrations() {
   type Status = "available" | "coming-q3" | "coming-q4" | "planned";
   const rows: Array<{ provider: string; status: Status; source: string; accuracy: string; notes: string }> = [
-    { provider: "Claude Code",         status: "available", source: "Local ~/.claude/projects/*.jsonl",        accuracy: "Exact",     notes: "Local parser, no API key" },
-    { provider: "Anthropic Admin API", status: "coming-q3", source: "Admin API key (user-provided)",            accuracy: "Exact",     notes: "For team-level attribution" },
-    { provider: "OpenAI API",          status: "coming-q3", source: "Admin API / usage export",                 accuracy: "Exact",     notes: "Requires user-provided API key" },
-    { provider: "ChatGPT Plus",        status: "coming-q3", source: "Settings → Export your data",              accuracy: "Estimate",  notes: "Flat plan — message counts only" },
-    { provider: "Cursor",              status: "coming-q3", source: "Local state DB + dashboard session",       accuracy: "Estimate",  notes: "Needs session cookie from devtools" },
-    { provider: "Google Gemini",       status: "planned",   source: "AI Studio + app export",                   accuracy: "TBD",       notes: "Export format under review" },
-    { provider: "GitHub Copilot",      status: "planned",   source: "Audit log export (Business / Enterprise)", accuracy: "Estimate",  notes: "Flat plan, per-seat attribution only" },
-    { provider: "Browser extension",   status: "coming-q4", source: "Web session capture (opt-in)",             accuracy: "Estimate",  notes: "Captures usage on chat.openai.com, claude.ai, etc." },
+    { provider: "Claude Code",          status: "available", source: "Local ~/.claude/projects/*.jsonl",            accuracy: "Exact",     notes: "Local parser, no API key" },
+    { provider: "Anthropic Admin API",  status: "available", source: "Admin API key (user-provided)",                accuracy: "Exact",     notes: "Set ANTHROPIC_ADMIN_KEY env var" },
+    { provider: "OpenAI API",           status: "available", source: "/v1/usage via user-provided key",              accuracy: "Exact",     notes: "GPT-5 / GPT-4o / o-series pricing live" },
+    { provider: "Cursor",               status: "available", source: "Local state.vscdb (read-only)",                accuracy: "Estimate",  notes: "Token counts approximated from message chars" },
+    { provider: "GitHub Copilot (org)", status: "available", source: "GitHub /orgs/<org>/copilot/usage",             accuracy: "Exact*",    notes: "*Org admin PAT required" },
+    { provider: "Browser extension",    status: "available", source: "Manifest V3 web capture (opt-in)",             accuracy: "Estimate",  notes: "ChatGPT / Claude.ai / Gemini / Perplexity" },
+    { provider: "Ask pulse assistant",  status: "available", source: "Anthropic Messages API + local SQL tools",     accuracy: "Exact",     notes: "Your API key; read-only queries on local data" },
+    { provider: "ChatGPT Plus export",  status: "coming-q3", source: "Settings → Data Controls → Export",            accuracy: "Estimate",  notes: "Flat plan — message counts only" },
+    { provider: "Google Gemini",        status: "planned",   source: "Google has no retrospective usage API",        accuracy: "—",         notes: "Use browser extension for going-forward capture" },
+    { provider: "Mistral",              status: "planned",   source: "API usage endpoint",                           accuracy: "TBD",       notes: "Parser planned Q3 2026" },
   ];
   const badge = (s: Status) => {
     if (s === "available")   return <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-mint-900/40 text-mint-400 border border-mint-800/50">Available now</span>;
