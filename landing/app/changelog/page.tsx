@@ -27,6 +27,88 @@ export default function ChangelogPage() {
         </a>.
       </p>
 
+      <h2 id="v1-8">v1.8 — Cloud server runnable + PWA + ChatGPT export + macOS CI (2026-05-15)</h2>
+      <p>
+        Closing the remaining infra gaps. The cloud server is now bootable in one command, the
+        landing is a real PWA with offline support, ChatGPT Plus exports import into the dashboard
+        with a drag-and-drop ZIP, and a GitHub Actions workflow produces an unsigned macOS build on
+        every push to <code>main</code>.
+      </p>
+      <h3>Added — runnable cloud server</h3>
+      <ul>
+        <li>
+          <code>python -m api.server --dev --port 8000</code> boots the FastAPI server in dev mode
+          (JWT signature verification bypassed; user_id derived from token sha1). Without <code>--dev</code>,
+          the server requires <code>SUPABASE_JWT_SECRET</code> and verifies every request.
+        </li>
+        <li>
+          Real HS256 JWT verification path — uses PyJWT if installed, falls back to a hand-rolled HMAC
+          verifier so a basic Supabase Pro setup works with zero extra dependencies.
+        </li>
+        <li>
+          New <code>/healthz</code> endpoint reports dev_mode + supabase_configured flags — picked up
+          automatically by Fly.io / Render / Railway health checks.
+        </li>
+        <li>
+          <strong>New <code>CLOUD_DEPLOY.md</code></strong> — step-by-step Supabase + Fly.io deploy (with fly.toml, Dockerfile.api, fly secrets set commands), alternative platform comparison table, env-var reference, cost-at-scale table.
+        </li>
+        <li>
+          9 new pytest cases (<code>tests/test_api_server.py</code>) covering health, unauthenticated rejection, dev-mode bypass, and every <code>/v1/*</code> endpoint shape. Total tests: 51 → 60.
+        </li>
+      </ul>
+      <h3>Added — PWA with offline support</h3>
+      <ul>
+        <li>
+          <code>landing/public/sw.js</code> — service worker with 4 strategies: network-first for
+          <code>/</code>, stale-while-revalidate for content subpages, cache-first for hashed Next
+          static + brand assets, no caching for <code>/api/*</code>. Precaches the 11 main routes on
+          install. Old caches evicted on activate.
+        </li>
+        <li>
+          <strong>New <code>/offline</code> route</strong> — fallback page when the network is down
+          and the user navigates to a non-cached page. Reminds the user the pulse desktop app keeps
+          working without the network. Lists which pages are cached.
+        </li>
+        <li>
+          Service worker registered from <code>layout.tsx</code> on HTTPS only (skipped in dev). Manifest
+          already existed; bumping <code>CACHE_VERSION</code> in <code>sw.js</code> evicts stale assets after
+          deploys.
+        </li>
+      </ul>
+      <h3>Added — ChatGPT Plus export import</h3>
+      <ul>
+        <li>
+          <code>sync_chatgpt_export(zip_path)</code> in <code>sync_tokens.py</code> wires the existing
+          <code>parse_export_archive()</code> from <code>providers/openai_parser.py</code> into the standard
+          insert pipeline. Inserts approximate token counts (1 token ≈ 4 chars) since ChatGPT exports
+          don't ship token counts.
+        </li>
+        <li>
+          Settings → Integrations → "ChatGPT Plus / Pro export importer" file-uploader. Drop the ZIP,
+          pulse parses it server-side in a temp file, deletes the temp on success/failure, shows the
+          count of imported messages.
+        </li>
+        <li>
+          Integration matrix on <code>/</code>: ChatGPT Plus export moves from <em>Coming Q3 2026</em>
+          to <em>Available now</em>.
+        </li>
+      </ul>
+      <h3>Added — macOS GitHub Actions</h3>
+      <ul>
+        <li>
+          <code>.github/workflows/build-macos.yml</code> — runs on every push to <code>main</code> that
+          touches Python or build scripts. Produces an unsigned <code>.app</code> + <code>.zip</code> as
+          a workflow artifact (14-day retention). Includes a GITHUB_STEP_SUMMARY explaining how to bypass
+          Gatekeeper for unsigned builds.
+        </li>
+        <li>
+          <code>release.yml</code> macOS job ungated. Was previously hidden behind an
+          <code>APPLE_BUILD_ENABLED</code> secret; now runs on every release tag and attaches the
+          macOS zip to the GitHub Release alongside the Windows installer. Signs only if
+          <code>APPLE_DEVELOPER_ID</code> secret is set; ships unsigned otherwise.
+        </li>
+      </ul>
+
       <h2 id="v1-7">v1.7 — Multi-provider wiring + Ask pulse (2026-05-15)</h2>
       <p>
         Stop letting v1.1 scaffolding sit on disk. OpenAI + Cursor parsers were written months ago but

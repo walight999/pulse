@@ -198,6 +198,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Privacy-safe analytics: no cookies, no PII. Disabled at build time
             if NEXT_PUBLIC_ANALYTICS_DISABLED=1. See WAITLIST_SETUP.md. */}
         {process.env.NEXT_PUBLIC_ANALYTICS_DISABLED !== "1" && <Analytics />}
+        {/* Service worker registration. Caches /demo /docs /methodology / etc.
+            so the site keeps working offline. Skipped in dev mode and in browsers
+            without SW support. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+                window.addEventListener('load', function () {
+                  navigator.serviceWorker.register('/sw.js').catch(function(){});
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

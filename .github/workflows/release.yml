@@ -165,12 +165,9 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.tag.outputs.ref }}" >> $GITHUB_STEP_SUMMARY
 
-  # Optional: trigger macOS build once Apple Developer cert is set up.
-  # Currently gated — runs only when secret APPLE_BUILD_ENABLED is set to "1".
   build-macos:
     name: Build macOS .app
     runs-on: macos-latest
-    if: ${{ secrets.APPLE_BUILD_ENABLED == '1' }}
     needs: [build-windows]
     steps:
       - uses: actions/checkout@v4
@@ -178,16 +175,33 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
-      - run: |
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller pillow rumps
+
+      - name: Run tests
+        run: pytest -q tests/
+
+      - name: Build .app (unsigned by default; signs only if APPLE_DEVELOPER_ID secret is set)
+        run: |
           chmod +x scripts/build_macos.sh
           ./scripts/build_macos.sh
         env:
           APPLE_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload .zip artifact
+        uses: actions/upload-artifact@v4
         with:
           name: pulse-macos
           path: dist/pulse-macos-*.zip
           retention-days: 90
+
+      - name: Attach to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.build-windows.outputs.ref || github.ref_name }}
+          files: dist/pulse-macos-*.zip
+          fail_on_unmatched_files: false

@@ -418,6 +418,43 @@ def sync_copilot(verbose: bool = False) -> dict:
     return {"source": "copilot_api", "rows_added": n, "fetched": len(rows)}
 
 
+def sync_chatgpt_export(zip_or_dir_path: str | Path, verbose: bool = False) -> dict:
+    """Parse a ChatGPT 'Export Data' archive and insert message-count rows into token_usage.
+
+    Path to the ZIP (or the unzipped folder) is passed in by the dashboard's file-uploader.
+    Token counts are approximated from message character length (1 token ≈ 4 chars) since
+    ChatGPT exports don't include token counts. Use the OpenAI API sync for exact figures.
+    """
+    try:
+        from providers.openai_parser import parse_export_archive
+    except Exception as e:
+        return {"source": "chatgpt_export", "rows_added": 0, "note": f"import error: {e}"}
+
+    target = Path(zip_or_dir_path) if not isinstance(zip_or_dir_path, Path) else zip_or_dir_path
+    if not target.exists():
+        return {"source": "chatgpt_export", "rows_added": 0,
+                "note": f"path not found: {target}"}
+
+    rows: list[dict] = []
+    try:
+        for row in parse_export_archive(target):
+            rows.append(row)
+    except Exception as e:
+        return {"source": "chatgpt_export", "rows_added": 0, "note": f"parse error: {e}"}
+
+    if not rows:
+        return {"source": "chatgpt_export", "rows_added": 0,
+                "note": "no assistant messages found in export"}
+
+    conn = init_db()
+    n = insert_rows(conn, rows)
+    record_sync("chatgpt_export", n,
+                note=f"parsed {len(rows)} messages from {target.name}")
+    if verbose:
+        print(f"  + {n} ChatGPT export rows (from {len(rows)} parsed)")
+    return {"source": "chatgpt_export", "rows_added": n, "fetched": len(rows)}
+
+
 def sync_gemini(verbose: bool = False) -> dict:
     """Validate Gemini API key. Google AI Studio doesn't expose retrospective usage —
     pulse tracks Gemini going forward via the browser extension (if installed)."""

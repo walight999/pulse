@@ -51,14 +51,78 @@ app.add_middleware(
 )
 
 
+import os
+
+# Dev mode bypasses JWT signature verification — only honored when
+# PULSE_API_DEV_MODE=1 is set in the environment. Production deployments
+# verify Supabase JWTs via JWKS or the shared SUPABASE_JWT_SECRET.
+PULSE_API_DEV_MODE = os.environ.get("PULSE_API_DEV_MODE", "") == "1"
+SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET", "")
+
+
+def _verify_supabase_jwt(token: str) -> dict:
+    """Verify a Supabase-issued JWT. Requires SUPABASE_JWT_SECRET env var.
+
+    Falls back to the dev bypass if SUPABASE_JWT_SECRET is not set AND
+    PULSE_API_DEV_MODE=1 — letting a developer hack on the API without
+    standing up a Supabase project first.
+    """
+    if not SUPABASE_JWT_SECRET:
+        if PULSE_API_DEV_MODE:
+            # Accept any non-empty token, derive user_id from a sha1 of it.
+            import hashlib
+            uid = hashlib.sha1(token.encode("utf-8")).hexdigest()[:16]
+            return {"user_id": f"dev-{uid}", "token": token, "dev_mode": True}
+        raise HTTPException(
+            status_code=500,
+            detail="SUPABASE_JWT_SECRET not configured (or set PULSE_API_DEV_MODE=1 for dev)",
+        )
+
+    # Real verification via PyJWT if available, otherwise hand-rolled HMAC.
+    try:
+        import jwt  # PyJWT
+        payload = jwt.decode(
+            token,
+            SUPABASE_JWT_SECRET,
+            algorithms=["HS256"],
+            audience=os.environ.get("SUPABASE_JWT_AUDIENCE", "authenticated"),
+        )
+        return {"user_id": payload.get("sub", ""), "token": token, "claims": payload}
+    except ImportError:
+        # Fallback: manual HMAC verify (good enough for HS256, the Supabase default)
+        return _verify_hs256_manual(token, SUPABASE_JWT_SECRET)
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"invalid_token: {e}")
+
+
+def _verify_hs256_manual(token: str, secret: str) -> dict:
+    import base64, hmac, hashlib, json as _json
+    try:
+        header_b64, payload_b64, sig_b64 = token.split(".")
+    except ValueError:
+        raise HTTPException(status_code=401, detail="malformed_token")
+
+    def _b64decode(s: str) -> bytes:
+        s = s + "=" * (-len(s) % 4)
+        return base64.urlsafe_b64decode(s)
+
+    signing_input = f"{header_b64}.{payload_b64}".encode("ascii")
+    expected_sig = hmac.new(secret.encode("utf-8"), signing_input, hashlib.sha256).digest()
+    if not hmac.compare_digest(_b64decode(sig_b64), expected_sig):
+        raise HTTPException(status_code=401, detail="invalid_signature")
+
+    payload = _json.loads(_b64decode(payload_b64))
+    exp = payload.get("exp", 0)
+    if exp and exp < datetime.now(timezone.utc).timestamp():
+        raise HTTPException(status_code=401, detail="token_expired")
+    return {"user_id": payload.get("sub", ""), "token": token, "claims": payload}
+
+
 def _require_auth(authorization: Optional[str]) -> dict:
-    """Verify Supabase JWT. For local dev, accept any header.
-    Production deployment must verify via Supabase JWKS."""
+    """Verify Supabase JWT (or accept any bearer in dev mode)."""
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="missing_bearer_token")
-    token = authorization[7:]
-    # TODO: verify against SUPABASE_JWT_SECRET or JWKS
-    return {"user_id": "local-dev", "token": token}
+    return _verify_supabase_jwt(authorization[7:])
 
 
 @app.get("/v1/me")
@@ -160,9 +224,65 @@ def health() -> dict:
             "ts": datetime.now(timezone.utc).isoformat()}
 
 
+@app.get("/healthz")
+def healthz() -> dict:
+    """Kubernetes-style health check — same as /health but with /z suffix
+    so platforms like Fly.io / Render / Railway recognize it automatically."""
+    return {
+        "status": "ok",
+        "service": "pulse-api",
+        "version": "1.0.0",
+        "dev_mode": PULSE_API_DEV_MODE,
+        "supabase_configured": bool(SUPABASE_JWT_SECRET),
+        "ts": datetime.now(timezone.utc).isoformat(),
+    }
+
+
 # Mount the WebSocket bridge for browser-extension real-time ingestion
 try:
     from api.ws_bridge import router as ws_router
     app.include_router(ws_router)
 except ImportError:
     pass
+
+
+def main() -> None:
+    """CLI entry point: `python -m api.server` or `python api/server.py`."""
+    import argparse
+    try:
+        import uvicorn
+    except ImportError:
+        raise SystemExit("uvicorn not installed — run: pip install -r requirements-cloud.txt")
+
+    parser = argparse.ArgumentParser(description="Pulse REST API server")
+    parser.add_argument("--host", default="127.0.0.1", help="Bind address (default: 127.0.0.1)")
+    parser.add_argument("--port", type=int, default=8000, help="Port (default: 8000)")
+    parser.add_argument("--dev", action="store_true",
+                        help="Dev mode — bypass JWT signature verification (sets PULSE_API_DEV_MODE=1)")
+    parser.add_argument("--reload", action="store_true", help="Auto-reload on file changes")
+    args = parser.parse_args()
+
+    if args.dev:
+        os.environ["PULSE_API_DEV_MODE"] = "1"
+        global PULSE_API_DEV_MODE
+        PULSE_API_DEV_MODE = True
+        print("⚠ DEV MODE — JWT signatures NOT verified. Do NOT expose this to the public internet.")
+
+    if not SUPABASE_JWT_SECRET and not PULSE_API_DEV_MODE:
+        print(
+            "⚠ SUPABASE_JWT_SECRET not set — every request will return 500.\n"
+            "  Either: (a) set SUPABASE_JWT_SECRET=... in env, or\n"
+            "          (b) pass --dev to bypass JWT verification for local development."
+        )
+
+    uvicorn.run(
+        "api.server:app",
+        host=args.host,
+        port=args.port,
+        reload=args.reload,
+        log_level="info",
+    )
+
+
+if __name__ == "__main__":
+    main()

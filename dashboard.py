@@ -4376,6 +4376,49 @@ def render_settings():
 
 def _render_settings_integrations():
     """Integration setup for Slack/Teams/Discord (Team tier) + SSO (Enterprise)."""
+
+    # ── ChatGPT Plus export importer ──────────────────────────────
+    st.markdown("##### ChatGPT Plus / Pro export importer")
+    st.caption(
+        "ChatGPT subscribers don't have an API-key usage endpoint, so pulse parses the official "
+        "export ZIP. Generate yours at **chatgpt.com → Settings → Data Controls → Export Data** "
+        "(arrives in your inbox within a few hours). Drop the ZIP below — pulse extracts assistant "
+        "message counts + approximate tokens. Imports never leave your machine."
+    )
+    upload = st.file_uploader(
+        "ChatGPT export ZIP",
+        type=["zip"],
+        accept_multiple_files=False,
+        key="chatgpt_export_uploader",
+        help="The ZIP filename is usually `xxxxxxxxxx-data-export.zip`. Last 30 days of conversations is enough; a larger file just imports more.",
+    )
+    if upload is not None:
+        import tempfile, shutil
+        with st.spinner("Parsing ChatGPT export…"):
+            with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
+                shutil.copyfileobj(upload, tmp)
+                tmp_path = tmp.name
+            try:
+                from sync_tokens import sync_chatgpt_export
+                result = sync_chatgpt_export(tmp_path)
+            except Exception as e:
+                result = {"source": "chatgpt_export", "rows_added": 0,
+                          "note": f"import failed: {e}"}
+            finally:
+                try:
+                    Path(tmp_path).unlink()
+                except OSError:
+                    pass
+
+        if result["rows_added"] > 0:
+            st.success(
+                f"✓ Imported **{result['rows_added']:,} ChatGPT messages**. "
+                "Switch to the **AI usage** tab to see them grouped by month/model."
+            )
+        else:
+            st.warning(f"No new messages imported — {result.get('note', '')}")
+
+    st.markdown("---")
     st.markdown("##### Slack, Teams, Discord webhooks")
     st.caption(
         "Pipe daily/weekly digests to your team chat. Webhook URLs are stored locally; "
