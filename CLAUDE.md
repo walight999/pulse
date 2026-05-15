@@ -104,11 +104,12 @@ Top 3 before Show HN post:
 
 ---
 
-## Notion HQ (verified 2026-05-11)
+## Notion HQ (verified 2026-05-15)
 
-Pulse **does** have a Notion HQ — discovered during Pipeline v2 sync. HQ tracks build progress v1.0 → v1.5 + Show HN launch playbook.
+Pulse has a Notion HQ tracking build progress + launch playbook.
 
 - **HQ root:** https://www.notion.so/35d9defb952981848312e64e6823571b
-- **Pipeline v2 sub-page:** https://www.notion.so/35d9defb952981b8aa92de940faca7c5
+- **Pipeline v2 sub-page:** https://www.notion.so/35d9defb952981b8aa92de940faca7c5 (archived 2026-05-15)
+- **Website Audit Phases 1-5 sub-page:** https://www.notion.so/3619defb952981ee8bfecc8cf628c8cc (2026-05-15)
 
-Earlier note in STATE.md said "no Notion HQ" — that was incorrect. Pulse HQ exists and v2 update has been pushed there. Solo-OSS model still applies (no agent roster, no `deploy-readiness.md`).
+Solo-OSS model still applies (no agent roster, no `deploy-readiness.md`).
