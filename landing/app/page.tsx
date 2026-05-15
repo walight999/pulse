@@ -8,6 +8,7 @@ export default function Home() {
     <main className="min-h-screen bg-black text-white">
       <Header />
       <Hero />
+      <WhatWorksToday />
       <Screenshots />
       <Compare />
       <Features />
@@ -70,6 +71,86 @@ function Header() {
         </div>
       )}
     </header>
+  );
+}
+
+function WhatWorksToday() {
+  const today: string[] = [
+    "Track AI subscriptions (30+ currencies, ECB rates)",
+    "Import Claude Code token logs from ~/.claude/projects/*.jsonl",
+    "Calculate Plan ROI vs equivalent API cost",
+    "Track app activity locally (foreground time)",
+    "See cost per active hour, per subscription",
+    "Cancellation savings tracker",
+    "Export your data (CSV)",
+    "Runs 100% locally, no account, no telemetry by default",
+  ];
+  const coming: string[] = [
+    "Pro hosted cloud sync (E2E encrypted)",
+    "Mobile PWA (iOS + Android)",
+    "Multi-provider live (OpenAI, Cursor, Gemini, Copilot)",
+    "Browser extension web capture",
+    "Ask pulse AI assistant",
+  ];
+  const roadmap: string[] = [
+    "Team dashboard + per-user attribution",
+    "SSO (SAML / OIDC)",
+    "SOC 2 Type II (planned target)",
+    "VPC / on-prem deployment",
+  ];
+  return (
+    <section className="max-w-6xl mx-auto px-6 py-16 md:py-20">
+      <div className="text-center max-w-2xl mx-auto mb-10">
+        <h2 className="text-2xl md:text-4xl font-bold mb-3">What you can use today</h2>
+        <p className="text-zinc-400 leading-relaxed">
+          Honest split of what's shipped, what's next, and what's on the roadmap. No feature appears as "available" in one place and "coming" in another.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="rounded-2xl border border-mint-800/60 bg-mint-950/20 p-6">
+          <div className="inline-flex items-center gap-2 mb-3 px-2 py-0.5 rounded bg-mint-900/40 text-mint-400 border border-mint-800/50 text-[10px] font-bold uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-mint-400" aria-hidden></span>
+            Available now · v1.0 local app
+          </div>
+          <ul className="space-y-2 text-sm text-zinc-200">
+            {today.map((t, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="text-mint-400 mt-0.5 flex-shrink-0" aria-hidden>✓</span>
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="rounded-2xl border border-amber-800/40 bg-amber-950/10 p-6">
+          <div className="inline-flex items-center gap-2 mb-3 px-2 py-0.5 rounded bg-amber-900/40 text-amber-400 border border-amber-800/50 text-[10px] font-bold uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" aria-hidden></span>
+            Coming Q3 2026 · Pro tier
+          </div>
+          <ul className="space-y-2 text-sm text-zinc-300">
+            {coming.map((t, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="text-amber-400 mt-0.5 flex-shrink-0" aria-hidden>○</span>
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="rounded-2xl border border-zinc-800 bg-black/40 p-6">
+          <div className="inline-flex items-center gap-2 mb-3 px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 text-[10px] font-bold uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" aria-hidden></span>
+            Roadmap · no ETA
+          </div>
+          <ul className="space-y-2 text-sm text-zinc-400">
+            {roadmap.map((t, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="text-zinc-600 mt-0.5 flex-shrink-0" aria-hidden>·</span>
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -254,6 +335,7 @@ function Features() {
 }
 
 function Pricing() {
+  type TierStatus = "available" | "coming-q3" | "roadmap";
   const tiers: Array<{
     name: string;
     price: string;
@@ -263,23 +345,25 @@ function Pricing() {
     cta: string;
     href: string;
     featured: boolean;
+    status: TierStatus;
   }> = [
     {
       name: "Free",
       price: "$0",
       sub: "forever",
-      tagline: "Local use, all features",
+      tagline: "Local use, all v1.0 features",
       perks: [
-        "All v1.0 features",
-        "Subscription tracker + AI usage + activity",
+        "Subscription tracker + Claude usage + activity",
         "Local SQLite, no account, no telemetry",
-        "Windows + macOS (Q3) + Linux (Q4)",
-        "Browser extension capture",
-        "Source available (MIT)",
+        "Windows packaged build",
+        "macOS + Linux from source (packaged Q3/Q4)",
+        "Multi-currency (30+ via ECB)",
+        "MIT license — audit the code yourself",
       ],
       cta: "Download",
       href: "https://github.com/walight999/pulse/releases",
       featured: false,
+      status: "available",
     },
     {
       name: "Pro",
@@ -288,16 +372,17 @@ function Pricing() {
       tagline: "Cross-device sync + mobile",
       perks: [
         "Everything in Free",
-        "E2E encrypted cloud sync",
+        "E2E encrypted cloud sync (designed, not yet shipped)",
         "Mobile PWA (iOS + Android)",
         "Friend leaderboard (opt-in)",
         "Multi-provider live (OpenAI, Cursor, Gemini, Copilot)",
         "Ask pulse AI assistant",
-        "Cancel any time",
+        "Self-host server is free under MIT",
       ],
-      cta: "Join waitlist",
+      cta: "Join Pro waitlist",
       href: "#waitlist",
       featured: true,
+      status: "coming-q3",
     },
     {
       name: "Team",
@@ -313,9 +398,10 @@ function Pricing() {
         "Priority email support",
         "Min 3 seats",
       ],
-      cta: "Contact sales",
-      href: "mailto:sales@mintforai.com?subject=pulse%20Team%20inquiry",
+      cta: "Request early access",
+      href: "mailto:sales@mintforai.com?subject=pulse%20Team%20early%20access",
       featured: false,
+      status: "coming-q3",
     },
     {
       name: "Enterprise",
@@ -325,41 +411,57 @@ function Pricing() {
       perks: [
         "Everything in Team",
         "SSO (SAML 2.0 + OIDC)",
-        "SOC 2 Type II",
+        "SOC 2 Type II (planned, not yet certified)",
         "Custom roles + audit retention (7yr)",
-        "Dedicated CSM + 99.9% SLA",
+        "Dedicated CSM + SLA",
         "On-prem / VPC deploy option",
         "EU/US data residency",
       ],
-      cta: "Talk to us",
-      href: "mailto:enterprise@mintforai.com?subject=pulse%20Enterprise%20inquiry",
+      cta: "Express interest",
+      href: "mailto:enterprise@mintforai.com?subject=pulse%20Enterprise%20interest",
       featured: false,
+      status: "roadmap",
     },
   ];
 
-  const matrix: Array<{ row: string; cells: [boolean | string, boolean | string, boolean | string, boolean | string] }> = [
-    { row: "Local desktop app", cells: ["✓", "✓", "✓", "✓"] },
-    { row: "Subscription tracker", cells: ["✓", "✓", "✓", "✓"] },
-    { row: "AI usage + Plan ROI", cells: ["✓", "✓", "✓", "✓"] },
-    { row: "Activity + categories", cells: ["✓", "✓", "✓", "✓"] },
-    { row: "Browser extension", cells: ["✓", "✓", "✓", "✓"] },
-    { row: "Multi-currency (30+)", cells: ["✓", "✓", "✓", "✓"] },
-    { row: "Cloud sync (E2E encrypted)", cells: [false, "✓", "✓", "✓"] },
-    { row: "Mobile PWA", cells: [false, "✓", "✓", "✓"] },
-    { row: "Multi-provider live", cells: [false, "✓", "✓", "✓"] },
-    { row: "Friend leaderboard", cells: [false, "✓", "✓", "✓"] },
-    { row: "Ask pulse AI", cells: [false, "✓", "✓", "✓"] },
-    { row: "Devices per account", cells: ["1", "3", "Unlimited", "Unlimited"] },
-    { row: "Team dashboard + roles", cells: [false, false, "✓", "✓"] },
-    { row: "Slack/Teams/Discord", cells: [false, false, "✓", "✓"] },
-    { row: "Per-user attribution", cells: [false, false, "✓", "✓"] },
-    { row: "Audit log retention", cells: ["30d local", "90d", "1yr", "7yr"] },
-    { row: "Admin controls", cells: [false, false, "Standard", "Custom roles"] },
-    { row: "SSO (SAML / OIDC)", cells: [false, false, false, "✓"] },
-    { row: "SOC 2 Type II", cells: [false, false, false, "✓"] },
-    { row: "Custom data residency", cells: [false, false, false, "✓"] },
-    { row: "Dedicated CSM + SLA", cells: [false, false, "Email", "99.9% SLA"] },
+  const tierBadge = (s: TierStatus) => {
+    if (s === "available") return <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-mint-900/40 text-mint-400 border border-mint-800/50">Available now</span>;
+    if (s === "coming-q3") return <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-900/40 text-amber-400 border border-amber-800/50">Coming Q3 2026</span>;
+    return                         <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">Roadmap · no ETA</span>;
+  };
+
+  type RowStatus = "shipped" | "coming-q3" | "roadmap" | "planned" | "mixed";
+  const matrix: Array<{ row: string; status: RowStatus; cells: [boolean | string, boolean | string, boolean | string, boolean | string] }> = [
+    { row: "Local desktop app",            status: "shipped",   cells: ["✓", "✓", "✓", "✓"] },
+    { row: "Subscription tracker",         status: "shipped",   cells: ["✓", "✓", "✓", "✓"] },
+    { row: "AI usage + Plan ROI",          status: "shipped",   cells: ["✓", "✓", "✓", "✓"] },
+    { row: "Activity + categories",        status: "shipped",   cells: ["✓", "✓", "✓", "✓"] },
+    { row: "Browser extension",            status: "coming-q3", cells: ["✓", "✓", "✓", "✓"] },
+    { row: "Multi-currency (30+)",         status: "shipped",   cells: ["✓", "✓", "✓", "✓"] },
+    { row: "Cloud sync (E2E encrypted)",   status: "coming-q3", cells: [false, "✓", "✓", "✓"] },
+    { row: "Mobile PWA",                   status: "coming-q3", cells: [false, "✓", "✓", "✓"] },
+    { row: "Multi-provider live",          status: "coming-q3", cells: [false, "✓", "✓", "✓"] },
+    { row: "Friend leaderboard",           status: "coming-q3", cells: [false, "✓", "✓", "✓"] },
+    { row: "Ask pulse AI",                 status: "coming-q3", cells: [false, "✓", "✓", "✓"] },
+    { row: "Devices per account",          status: "mixed",     cells: ["1", "3", "Unlimited", "Unlimited"] },
+    { row: "Team dashboard + roles",       status: "coming-q3", cells: [false, false, "✓", "✓"] },
+    { row: "Slack/Teams/Discord",          status: "coming-q3", cells: [false, false, "✓", "✓"] },
+    { row: "Per-user attribution",         status: "coming-q3", cells: [false, false, "✓", "✓"] },
+    { row: "Audit log retention",          status: "mixed",     cells: ["30d local", "90d", "1yr", "7yr"] },
+    { row: "Admin controls",               status: "roadmap",   cells: [false, false, "Standard", "Custom roles"] },
+    { row: "SSO (SAML / OIDC)",            status: "roadmap",   cells: [false, false, false, "✓"] },
+    { row: "SOC 2 Type II",                status: "planned",   cells: [false, false, false, "✓"] },
+    { row: "Custom data residency",        status: "roadmap",   cells: [false, false, false, "✓"] },
+    { row: "Dedicated CSM + SLA",          status: "roadmap",   cells: [false, false, "Email", "99.9% SLA"] },
   ];
+
+  const rowBadge = (s: RowStatus) => {
+    if (s === "shipped")   return <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-mint-900/40 text-mint-400 border border-mint-800/50">Shipped</span>;
+    if (s === "coming-q3") return <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-900/40 text-amber-400 border border-amber-800/50">Q3 2026</span>;
+    if (s === "planned")   return <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">Planned</span>;
+    if (s === "mixed")     return <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">Per-tier</span>;
+    return                        <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">Roadmap</span>;
+  };
 
   const faqs: Array<[string, string]> = [
     [
@@ -396,7 +498,7 @@ function Pricing() {
     ],
     [
       "Is there a lifetime deal?",
-      "Yes — Lifetime Pro $199 (one-time) for the first 500 customers. After that, the deal closes permanently and Pro reverts to monthly/annual only. Lifetime includes every future Pro feature: cloud sync, mobile PWA, multi-provider live, friend leaderboard, Ask pulse AI, and anything we ship under Pro through pulse v9.x.",
+      "We're exploring a one-time Lifetime Pro tier when Pro launches in Q3 2026. Price, customer cap, and exact feature scope are not finalized and no payment is being collected today — anything you see on this page is an indication of intent, not a commercial offer. Final Lifetime Deal Terms (including version scope, refund window, fair-use limits, and what happens if the project is discontinued) will be published before any sale. Join the waitlist if you want to be notified when those terms go live.",
     ],
     [
       "What's the difference between pulse and ClaudeMetrics?",
@@ -443,6 +545,7 @@ function Pricing() {
               {t.featured && (
                 <div className="text-xs font-bold tracking-wider text-mint-400 uppercase mb-3">Most popular</div>
               )}
+              <div className="mb-3">{tierBadge(t.status)}</div>
               <div className="text-lg font-bold mb-1">{t.name}</div>
               <div className="text-zinc-500 text-sm mb-5">{t.tagline}</div>
               <div className="flex items-baseline mb-5">
@@ -477,20 +580,20 @@ function Pricing() {
             <div className="flex-1">
               <div className="inline-flex items-center gap-2 mb-2 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" aria-hidden></span>
-                Early-adopter unlock · first 500 only
+                Interest list · no payment today
               </div>
               <h3 className="text-2xl md:text-3xl font-bold tracking-tight">
-                Lifetime Pro for <span className="text-amber-400 tabular-nums">$199</span>
+                Lifetime Pro — exploring a launch-only one-time tier
               </h3>
               <p className="mt-2 text-zinc-400 text-sm max-w-xl leading-relaxed">
-                One-time payment. Pulse Pro forever — cloud sync, mobile PWA, multi-provider live, friend leaderboard, Ask pulse AI, and every future Pro feature through v9.x. After 500 buyers, this deal closes permanently.
+                We're considering a one-time Lifetime Pro tier when Pro launches in Q3 2026. Price, cap, and feature scope are not finalized. Join the interest list to get notified before it opens; no card, no commitment. Final terms will be published before any sale.
               </p>
             </div>
             <a
               href="#waitlist"
               className="flex-shrink-0 bg-amber-500 hover:bg-amber-400 text-black font-bold px-7 py-3.5 rounded-xl transition shadow-lg shadow-amber-500/30 text-sm whitespace-nowrap"
             >
-              Reserve a lifetime seat →
+              Notify me when terms are set →
             </a>
           </div>
         </div>
@@ -505,12 +608,16 @@ function Pricing() {
 
         <div className="mt-20">
           <h3 className="text-xl md:text-2xl font-bold text-center mb-3">Compare every feature</h3>
-          <p className="text-zinc-500 text-center text-sm mb-10">Honest comparison, no hidden gotchas.</p>
+          <p className="text-zinc-500 text-center text-sm mb-3">Honest comparison, no hidden gotchas.</p>
+          <p className="text-zinc-600 text-center text-xs mb-10">
+            Status: <span className="text-mint-400 font-semibold">Shipped</span> = in v1.0 today · <span className="text-amber-400 font-semibold">Q3 2026</span> = launches with Pro · <span className="text-zinc-400 font-semibold">Planned</span> = work started, no certification · <span className="text-zinc-500 font-semibold">Roadmap</span> = no ETA
+          </p>
           <div className="overflow-x-auto rounded-xl border border-zinc-900 bg-black/40">
             <table className="w-full text-sm">
               <thead className="bg-zinc-950 border-b border-zinc-900">
                 <tr>
                   <th className="text-left font-semibold text-zinc-300 px-4 py-3">Feature</th>
+                  <th className="text-center font-semibold text-zinc-500 px-3 py-3 w-24">Status</th>
                   <th className="font-semibold text-zinc-400 px-4 py-3">Free</th>
                   <th className="font-semibold text-mint-400 px-4 py-3">Pro</th>
                   <th className="font-semibold text-zinc-300 px-4 py-3">Team</th>
@@ -521,6 +628,7 @@ function Pricing() {
                 {matrix.map((m, i) => (
                   <tr key={i} className="hover:bg-zinc-950/40">
                     <td className="text-left text-zinc-300 px-4 py-2.5">{m.row}</td>
+                    <td className="text-center px-3 py-2.5">{rowBadge(m.status)}</td>
                     {m.cells.map((c, j) => (
                       <td key={j} className="text-center px-4 py-2.5">
                         {c === false ? (
@@ -671,10 +779,12 @@ function Footer() {
           </div>
         </div>
         <div className="border-t border-zinc-900 pt-8 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-zinc-600">
-          <div>© 2026 White · Built in Bangkok · MIT licensed</div>
+          <div className="text-center md:text-left">
+            © 2026 pulse · operated by White, Bangkok, Thailand · governed by Thai law · MIT licensed local app
+          </div>
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-mint-400 animate-pulse" aria-hidden></span>
-            <span>v1.5 · all systems operational</span>
+            <span>v1.0 local preview · no production cloud service</span>
           </div>
         </div>
       </div>

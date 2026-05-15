@@ -83,10 +83,18 @@ export default function TermsPage() {
         Continued use after an update constitutes acceptance.
       </p>
 
-      <h2>Governing law</h2>
+      <h2>Operator & governing law</h2>
       <p>
-        To be specified at the Pro launch. For now, no specific jurisdiction applies; use is at your
-        own discretion.
+        Pulse is operated by White, a solo developer based in Bangkok, Thailand. These terms are
+        governed by the laws of the Kingdom of Thailand. Disputes that cannot be resolved by
+        good-faith discussion will be brought before the courts of Bangkok, Thailand.
+      </p>
+      <p>
+        A separate paid-tier service agreement (covering Pro hosted cloud sync, Team workspaces,
+        Enterprise, and any Lifetime Deal tier) will be published before any payment is collected.
+        Until that agreement is in force, no money is being accepted for Pro / Team / Enterprise /
+        Lifetime — anything you see on the pricing page about those tiers is an indication of intent,
+        not a commercial offer.
       </p>
 
       <h2>Contact</h2>
