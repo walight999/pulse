@@ -1,0 +1,10 @@
+section,name,vendor,monthly_usd,currency,billing_cycle,active,linked_app,foreground_hours_this_month,cancelled_on,months_since_cancel,cost_per_active_hour_usd
+subscription,Claude Max,Anthropic,200.00,USD,monthly,true,Claude (claude.ai + claude code),38,,,5.26
+subscription,ChatGPT Plus,OpenAI,20.00,USD,monthly,true,ChatGPT (chat.openai.com),8,,,2.50
+subscription,Cursor Pro,Cursor,20.00,USD,monthly,true,Cursor.exe,24,,,0.83
+subscription,Suno,Suno,10.00,USD,monthly,false,,,2026-01-15,4,
+section,model,input_tokens,output_tokens,cache_write_5m_tokens,cache_write_1h_tokens,cache_read_tokens,equivalent_api_usd,,,,
+token_usage,claude-opus-4-7,6200000,1900000,2400000,180000,12000000,304.95,,,,
+token_usage,claude-sonnet-4-6,14000000,4100000,5100000,320000,28000000,150.36,,,,
+section,total_equivalent_api_usd,subscription_cost_usd,plan_roi_x,monthly_ai_spend_usd,cancellation_savings_usd,foreground_hours_total,,,,,
+totals,455.31,200.00,2.28,240.00,40.00,70,,,,,

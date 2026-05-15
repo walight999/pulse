@@ -140,11 +140,43 @@ export default function ChangelogPage() {
           Disabled at build time via <code>NEXT_PUBLIC_ANALYTICS_DISABLED=1</code> if you don't want it.
         </li>
       </ul>
+      <h3>Phase 6 — Interactive demo + SEO landing variants</h3>
+      <ul>
+        <li>
+          <strong>New <code>/demo</code></strong> — interactive client page with persona toggle (Solo / Developer / Founder),
+          synthetic-but-realistic subscriptions and token usage, all metrics computed live from the same
+          formulas as the real app. Plan ROI / equivalent API value / cost per active hour / cancellation
+          savings update instantly when you switch persona. "Demo data only — your real data stays local"
+          banner at the top. Downloadable sample CSV.
+        </li>
+        <li>
+          <strong>New <code>/alternatives</code></strong> — honest 800-word comparison hub against ClaudeMetrics,
+          Anthropic Console, OpenAI Usage, Vantage, Pry/Cledara, Mint (shut down 2024), YNAB, Lunch Money,
+          Actual Budget. Includes "where pulse is genuinely worse" section (no shared dashboards today,
+          Claude-first parser coverage, no bank auto-sync). Quick-pick guide table at the bottom.
+        </li>
+        <li>
+          <strong>New <code>/compare/claude-code-cost-tracker</code></strong> — focused SEO landing for the highest-intent
+          search term. Explains the cache TTL 5m/1h pricing math, why most cost trackers are off by 10-60%,
+          and the local-parser-no-upload advantage.
+        </li>
+        <li>
+          <strong>New <code>/compare/cursor-cost-tracker</code></strong> — Cursor-specific landing. Tells the truth about
+          what's available now (subscription cost + foreground time + cost-per-hour) vs Q3 2026 (per-request
+          token breakdown from Cursor's local state DB).
+        </li>
+        <li>
+          Sample CSV file at <code>/samples/pulse-sample-export.csv</code> — same column structure as the real export,
+          populated with the demo persona's data.
+        </li>
+        <li>Hero CTA simplified to <em>Download pulse</em> + <em>Try interactive demo</em> (the demo replaces "View on GitHub" as the secondary action — GitHub stays in the header).</li>
+        <li>Footer Product column + nav (desktop and mobile) updated for all 4 new routes. Sitemap priorities set.</li>
+      </ul>
       <h3>Build verification</h3>
       <p>
-        pytest 51/51 pass. Next 14.2.35 build clean (16 routes static at the end of Phase 5).
-        <code>/</code> at 116 kB First Load JS. <code>/docs</code>, <code>/download</code>, <code>/methodology</code>,
-        <code>/roadmap</code> all under 100 kB.
+        pytest 51/51 pass. Next 14.2.35 build clean (<strong>20 routes static</strong> at the end of Phase 6).
+        <code>/</code> at 115 kB First Load JS. <code>/demo</code> at 100 kB (client-side React for the persona toggle).
+        Every other subpage under 97 kB.
       </p>
 
       <h2 id="v1-5">v1.5 — Open-core + domain (2026-05-12)</h2>

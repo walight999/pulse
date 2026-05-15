@@ -290,22 +290,26 @@ export default function DocsPage() {
           GitHub.
         </p>
 
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mt-12 grid grid-cols-2 lg:grid-cols-5 gap-4">
           <a href="/download" className="rounded-xl border border-mint-800/60 bg-mint-950/20 p-4 hover:border-mint-700 transition">
             <div className="text-sm font-bold text-mint-400">Quickstart →</div>
-            <div className="text-xs text-zinc-400 mt-1">Install + first-run in 5 minutes</div>
+            <div className="text-xs text-zinc-400 mt-1">Install in 5 minutes</div>
+          </a>
+          <a href="/demo" className="rounded-xl border border-zinc-900 bg-zinc-950/40 p-4 hover:border-zinc-700 transition">
+            <div className="text-sm font-bold text-zinc-100">Interactive demo →</div>
+            <div className="text-xs text-zinc-400 mt-1">See it before installing</div>
           </a>
           <a href="/methodology" className="rounded-xl border border-zinc-900 bg-zinc-950/40 p-4 hover:border-zinc-700 transition">
             <div className="text-sm font-bold text-zinc-100">ROI methodology →</div>
-            <div className="text-xs text-zinc-400 mt-1">Every formula, source, and limitation</div>
+            <div className="text-xs text-zinc-400 mt-1">Every formula + source</div>
           </a>
-          <a href="/security" className="rounded-xl border border-zinc-900 bg-zinc-950/40 p-4 hover:border-zinc-700 transition">
-            <div className="text-sm font-bold text-zinc-100">Security →</div>
-            <div className="text-xs text-zinc-400 mt-1">Threat model + implemented vs planned</div>
+          <a href="/alternatives" className="rounded-xl border border-zinc-900 bg-zinc-950/40 p-4 hover:border-zinc-700 transition">
+            <div className="text-sm font-bold text-zinc-100">Alternatives →</div>
+            <div className="text-xs text-zinc-400 mt-1">Honest comparisons</div>
           </a>
           <a href={REPO} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-zinc-900 bg-zinc-950/40 p-4 hover:border-zinc-700 transition">
             <div className="text-sm font-bold text-zinc-100">GitHub →</div>
-            <div className="text-xs text-zinc-400 mt-1">Source code, releases, issues</div>
+            <div className="text-xs text-zinc-400 mt-1">Source, releases, issues</div>
           </a>
         </div>
 

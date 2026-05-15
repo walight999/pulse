@@ -33,6 +33,7 @@ function Header() {
           <span className="text-lg font-bold tracking-tight lowercase">pulse</span>
         </a>
         <div className="hidden md:flex items-center gap-6 text-sm text-zinc-400">
+          <Link href="/demo" className="hover:text-white">Demo</Link>
           <Link href="/download" className="hover:text-white">Download</Link>
           <a href="#pricing" className="hover:text-white">Pricing</a>
           <Link href="/docs" className="hover:text-white">Docs</Link>
@@ -67,11 +68,13 @@ function Header() {
       {open && (
         <div id="mobile-menu" className="md:hidden border-t border-zinc-900 bg-black/95 backdrop-blur">
           <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-3 text-sm text-zinc-300">
+            <Link href="/demo" onClick={() => setOpen(false)} className="py-2 hover:text-white">Demo</Link>
             <Link href="/download" onClick={() => setOpen(false)} className="py-2 hover:text-white">Download</Link>
             <a href="#pricing" onClick={() => setOpen(false)} className="py-2 hover:text-white">Pricing</a>
             <Link href="/docs" onClick={() => setOpen(false)} className="py-2 hover:text-white">Docs</Link>
             <Link href="/methodology" onClick={() => setOpen(false)} className="py-2 hover:text-white">Methodology</Link>
             <Link href="/roadmap" onClick={() => setOpen(false)} className="py-2 hover:text-white">Roadmap</Link>
+            <Link href="/alternatives" onClick={() => setOpen(false)} className="py-2 hover:text-white">Compare</Link>
             <Link href="/changelog" onClick={() => setOpen(false)} className="py-2 hover:text-white">Changelog</Link>
             <a href="https://github.com/walight999/pulse" target="_blank" rel="noopener" className="py-2 hover:text-white">GitHub</a>
             <a href="#waitlist" onClick={() => setOpen(false)} className="mt-2 bg-mint-500 hover:bg-mint-600 text-white text-center font-semibold px-4 py-3 rounded-lg transition">Get early access</a>
@@ -244,12 +247,12 @@ function Hero() {
         Local-first personal-finance dashboard for the AI era. Track every recurring AI subscription, every Claude token, every hour of focused work — in one beautiful view.
       </p>
       <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="#waitlist" className="bg-mint-500 hover:bg-mint-600 text-white font-semibold px-8 py-4 rounded-xl transition shadow-lg shadow-mint-500/20 text-base">
-          Join waitlist
-        </a>
-        <a href="https://github.com/walight999/pulse" target="_blank" rel="noopener" className="text-zinc-300 hover:text-white font-medium px-6 py-4 transition">
-          View on GitHub →
-        </a>
+        <Link href="/download" className="bg-mint-500 hover:bg-mint-600 text-white font-semibold px-8 py-4 rounded-xl transition shadow-lg shadow-mint-500/20 text-base">
+          Download pulse
+        </Link>
+        <Link href="/demo" className="text-zinc-300 hover:text-white font-medium px-6 py-4 transition">
+          Try interactive demo →
+        </Link>
       </div>
       <div className="mt-14 ecg-line max-w-4xl mx-auto" />
     </section>
@@ -1199,10 +1202,12 @@ function Footer() {
             <ul className="space-y-3 text-sm">
               <li><a href="#features" className="text-zinc-400 hover:text-white">Features</a></li>
               <li><a href="#pricing" className="text-zinc-400 hover:text-white">Pricing</a></li>
+              <li><Link href="/demo" className="text-zinc-400 hover:text-white">Interactive demo</Link></li>
               <li><Link href="/download" className="text-zinc-400 hover:text-white">Download</Link></li>
               <li><Link href="/docs" className="text-zinc-400 hover:text-white">Docs</Link></li>
               <li><Link href="/methodology" className="text-zinc-400 hover:text-white">ROI methodology</Link></li>
               <li><Link href="/roadmap" className="text-zinc-400 hover:text-white">Roadmap</Link></li>
+              <li><Link href="/alternatives" className="text-zinc-400 hover:text-white">Compare alternatives</Link></li>
               <li><Link href="/changelog" className="text-zinc-400 hover:text-white">Changelog</Link></li>
               <li><a href="#waitlist" className="text-zinc-400 hover:text-white">Pro waitlist</a></li>
             </ul>
