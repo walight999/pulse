@@ -28,10 +28,11 @@ function Header() {
           <span className="logo-mark w-8 h-8 rounded-lg text-sm" aria-hidden>P</span>
           <span className="text-lg font-bold tracking-tight lowercase">pulse</span>
         </a>
-        <div className="hidden md:flex items-center gap-7 text-sm text-zinc-400">
+        <div className="hidden md:flex items-center gap-6 text-sm text-zinc-400">
           <a href="#features" className="hover:text-white">Features</a>
           <a href="#pricing" className="hover:text-white">Pricing</a>
-          <Link href="/changelog" className="hover:text-white">Changelog</Link>
+          <Link href="/download" className="hover:text-white">Download</Link>
+          <Link href="/methodology" className="hover:text-white">Methodology</Link>
           <a href="https://github.com/walight999/pulse" target="_blank" rel="noopener" className="hover:text-white">GitHub</a>
           <a href="#waitlist" className="bg-mint-500 hover:bg-mint-600 text-white font-semibold px-4 py-2 rounded-lg transition">Get early access</a>
         </div>
@@ -64,6 +65,8 @@ function Header() {
           <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-3 text-sm text-zinc-300">
             <a href="#features" onClick={() => setOpen(false)} className="py-2 hover:text-white">Features</a>
             <a href="#pricing" onClick={() => setOpen(false)} className="py-2 hover:text-white">Pricing</a>
+            <Link href="/download" onClick={() => setOpen(false)} className="py-2 hover:text-white">Download</Link>
+            <Link href="/methodology" onClick={() => setOpen(false)} className="py-2 hover:text-white">Methodology</Link>
             <Link href="/changelog" onClick={() => setOpen(false)} className="py-2 hover:text-white">Changelog</Link>
             <a href="https://github.com/walight999/pulse" target="_blank" rel="noopener" className="py-2 hover:text-white">GitHub</a>
             <a href="#waitlist" onClick={() => setOpen(false)} className="mt-2 bg-mint-500 hover:bg-mint-600 text-white text-center font-semibold px-4 py-3 rounded-lg transition">Get early access</a>
@@ -668,7 +671,19 @@ function Pricing() {
 
 function Waitlist() {
   const [email, setEmail] = useState("");
+  const [persona, setPersona] = useState("");
+  const [os, setOs] = useState("");
+  const [tools, setTools] = useState<string[]>([]);
+  const [monthlySpend, setMonthlySpend] = useState("");
+  const [planInterest, setPlanInterest] = useState("");
+  const [biggestPain, setBiggestPain] = useState("");
+  const [expanded, setExpanded] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
+  const [referralCode, setReferralCode] = useState<string>("");
+
+  function toggleTool(t: string) {
+    setTools((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -677,27 +692,90 @@ function Waitlist() {
       const r = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          persona,
+          os,
+          tools,
+          monthlySpend,
+          planInterest,
+          biggestPain,
+          referrer: typeof document !== "undefined" ? document.referrer.slice(0, 64) : "",
+        }),
       });
-      setStatus(r.ok ? "ok" : "err");
+      const data = (await r.json().catch(() => ({}))) as { ok?: boolean; referralCode?: string };
+      if (r.ok && data.ok) {
+        setReferralCode(data.referralCode || "");
+        setStatus("ok");
+      } else {
+        setStatus("err");
+      }
     } catch {
       setStatus("err");
     }
+  }
+
+  const personas = ["Solo AI user", "Developer", "Founder", "Student", "Team", "Enterprise"];
+  const oses = ["Windows", "macOS", "Linux"];
+  const toolList = ["Claude", "ChatGPT", "Cursor", "Gemini", "Copilot", "OpenAI API", "Anthropic API"];
+  const spends = ["< $20/mo", "$20–100/mo", "$100–500/mo", "$500–2k/mo", "> $2k/mo"];
+  const plans = ["Free local only", "Pro hosted ($9)", "Team ($19/seat)", "Enterprise", "Lifetime (if offered)"];
+  const pains = [
+    "Too many AI subscriptions",
+    "Token cost visibility",
+    "Team / per-user attribution",
+    "Activity ROI per tool",
+    "Budget reporting",
+  ];
+
+  if (status === "ok") {
+    const shareUrl =
+      typeof window !== "undefined" && referralCode
+        ? `${window.location.origin}/?r=${referralCode}`
+        : "";
+    return (
+      <section id="waitlist" className="max-w-3xl mx-auto px-6 py-24 text-center">
+        <h2 className="text-2xl md:text-4xl font-bold mb-3">You're on the list</h2>
+        <p className="text-zinc-400 mb-8 max-w-xl mx-auto">
+          We'll email you when pulse Pro launches in Q3 2026, and again before any Lifetime tier
+          terms go live — never before.
+        </p>
+        <div className="bg-mint-900/20 border border-mint-700/50 rounded-2xl p-6 max-w-xl mx-auto text-left">
+          <div className="text-xs uppercase tracking-wider text-mint-400 font-bold mb-3">Next steps</div>
+          <ol className="space-y-3 text-sm text-zinc-300">
+            <li>
+              <strong>1.</strong> Download pulse and use it locally today — it's free, MIT-licensed, no account.{" "}
+              <a href="/download" className="text-mint-400 hover:text-mint-300">Get the installer →</a>
+            </li>
+            <li>
+              <strong>2.</strong> Check out the{" "}
+              <a href="https://github.com/walight999/pulse" target="_blank" rel="noopener noreferrer" className="text-mint-400 hover:text-mint-300">GitHub repo</a>
+              {" "}— star it if it's useful, file issues if it breaks.
+            </li>
+            {shareUrl && (
+              <li>
+                <strong>3.</strong> Your referral link:
+                <div className="mt-2 flex items-center gap-2">
+                  <code className="flex-1 text-xs bg-black border border-zinc-800 rounded px-3 py-2 text-mint-300 break-all">{shareUrl}</code>
+                </div>
+                <span className="text-xs text-zinc-500">When Pro launches, referrers get priority access.</span>
+              </li>
+            )}
+          </ol>
+        </div>
+      </section>
+    );
   }
 
   return (
     <section id="waitlist" className="max-w-3xl mx-auto px-6 py-24 text-center">
       <h2 className="text-2xl md:text-4xl font-bold mb-3">Get early access</h2>
       <p className="text-zinc-400 mb-10 max-w-xl mx-auto">
-        Pulse Pro launches Q3 2026. Sign up now and get 1 month free + first dibs on friend
-        leaderboard invite codes.
+        Pulse local is free and available today. Join the list to be notified when Pro (cloud sync,
+        mobile, multi-provider) launches in Q3 2026 — and before any paid tier opens.
       </p>
-      {status === "ok" ? (
-        <div className="bg-mint-900/30 border border-mint-700 rounded-xl p-6 text-mint-400">
-          You're on the list. We'll email when pulse Pro launches.
-        </div>
-      ) : (
-        <form onSubmit={submit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+      <form onSubmit={submit} className="max-w-lg mx-auto text-left">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="email"
             required
@@ -713,12 +791,114 @@ function Waitlist() {
           >
             {status === "loading" ? "Joining..." : "Join waitlist"}
           </button>
-        </form>
-      )}
-      <div className="text-xs text-zinc-600 mt-4">
-        No spam. One email when Pro launches. Unsubscribe anytime.
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          aria-controls="waitlist-extra"
+          className="mt-4 text-xs text-zinc-500 hover:text-zinc-300 transition"
+        >
+          {expanded ? "− Hide optional details" : "+ Tell us about your setup (optional, helps us prioritize)"}
+        </button>
+
+        {expanded && (
+          <div id="waitlist-extra" className="mt-5 space-y-5 rounded-xl border border-zinc-900 bg-zinc-950/40 p-5">
+            <ChipGroup label="I am a…" options={personas} value={persona} onChange={setPersona} />
+            <ChipGroup label="Primary OS" options={oses} value={os} onChange={setOs} />
+            <ChipGroupMulti label="AI tools I use" options={toolList} values={tools} onToggle={toggleTool} />
+            <ChipGroup label="Monthly AI spend" options={spends} value={monthlySpend} onChange={setMonthlySpend} />
+            <ChipGroup label="Plan I'm interested in" options={plans} value={planInterest} onChange={setPlanInterest} />
+            <ChipGroup label="My biggest pain" options={pains} value={biggestPain} onChange={setBiggestPain} />
+          </div>
+        )}
+
+        {status === "err" && (
+          <div className="mt-4 text-sm text-amber-400 text-center">
+            Something went wrong — please check your email and try again, or DM <a href="https://twitter.com/mintforai" target="_blank" rel="noopener noreferrer" className="underline">@mintforai</a>.
+          </div>
+        )}
+      </form>
+      <div className="text-xs text-zinc-600 mt-6 max-w-xl mx-auto">
+        No spam. One email when Pro launches. No payment is being collected — see{" "}
+        <a href="/terms" className="underline hover:text-zinc-400">Terms</a> for the operator and governing law.
       </div>
     </section>
+  );
+}
+
+function ChipGroup({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <div className="text-xs uppercase tracking-wider text-zinc-500 font-semibold mb-2">{label}</div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt) => {
+          const active = value === opt;
+          return (
+            <button
+              type="button"
+              key={opt}
+              onClick={() => onChange(active ? "" : opt)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition ${
+                active
+                  ? "bg-mint-500 border-mint-400 text-white"
+                  : "bg-black border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+              }`}
+            >
+              {opt}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ChipGroupMulti({
+  label,
+  options,
+  values,
+  onToggle,
+}: {
+  label: string;
+  options: string[];
+  values: string[];
+  onToggle: (v: string) => void;
+}) {
+  return (
+    <div>
+      <div className="text-xs uppercase tracking-wider text-zinc-500 font-semibold mb-2">{label}</div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt) => {
+          const active = values.includes(opt);
+          return (
+            <button
+              type="button"
+              key={opt}
+              onClick={() => onToggle(opt)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition ${
+                active
+                  ? "bg-mint-500 border-mint-400 text-white"
+                  : "bg-black border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+              }`}
+            >
+              {opt}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -753,7 +933,8 @@ function Footer() {
             <ul className="space-y-3 text-sm">
               <li><a href="#features" className="text-zinc-400 hover:text-white">Features</a></li>
               <li><a href="#pricing" className="text-zinc-400 hover:text-white">Pricing</a></li>
-              <li><a href="https://github.com/walight999/pulse/releases" target="_blank" rel="noopener" className="text-zinc-400 hover:text-white">Download</a></li>
+              <li><Link href="/download" className="text-zinc-400 hover:text-white">Download</Link></li>
+              <li><Link href="/methodology" className="text-zinc-400 hover:text-white">ROI methodology</Link></li>
               <li><Link href="/changelog" className="text-zinc-400 hover:text-white">Changelog</Link></li>
               <li><a href="#waitlist" className="text-zinc-400 hover:text-white">Pro waitlist</a></li>
             </ul>
